@@ -34,7 +34,7 @@ jobs:
           context: .
           file: ui/Dockerfile
           push: true
-          tags: reti-ui/pr-${{ github.event.pull_request.number }}
+          tags: algorandfoundation/reti:ui-pr-${{ github.event.pull_request.number }}
 
       - name: Deploy to Coolify
         run: |
