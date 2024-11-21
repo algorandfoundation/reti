@@ -14,7 +14,7 @@ Validators can define a number of parameters - some of which are immutable. More
 
 **Mandatory Parameters**
 
-* Owner address (preferably a cold wallet)
+* Owner address (should be a **secure wallet!  Hardware wallet or multi-sig**)
 * Manager address (hot wallet)
 * Epoch Length (Payout frequency) in rounds \[blocks]
 * Validator commission rate
@@ -27,7 +27,7 @@ Validators can define a number of parameters - some of which are immutable. More
 **Optional Parameters**
 
 * Link an NFD to the Validator - this enables linking certain data to their Validator details page like a profile picture and bio.
-* Reward token / reward rate&#x20;
+* Reward token / reward rate
 * Sunsetting information
 * Token / NFD Gating:
   * Supported gating options include:
@@ -38,5 +38,5 @@ Validators can define a number of parameters - some of which are immutable. More
 
 ### Add First Staking Pool
 
-* Once your validator has been added, you **MUST** add a staking pool.  Click the '...' to the right of your listed validator, and select 'Add Staking Pool' to add your first pool.  Without a pool, users can't stake.  The node number you specify is the node number the pool will be hosted and which the node daemon will manage keys for.
+* Once your validator has been added, you **MUST** add a staking pool. Click the '...' to the right of your listed validator, and select 'Add Staking Pool' to add your first pool. Without a pool, users can't stake. The node number you specify is the node number the pool will be hosted and which the node daemon will manage keys for.
 * See [staking-pools.md](../core-concepts/staking-pools.md "mention") for more information.
