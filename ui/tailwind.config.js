@@ -209,7 +209,7 @@ module.exports = {
         'accordion-up': 'accordion-up 0.2s ease-out',
       },
       fontFamily: {
-        sans: ['InterVariable', ...defaultTheme.fontFamily.sans],
+        sans: ['InterVariable', 'Inter', ...defaultTheme.fontFamily.sans],
         algo: ['Algo', ...defaultTheme.fontFamily.sans],
       },
     },
