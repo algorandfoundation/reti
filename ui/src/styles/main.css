@@ -67,7 +67,7 @@
 @font-face {
   font-family: 'InterVariable';
   font-style: normal;
-  font-weight: 100 900;
+  font-weight: 400 700;
   font-display: swap;
   src:
     url('/fonts/InterVariable.woff2') format('woff2-variations'),
@@ -77,7 +77,7 @@
 @font-face {
   font-family: 'InterVariable';
   font-style: italic;
-  font-weight: 100 900;
+  font-weight: 400 700;
   font-display: swap;
   src:
     url('/fonts/InterVariable-Italic.woff2') format('woff2-variations'),
