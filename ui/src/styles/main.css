@@ -69,7 +69,9 @@
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
-  src: url('/fonts/InterVariable.ttf') format('truetype-variations');
+  src:
+    url('/fonts/InterVariable.woff2') format('woff2-variations'),
+    url('/fonts/InterVariable.ttf') format('truetype-variations');
 }
 
 @font-face {
@@ -77,7 +79,9 @@
   font-style: italic;
   font-weight: 100 900;
   font-display: swap;
-  src: url('/fonts/InterVariable-Italic.ttf') format('truetype-variations');
+  src:
+    url('/fonts/InterVariable-Italic.woff2') format('woff2-variations'),
+    url('/fonts/InterVariable-Italic.ttf') format('truetype-variations');
 }
 
 /* Static fonts as fallback */
@@ -86,7 +90,9 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('/fonts/Inter-Regular.ttf') format('truetype');
+  src:
+    url('/fonts/Inter-Regular.woff2') format('woff2'),
+    url('/fonts/Inter-Regular.ttf') format('truetype');
 }
 
 @font-face {
@@ -94,7 +100,9 @@
   font-style: normal;
   font-weight: 500;
   font-display: swap;
-  src: url('/fonts/Inter-Medium.ttf') format('truetype');
+  src:
+    url('/fonts/Inter-Medium.woff2') format('woff2'),
+    url('/fonts/Inter-Medium.ttf') format('truetype');
 }
 
 @font-face {
@@ -102,7 +110,9 @@
   font-style: normal;
   font-weight: 600;
   font-display: swap;
-  src: url('/fonts/Inter-SemiBold.ttf') format('truetype');
+  src:
+    url('/fonts/Inter-SemiBold.woff2') format('woff2'),
+    url('/fonts/Inter-SemiBold.ttf') format('truetype');
 }
 
 @font-face {
@@ -110,7 +120,9 @@
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url('/fonts/Inter-Bold.ttf') format('truetype');
+  src:
+    url('/fonts/Inter-Bold.woff2') format('woff2'),
+    url('/fonts/Inter-Bold.ttf') format('truetype');
 }
 
 @font-face {
@@ -118,7 +130,9 @@
   font-style: italic;
   font-weight: 400;
   font-display: swap;
-  src: url('/fonts/Inter-Italic.ttf') format('truetype');
+  src:
+    url('/fonts/Inter-Italic.woff2') format('woff2'),
+    url('/fonts/Inter-Italic.ttf') format('truetype');
 }
 
 @font-face {
@@ -126,7 +140,9 @@
   font-style: italic;
   font-weight: 500;
   font-display: swap;
-  src: url('/fonts/Inter-MediumItalic.ttf') format('truetype');
+  src:
+    url('/fonts/Inter-MediumItalic.woff2') format('woff2'),
+    url('/fonts/Inter-MediumItalic.ttf') format('truetype');
 }
 
 @font-face {
