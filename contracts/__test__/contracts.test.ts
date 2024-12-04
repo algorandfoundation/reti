@@ -365,7 +365,7 @@ describe('reti', () => {
 
             // ....and verify data for the 'staker' is correct as well
             const stakerInfo = await getStakerInfo(ourPoolClient, stakerAccount)
-            expect(stakerInfo.account).toEqual(stakerAccount.addr)
+            expect(stakerInfo.account).toEqual(stakerAccount.addr.toString())
             // should be full 2000 algos (we included extra for mbr to begin with)
             expect(stakerInfo.balance).toEqual(AlgoAmount.Algos(2000).microAlgos)
 
@@ -658,7 +658,7 @@ describe('reti', () => {
             })
             // The amount 'actually' staked won't include the MBR amount
             const stakerInfo = await getStakerInfo(ourPoolClient, stakerAccount)
-            expect(stakerInfo.account).toEqual(stakerAccount.addr)
+            expect(stakerInfo.account).toEqual(stakerAccount.addr.toString())
             expect(stakerInfo.balance).toEqual(amountStaked - mbrs.addStakerMbr)
 
             // Get Pool info before removing stake..
@@ -719,7 +719,7 @@ describe('reti', () => {
             })
             // The amount 'actually' staked won't include the MBR amount
             const stakerInfo = await getStakerInfo(ourPoolClient, stakerAccount)
-            expect(stakerInfo.account).toEqual(stakerAccount.addr)
+            expect(stakerInfo.account).toEqual(stakerAccount.addr.toString())
             expect(stakerInfo.balance).toEqual(amountStaked - mbrs.addStakerMbr)
 
             // Get Pool info before removing stake..
@@ -3518,9 +3518,9 @@ describe('reti', () => {
 
             // ledger should be staker 0, 2, 1, {empty}
             let stakerData = await getStakeInfoFromBoxValue(firstPoolClient)
-            expect(stakerData[0].account).toEqual(stakers[0].addr)
-            expect(stakerData[1].account).toEqual(stakers[2].addr)
-            expect(stakerData[2].account).toEqual(stakers[1].addr)
+            expect(stakerData[0].account).toEqual(stakers[0].addr.toString())
+            expect(stakerData[1].account).toEqual(stakers[2].addr.toString())
+            expect(stakerData[2].account).toEqual(stakers[1].addr.toString())
             expect(stakerData[3].account).toEqual(ALGORAND_ZERO_ADDRESS_STRING)
             expect(stakerData[0].balance).toEqual(1000n * 1000000n)
             expect(stakerData[1].balance).toEqual(1000n * 1000000n)
@@ -3530,9 +3530,9 @@ describe('reti', () => {
             // now remove staker 2's stake - and we should end up with ledger of 0, {empty}, 1, {empty}
             await removeStake(firstPoolClient, stakers[2], AlgoAmount.Algos(1000))
             stakerData = await getStakeInfoFromBoxValue(firstPoolClient)
-            expect(stakerData[0].account).toEqual(stakers[0].addr)
+            expect(stakerData[0].account).toEqual(stakers[0].addr.toString())
             expect(stakerData[1].account).toEqual(ALGORAND_ZERO_ADDRESS_STRING)
-            expect(stakerData[2].account).toEqual(stakers[1].addr)
+            expect(stakerData[2].account).toEqual(stakers[1].addr.toString())
             expect(stakerData[3].account).toEqual(ALGORAND_ZERO_ADDRESS_STRING)
             expect(stakerData[0].balance).toEqual(1000n * 1000000n)
             expect(stakerData[1].balance).toEqual(0n)
@@ -3552,9 +3552,9 @@ describe('reti', () => {
             expect(poolKey.id).toEqual(firstPoolKey.id)
 
             stakerData = await getStakeInfoFromBoxValue(firstPoolClient)
-            expect(stakerData[0].account).toEqual(stakers[0].addr)
+            expect(stakerData[0].account).toEqual(stakers[0].addr.toString())
             expect(stakerData[1].account).toEqual(ALGORAND_ZERO_ADDRESS_STRING)
-            expect(stakerData[2].account).toEqual(stakers[1].addr)
+            expect(stakerData[2].account).toEqual(stakers[1].addr.toString())
             expect(stakerData[3].account).toEqual(ALGORAND_ZERO_ADDRESS_STRING)
             expect(stakerData[0].balance).toEqual(1000n * 1000000n)
             expect(stakerData[1].balance).toEqual(0n)

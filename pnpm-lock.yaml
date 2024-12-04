@@ -18,8 +18,8 @@ importers:
         version: 3.0.0
     devDependencies:
       '@algorandfoundation/algokit-client-generator':
-        specifier: 4.0.0
-        version: 4.0.0(@algorandfoundation/algokit-utils@8.0.0(algosdk@3.0.0))(algosdk@3.0.0)
+        specifier: 4.0.2
+        version: 4.0.2(@algorandfoundation/algokit-utils@8.0.0(algosdk@3.0.0))(algosdk@3.0.0)
       '@algorandfoundation/tealscript':
         specifier: 0.106.0
         version: 0.106.0
@@ -346,9 +346,9 @@ packages:
   '@adobe/css-tools@4.4.0':
     resolution: {integrity: sha512-Ff9+ksdQQB3rMncgqDK78uLznstjyfIf2Arnh22pW8kBpLs6rpKDwgnZT46hin5Hl1WzazzK64DOrhSwYpS7bQ==}
 
-  '@algorandfoundation/algokit-client-generator@4.0.0':
-    resolution: {integrity: sha512-dRNtpYXko6cTfQ09D4STiFouVNtWPLAyttCzYMOd2C58ELLOHXBWGLfFCQyLOz+4uWwjFzSOOhgP49SuR7okuw==}
-    engines: {node: '>=18.0'}
+  '@algorandfoundation/algokit-client-generator@4.0.2':
+    resolution: {integrity: sha512-c57qdsEMjJ6UMpEc2/IzZ/aPlGJ9olO1s+HTzsmG/FHPge/mASIZypxBncNQo/fdL1XhkafMje/1kwGfDd6xeg==}
+    engines: {node: '>=20.0'}
     hasBin: true
     peerDependencies:
       '@algorandfoundation/algokit-utils': ^7.0.0 || ^8.0.0
@@ -5139,7 +5139,7 @@ snapshots:
 
   '@adobe/css-tools@4.4.0': {}
 
-  '@algorandfoundation/algokit-client-generator@4.0.0(@algorandfoundation/algokit-utils@8.0.0(algosdk@3.0.0))(algosdk@3.0.0)':
+  '@algorandfoundation/algokit-client-generator@4.0.2(@algorandfoundation/algokit-utils@8.0.0(algosdk@3.0.0))(algosdk@3.0.0)':
     dependencies:
       '@algorandfoundation/algokit-utils': 8.0.0(algosdk@3.0.0)
       algosdk: 3.0.0

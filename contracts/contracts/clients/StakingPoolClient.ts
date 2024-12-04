@@ -8,7 +8,7 @@ import { AlgorandClientInterface } from '@algorandfoundation/algokit-utils/types
 import { ABIReturn, AppReturn, SendAppTransactionResult } from '@algorandfoundation/algokit-utils/types/app'
 import { Arc56Contract, getArc56ReturnValue, getABIStructFromABITuple } from '@algorandfoundation/algokit-utils/types/app-arc56'
 import {
-  AppClient,
+  AppClient as _AppClient,
   AppClientMethodCallParams,
   AppClientParams,
   AppClientBareCallParams,
@@ -18,7 +18,7 @@ import {
   ResolveAppClientByNetwork,
   CloneAppClientParams,
 } from '@algorandfoundation/algokit-utils/types/app-client'
-import { AppFactory, AppFactoryAppClientParams, AppFactoryResolveAppClientByCreatorAndNameParams, AppFactoryDeployParams, AppFactoryParams, CreateSchema } from '@algorandfoundation/algokit-utils/types/app-factory'
+import { AppFactory as _AppFactory, AppFactoryAppClientParams, AppFactoryResolveAppClientByCreatorAndNameParams, AppFactoryDeployParams, AppFactoryParams, CreateSchema } from '@algorandfoundation/algokit-utils/types/app-factory'
 import { TransactionComposer, AppCallMethodCall, AppMethodCallTransactionArgument, SimulateOptions } from '@algorandfoundation/algokit-utils/types/composer'
 import { SendParams, SendSingleTransactionResult, SendAtomicTransactionComposerResults } from '@algorandfoundation/algokit-utils/types/transaction'
 import { Address, encodeAddress, modelsv2, OnApplicationComplete, Transaction, TransactionSigner } from 'algosdk'
@@ -725,7 +725,7 @@ export class StakingPoolFactory {
   /**
    * The underlying `AppFactory` for when you want to have more flexibility
    */
-  public readonly appFactory: AppFactory
+  public readonly appFactory: _AppFactory
 
   /**
    * Creates a new instance of `StakingPoolFactory`
@@ -733,7 +733,7 @@ export class StakingPoolFactory {
    * @param params The parameters to initialise the app factory with
    */
   constructor(params: Omit<AppFactoryParams, 'appSpec'>) {
-    this.appFactory = new AppFactory({
+    this.appFactory = new _AppFactory({
       ...params,
       appSpec: APP_SPEC,
     })
@@ -832,10 +832,10 @@ export class StakingPoolFactory {
        * Initialize the staking pool w/ owner and manager, but can only be created by the validator contract.
        *
        * @param params The params for the smart contract call
-       * @returns The create params
+       * @returns The create transaction
        */
       createApplication: (params: CallParams<StakingPoolArgs['obj']['createApplication(uint64,uint64,uint64,uint64)void'] | StakingPoolArgs['tuple']['createApplication(uint64,uint64,uint64,uint64)void']> & AppClientCompilationParams & CreateSchema & {onComplete?: OnApplicationComplete.NoOpOC}) => {
-        return this.appFactory.params.create(StakingPoolParamsFactory.create.createApplication(params))
+        return this.appFactory.createTransaction.create(StakingPoolParamsFactory.create.createApplication(params))
       },
     },
 
@@ -873,22 +873,22 @@ export class StakingPoolClient {
   /**
    * The underlying `AppClient` for when you want to have more flexibility
    */
-  public readonly appClient: AppClient
+  public readonly appClient: _AppClient
 
   /**
    * Creates a new instance of `StakingPoolClient`
    *
    * @param appClient An `AppClient` instance which has been created with the StakingPool app spec
    */
-  constructor(appClient: AppClient)
+  constructor(appClient: _AppClient)
   /**
    * Creates a new instance of `StakingPoolClient`
    *
    * @param params The parameters to initialise the app client with
    */
   constructor(params: Omit<AppClientParams, 'appSpec'>)
-  constructor(appClientOrParams: AppClient | Omit<AppClientParams, 'appSpec'>) {
-    this.appClient = appClientOrParams instanceof AppClient ? appClientOrParams : new AppClient({
+  constructor(appClientOrParams: _AppClient | Omit<AppClientParams, 'appSpec'>) {
+    this.appClient = appClientOrParams instanceof _AppClient ? appClientOrParams : new _AppClient({
       ...appClientOrParams,
       appSpec: APP_SPEC,
     })
@@ -908,7 +908,7 @@ export class StakingPoolClient {
    * @param params The parameters to create the app client
    */
   public static async fromCreatorAndName(params: Omit<ResolveAppClientByCreatorAndName, 'appSpec'>): Promise<StakingPoolClient> {
-    return new StakingPoolClient(await AppClient.fromCreatorAndName({...params, appSpec: APP_SPEC}))
+    return new StakingPoolClient(await _AppClient.fromCreatorAndName({...params, appSpec: APP_SPEC}))
   }
   
   /**
@@ -921,7 +921,7 @@ export class StakingPoolClient {
   static async fromNetwork(
     params: Omit<ResolveAppClientByNetwork, 'appSpec'>
   ): Promise<StakingPoolClient> {
-    return new StakingPoolClient(await AppClient.fromNetwork({...params, appSpec: APP_SPEC}))
+    return new StakingPoolClient(await _AppClient.fromNetwork({...params, appSpec: APP_SPEC}))
   }
   
   /** The ID of the app instance this client is linked to. */
