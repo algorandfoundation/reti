@@ -52,15 +52,20 @@ if (import.meta.env.VITE_ALGOD_NETWORK === 'localnet') {
 }
 
 const algodConfig = getAlgodConfigFromViteEnvironment()
-const network = getAlgodNetwork()
+const defaultNetwork = getAlgodNetwork()
 
 const walletManager = new WalletManager({
   wallets,
-  network,
-  algod: {
-    baseServer: algodConfig.server,
-    port: algodConfig.port,
-    token: algodConfig.token as string,
+  defaultNetwork,
+  networks: {
+    [defaultNetwork]: {
+      name: defaultNetwork,
+      algod: {
+        baseServer: algodConfig.server,
+        port: algodConfig.port,
+        token: algodConfig.token as string,
+      },
+    },
   },
   options: {
     resetNetwork: true,

@@ -1,9 +1,8 @@
 import * as msgpack from 'algo-msgpack-with-bigint'
-import { ABIMethod, ABIType, getMethodByName } from 'algosdk'
+import algosdk, { ABIMethod, ABIType, getMethodByName } from 'algosdk'
 import { HttpResponse, http } from 'msw'
 import { APP_SPEC as ValidatorRegistrySpec } from '@/contracts/ValidatorRegistryClient'
 import { Application, BlockHeader } from '@/interfaces/algod'
-import { SimulateRequest, SimulateResponse } from '@/interfaces/simulate'
 import { concatUint8Arrays } from '@/utils/bytes'
 import { MethodCallParams } from '@/utils/tests/abi'
 import {
@@ -109,10 +108,12 @@ const handlers = [
 
         /* Inspect request */
         const requestBody = await request.arrayBuffer()
-        const decodedRequest = msgpack.decode(new Uint8Array(requestBody)) as SimulateRequest
+        const decodedRequest = msgpack.decode(
+          new Uint8Array(requestBody),
+        ) as algosdk.modelsv2.SimulateRequest
         // console.log('decodedRequest', decodedRequest)
 
-        const txns = decodedRequest['txn-groups'][0].txns
+        const txns = decodedRequest.txnGroups[0].txns
         const txn = txns[0]
 
         if (!txn.txn.note) {
@@ -140,7 +141,8 @@ const handlers = [
         const returnValue = returnType.encode(fixtureData)
         const returnLogs = [concatUint8Arrays(RETURN_PREFIX, returnValue)]
 
-        const mockResponse: SimulateResponse = {
+        // algosdk.modelsv2.SimulateResponse
+        const mockResponse = {
           'last-round': LAST_ROUND,
           version: 2,
           'txn-groups': [

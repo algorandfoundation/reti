@@ -1,4 +1,4 @@
-import algosdk, { Transaction, TransactionSigner, EncodedSignedTransaction } from 'algosdk'
+import algosdk from 'algosdk'
 
 /**
  * This is a "polyfill" for algosdk's `makeEmptyTransactionSigner` function that supports simulate
@@ -8,23 +8,20 @@ import algosdk, { Transaction, TransactionSigner, EncodedSignedTransaction } fro
  * @param {string} authAddr - Optional authorized address (spending key) for a rekeyed account.
  * @returns A function that can be used with simulate w/ the "allow empty signatures" option.
  */
-export const makeEmptyTransactionSigner = (authAddr?: string): TransactionSigner => {
-  return async (txns: Transaction[], indexesToSign: number[]): Promise<Uint8Array[]> => {
+export const makeEmptyTransactionSigner = (authAddr?: string): algosdk.TransactionSigner => {
+  return async (txns: algosdk.Transaction[], indexesToSign: number[]): Promise<Uint8Array[]> => {
     const emptySigTxns: Uint8Array[] = []
 
     indexesToSign.forEach((i) => {
-      const encodedStxn: EncodedSignedTransaction = {
-        txn: txns[i].get_obj_for_encoding(),
-      }
+      const txn = txns[i]
+      const encodedStxn: Map<string, unknown> = new Map([['txn', txn.toEncodingData()]])
 
       // If authAddr is provided, use its decoded publicKey as the signer
       if (authAddr) {
-        const { publicKey } = algosdk.decodeAddress(authAddr)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        encodedStxn.sgnr = publicKey as any as Buffer
+        encodedStxn.set('sgnr', algosdk.decodeAddress(authAddr).publicKey)
       }
 
-      emptySigTxns.push(algosdk.encodeObj(encodedStxn))
+      emptySigTxns.push(algosdk.msgpackRawEncode(encodedStxn))
     })
 
     return emptySigTxns

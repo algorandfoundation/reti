@@ -17,13 +17,14 @@ import { ParamsCache } from '@/utils/paramsCache'
  */
 async function fetchRewardBalances(validator: Validator) {
   try {
-    let totalBalances = 0
+    let totalBalances = 0n
     for (const pool of validator.pools) {
-      const poolBal = await fetchAccountBalance(getApplicationAddress(pool.poolAppId), true)
+      const poolAddress = getApplicationAddress(pool.poolAppId)
+      const poolBal = await fetchAccountBalance(poolAddress.toString(), true)
       totalBalances += poolBal
     }
     // Truncate to nearest whole ALGO
-    return Math.round((totalBalances - Number(validator.state.totalAlgoStaked)) / 1e6) * 1e6
+    return Math.round((Number(totalBalances) - Number(validator.state.totalAlgoStaked)) / 1e6) * 1e6
   } catch (error) {
     console.error(error)
     return 0
@@ -36,7 +37,8 @@ async function epochPayoutFetch(validator: Validator) {
   try {
     let oldestRound = 0n
     for (const pool of validator.pools) {
-      const poolBal = await fetchAccountBalance(getApplicationAddress(pool.poolAppId), true)
+      const poolAddress = getApplicationAddress(pool.poolAppId)
+      const poolBal = await fetchAccountBalance(poolAddress.toString(), true)
       if (poolBal > 0) {
         const stakingPoolClient = await getSimulateStakingPoolClient(pool.poolAppId)
         const stakingPoolGS = await stakingPoolClient.appClient.getGlobalState()
@@ -54,7 +56,7 @@ async function epochPayoutFetch(validator: Validator) {
         }
       }
     }
-    return BigInt(params.firstRound) - oldestRound
+    return BigInt(params.firstValid) - oldestRound
   } catch (error) {
     console.error(error)
     return 0n

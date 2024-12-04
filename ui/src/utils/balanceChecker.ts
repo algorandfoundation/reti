@@ -1,5 +1,6 @@
 import { ClientManager } from '@algorandfoundation/algokit-utils/types/client-manager'
 import algosdk from 'algosdk'
+import { BigMath } from '@/utils/bigint'
 import { formatAlgoAmount } from '@/utils/format'
 import { getAlgodConfigFromViteEnvironment } from '@/utils/network/getAlgoClientConfigs'
 
@@ -7,8 +8,8 @@ export class InsufficientBalanceError extends Error {
   public toastMessage: string
 
   constructor(
-    public required: number,
-    public available: number,
+    public required: bigint,
+    public available: bigint,
     action?: string,
   ) {
     const message = action
@@ -37,13 +38,13 @@ export class BalanceChecker {
     })
   }
 
-  private async getAvailableBalance(): Promise<number> {
+  private async getAvailableBalance(): Promise<bigint> {
     const accountInfo = await this.algodClient.accountInformation(this.address).exclude('all').do()
-    const availableBalance = Math.max(0, accountInfo.amount - accountInfo['min-balance'])
+    const availableBalance = BigMath.max(0n, accountInfo.amount - accountInfo.minBalance)
     return availableBalance
   }
 
-  private async checkAccountBalance(requiredBalance: number, action?: string): Promise<void> {
+  private async checkAccountBalance(requiredBalance: bigint, action?: string): Promise<void> {
     const availableBalance = await this.getAvailableBalance()
     if (availableBalance < requiredBalance) {
       throw new InsufficientBalanceError(requiredBalance, availableBalance, action)
@@ -52,10 +53,10 @@ export class BalanceChecker {
 
   public static async check(
     address: string,
-    requiredBalance: bigint | number,
+    requiredBalance: bigint,
     action?: string,
   ): Promise<void> {
     const checker = new BalanceChecker(address)
-    await checker.checkAccountBalance(Number(requiredBalance), action)
+    await checker.checkAccountBalance(requiredBalance, action)
   }
 }

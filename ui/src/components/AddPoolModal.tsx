@@ -87,9 +87,9 @@ export function AddPoolModal({
     enabled: !!activeAddress && !!validator, // wait until modal is open
   })
 
-  const { amount = 0, 'min-balance': minBalance = 0 } = accountInfoQuery.data || {}
+  const { amount = 0n, minBalance = 0n } = accountInfoQuery.data || {}
 
-  const availableBalance = Math.max(0, amount - minBalance)
+  const availableBalance = amount - minBalance < 0n ? 0n : amount - minBalance
 
   const mbrQuery = useQuery(mbrQueryOptions)
   const { addPoolMbr = 0n, poolInitMbr = 0n } = mbrQuery.data || {}
@@ -231,7 +231,7 @@ export function AddPoolModal({
       setPoolKey(stakingPoolKey)
 
       const poolAppAddress = algosdk.getApplicationAddress(stakingPoolKey.poolAppId)
-      setPoolAddress(poolAppAddress)
+      setPoolAddress(poolAppAddress.toString())
 
       toast.success(`Staking pool ${stakingPoolKey.poolId} created!`, {
         id: toastId,

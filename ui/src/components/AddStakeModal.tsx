@@ -54,6 +54,7 @@ import { ellipseAddressJsx } from '@/utils/ellipseAddress'
 import { ExplorerLink } from '@/utils/explorer'
 import { formatAlgoAmount, formatAmount } from '@/utils/format'
 import { Constraints } from '@/contracts/ValidatorRegistryClient'
+import { BigMath } from '@/utils/bigint'
 
 interface AddStakeModalProps {
   validator: Validator | null
@@ -89,13 +90,9 @@ export function AddStakeModal({
     enabled: !!activeAddress && !!validator, // wait until modal is open
   })
 
-  const {
-    amount = 0,
-    'min-balance': minBalance = 0,
-    assets: heldAssets = [],
-  } = accountInfoQuery.data || {}
+  const { amount = 0n, minBalance = 0n, assets: heldAssets = [] } = accountInfoQuery.data || {}
 
-  const availableBalance = Math.max(0, amount - minBalance)
+  const availableBalance = amount - minBalance < 0n ? 0n : amount - minBalance
 
   const heldGatingAssetQuery = useQuery({
     queryKey: ['held-gating-asset', validator?.id, activeAddress],
@@ -132,16 +129,19 @@ export function AddStakeModal({
     () => stakesByValidator.find((data) => Number(data.validatorId) === validator?.id)?.pools || [],
     [stakesByValidator, validator],
   )
-  const minimumStake = stakerPoolsData.length === 0 ? Number(validator?.config.minEntryStake) : 0
+  const minimumStake = stakerPoolsData.length === 0 ? (validator?.config.minEntryStake ?? 0n) : 0n
 
-  const poolMaximumStake = validator ? calculateMaxAvailableToStake(validator, constraints) : 0
+  const poolMaximumStake = validator ? calculateMaxAvailableToStake(validator, constraints) : 0n
 
   const stakerMaximumStake = React.useMemo(() => {
     const estimatedFee = AlgoAmount.MicroAlgos(240_000).microAlgos
-    return Math.max(0, availableBalance - Number(mbrAmount) - Number(estimatedFee))
+    return BigMath.max(0n, availableBalance - mbrAmount - estimatedFee)
   }, [availableBalance, mbrAmount])
 
-  const maximumStake = Math.min(stakerMaximumStake, poolMaximumStake || stakerMaximumStake)
+  const maximumStake = BigMath.min(
+    stakerMaximumStake,
+    poolMaximumStake === 0n ? stakerMaximumStake : poolMaximumStake,
+  )
 
   const formSchema = z.object({
     amountToStake: z

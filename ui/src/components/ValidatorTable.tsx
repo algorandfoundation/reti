@@ -326,7 +326,7 @@ export function ValidatorTable({
 
         return (
           <Tooltip content={tooltipContent}>
-            <span className="font-mono">{validator.rewardToken.params['unit-name']}</span>
+            <span className="font-mono">{validator.rewardToken.params.unitName}</span>
           </Tooltip>
         )
       },

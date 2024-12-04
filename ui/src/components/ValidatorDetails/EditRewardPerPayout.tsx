@@ -48,7 +48,7 @@ export function EditRewardPerPayout({ validator }: EditRewardPerPayoutProps) {
     rewardPerPayout,
   } = validator.config
 
-  const tokenUnitName = validator.rewardToken?.params['unit-name']
+  const tokenUnitName = validator.rewardToken?.params.unitName
   const tokenDecimals = validator.rewardToken?.params.decimals
 
   const rewardPerPayoutWholeUnits = convertFromBaseUnits(rewardPerPayout, tokenDecimals)

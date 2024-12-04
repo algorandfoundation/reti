@@ -1,30 +1,9 @@
 import { AlgoAmount } from '@algorandfoundation/algokit-utils/types/amount'
-import { AssetParams } from '@algorandfoundation/algokit-utils/types/indexer'
-import { BaseHTTPClientError, BaseHTTPClientResponse } from 'algosdk'
+import algosdk, { BaseHTTPClientError, BaseHTTPClientResponse } from 'algosdk'
 
-export interface AssetHolding {
-  amount: number
-  'asset-id': number
-  'is-frozen': boolean
-}
-
-export interface AssetCreatorHolding extends AssetHolding {
+export interface AssetCreatorHolding
+  extends Omit<algosdk.modelsv2.AssetHolding, 'getEncodingSchema' | 'toEncodingData'> {
   creator: string
-}
-
-export interface AccountInformation {
-  address: string
-  amount: number
-  'min-balance': number
-  assets?: AssetHolding[]
-  'auth-addr'?: string
-  'created-assets'?: Asset[]
-  // add more fields as needed
-}
-
-export interface AccountAssetInformation {
-  'asset-holding': AssetHolding
-  round: number
 }
 
 export type AccountBalance = {
@@ -40,11 +19,6 @@ export type Exclude =
   | 'apps-local-state'
   | 'created-apps'
   | 'none'
-
-export interface Asset {
-  index: number
-  params: AssetParams
-}
 
 export class AlgodHttpError extends Error implements BaseHTTPClientError {
   constructor(

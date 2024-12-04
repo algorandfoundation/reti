@@ -27,8 +27,8 @@ export function AuthAddressProvider({ children }: { children: React.ReactNode })
     const fetchAuthAddress = async () => {
       try {
         const accountInfo = await fetchAccountInformation(activeAddress!, 'all')
-        const authAddr = accountInfo['auth-addr']
-        setAuthAddress(authAddr)
+        const authAddr = accountInfo.authAddr
+        setAuthAddress(authAddr?.toString())
       } catch (error) {
         console.error(`Error fetching active wallet's authorized address:`, error)
         setAuthAddress(undefined)

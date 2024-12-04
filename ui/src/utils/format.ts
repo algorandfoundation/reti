@@ -1,6 +1,5 @@
+import algosdk from 'algosdk'
 import Big from 'big.js'
-import { Asset } from '@/interfaces/algod'
-
 /**
  * Convert an asset amount from base units to whole units
  * @param {number | bigint | string} amount - The amount in base units
@@ -197,13 +196,13 @@ type FormatAssetAmountOptions = Omit<FormatAmountOptions, 'decimals'> & {
  * @see {@link formatAmount}
  */
 export function formatAssetAmount(
-  asset: Asset,
+  asset: algosdk.modelsv2.Asset,
   amount: number | bigint | string,
   options: FormatAssetAmountOptions = {},
 ): string {
   const { precision, trim, maxLength, compact, unitName } = options
   const decimals = Number(asset.params.decimals)
-  const assetUnitName = unitName ? asset.params['unit-name'] : ''
+  const assetUnitName = unitName ? asset.params.unitName : ''
 
   const formatOptions = { precision, trim, maxLength, compact, decimals }
 
