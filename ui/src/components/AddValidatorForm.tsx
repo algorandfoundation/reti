@@ -38,7 +38,6 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { GatingType } from '@/constants/gating'
 import { useBlockTime } from '@/hooks/useBlockTime'
-import { useAuthAddress } from '@/providers/AuthAddressProvider'
 import { InsufficientBalanceError } from '@/utils/balanceChecker'
 import {
   getEpochLengthBlocks,
@@ -74,10 +73,8 @@ export function AddValidatorForm({ constraints }: AddValidatorFormProps) {
   const [isSigning, setIsSigning] = React.useState(false)
 
   const { transactionSigner, activeAddress } = useWallet()
-  const { authAddress } = useAuthAddress()
 
   const queryClient = useQueryClient()
-
   const navigate = useNavigate({ from: '/add' })
 
   const formSchema = z
@@ -322,7 +319,6 @@ export function AddValidatorForm({ constraints }: AddValidatorFormProps) {
         nfdForInfoAppId,
         transactionSigner,
         activeAddress,
-        authAddress,
       )
 
       toast.success(

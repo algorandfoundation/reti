@@ -97,7 +97,6 @@ export async function triggerPoolPayouts(
   pools: StakerPoolData[],
   signer: algosdk.TransactionSigner,
   activeAddress: string,
-  authAddr: string | undefined,
 ) {
   if (process.env.NODE_ENV !== 'development') {
     throw new Error('Triggering pool payouts is only available in development mode')
@@ -118,7 +117,7 @@ export async function triggerPoolPayouts(
 
     const isLastPool = i === pools.length - 1
 
-    const promiseFunction = epochBalanceUpdate(poolAppId, signer, activeAddress, authAddr)
+    const promiseFunction = epochBalanceUpdate(poolAppId, signer, activeAddress)
 
     const [nextItemPromise, resolveNextItem] = createNextItemPromise()
 
@@ -156,7 +155,6 @@ export async function simulateEpoch(
   rewardAmount: number,
   signer: algosdk.TransactionSigner,
   activeAddress: string,
-  authAddr: string | undefined,
   queryClient: QueryClient,
   router: ReturnType<typeof useRouter>,
 ) {
@@ -227,7 +225,7 @@ export async function simulateEpoch(
     await wait(3000)
 
     // Trigger payouts by calling epochBalanceUpdate, starting with first pool (will iterate through all pools)
-    await triggerPoolPayouts(pools, signer, activeAddress, authAddr)
+    await triggerPoolPayouts(pools, signer, activeAddress)
 
     queryClient.invalidateQueries({ queryKey: ['stakes', { staker: activeAddress }] })
     router.invalidate()
