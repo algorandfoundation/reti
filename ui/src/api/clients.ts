@@ -1,4 +1,4 @@
-import algosdk, { makeEmptyTransactionSigner } from 'algosdk'
+import algosdk from 'algosdk'
 import { FEE_SINK } from '@/constants/accounts'
 import { StakingPoolClient, StakingPoolFactory } from '@/contracts/StakingPoolClient'
 import { ValidatorRegistryClient } from '@/contracts/ValidatorRegistryClient'
@@ -31,7 +31,6 @@ export async function getSimulateValidatorClient(
 ): Promise<ValidatorRegistryClient> {
   return algorandClient.client.getTypedAppClientById(ValidatorRegistryClient, {
     defaultSender: senderAddr,
-    defaultSigner: makeEmptyTransactionSigner(),
     appId: RETI_APP_ID,
   })
 }
@@ -54,7 +53,6 @@ export async function getSimulateStakingPoolClient(
 ): Promise<StakingPoolClient> {
   return algorandClient.client.getTypedAppClientById(StakingPoolClient, {
     defaultSender: senderAddr,
-    defaultSigner: makeEmptyTransactionSigner(),
     appId: poolAppId,
   })
 }

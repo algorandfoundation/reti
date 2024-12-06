@@ -254,7 +254,6 @@ export async function addValidator(
   const { addValidatorMbr } = (
     await validatorClient.send.getMbrAmounts({
       args: {},
-      signer: algosdk.makeEmptyTransactionSigner(),
     })
   ).return!
 
@@ -467,7 +466,7 @@ export async function findPoolForStaker(
       },
       extraFee: AlgoAmount.MicroAlgos(1000),
     })
-    .simulate({ allowEmptySignatures: true, allowUnnamedResources: true })
+    .simulate({ skipSignatures: true, allowUnnamedResources: true })
 
   const errorMessage = result.simulateResponse.txnGroups[0].failureMessage
 
@@ -531,11 +530,11 @@ export async function addStake(
       suggestedParams,
     })
 
-    simulateComposer.addTransaction(rewardTokenOptInTxn, algosdk.makeEmptyTransactionSigner())
+    simulateComposer.addTransaction(rewardTokenOptInTxn)
   }
 
   const simulateResults = await simulateComposer.simulate({
-    allowEmptySignatures: true,
+    skipSignatures: true,
     allowUnnamedResources: true,
   })
 
@@ -784,11 +783,11 @@ export async function removeStake(
       suggestedParams,
     })
 
-    simulateComposer.addTransaction(rewardTokenOptInTxn, algosdk.makeEmptyTransactionSigner())
+    simulateComposer.addTransaction(rewardTokenOptInTxn)
   }
 
   const simulateResult = await simulateComposer.simulate({
-    allowEmptySignatures: true,
+    skipSignatures: true,
     allowUnnamedResources: true,
   })
 
@@ -847,20 +846,17 @@ export async function epochBalanceUpdate(
         args: [],
         note: '1',
         staticFee: AlgoAmount.MicroAlgos(0),
-        signer: algosdk.makeEmptyTransactionSigner(),
       })
       .gas({
         args: [],
         note: '2',
         staticFee: AlgoAmount.MicroAlgos(0),
-        signer: algosdk.makeEmptyTransactionSigner(),
       })
       .epochBalanceUpdate({
         args: {},
         staticFee: AlgoAmount.MicroAlgos(240_000),
-        signer: algosdk.makeEmptyTransactionSigner(),
       })
-      .simulate({ allowEmptySignatures: true, allowUnnamedResources: true })
+      .simulate({ skipSignatures: true, allowUnnamedResources: true })
 
     const feeAmount = AlgoAmount.MicroAlgos(
       1000 *
@@ -978,7 +974,6 @@ export async function claimTokens(
     const client = stakingFactory.getAppClientById({
       appId: pool.poolAppId,
       defaultSender: activeAddress,
-      defaultSigner: algosdk.makeEmptyTransactionSigner(),
     })
     feeComposer
       .addAppCallMethodCall(
@@ -993,7 +988,7 @@ export async function claimTokens(
   }
 
   const simulateResult = await feeComposer.simulate({
-    allowEmptySignatures: true,
+    skipSignatures: true,
     allowUnnamedResources: true,
   })
 
