@@ -6,7 +6,6 @@ import { toast } from 'sonner'
 import { claimTokens } from '@/api/contracts'
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu'
 import { Validator } from '@/interfaces/validator'
-import { useAuthAddress } from '@/providers/AuthAddressProvider'
 import { formatAssetAmount } from '@/utils/format'
 
 interface ClaimTokensProps {
@@ -16,7 +15,6 @@ interface ClaimTokensProps {
 
 export function ClaimTokens({ validator, rewardTokenBalance }: ClaimTokensProps) {
   const { transactionSigner, activeAddress } = useWallet()
-  const { authAddress } = useAuthAddress()
   const queryClient = useQueryClient()
 
   const toastIdRef = React.useRef(`toast-${Date.now()}-${Math.random()}`)
@@ -40,7 +38,7 @@ export function ClaimTokens({ validator, rewardTokenBalance }: ClaimTokensProps)
 
       toast.loading('Sign transactions to claim reward tokens...', { id: toastId })
 
-      await claimTokens(validator.pools, transactionSigner, activeAddress, authAddress)
+      await claimTokens(validator.pools, transactionSigner, activeAddress)
 
       toast.success(
         <div className="flex items-center gap-x-2">

@@ -1,3 +1,4 @@
+import algosdk from 'algosdk'
 import { Check } from 'lucide-react'
 import * as React from 'react'
 import { FieldPath, FieldValues, UseFormReturn } from 'react-hook-form'
@@ -5,7 +6,7 @@ import { useDebouncedCallback } from 'use-debounce'
 import { fetchAsset as fetchAssetInformation } from '@/api/algod'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { AlgodHttpError, Asset } from '@/interfaces/algod'
+import { AlgodHttpError } from '@/interfaces/algod'
 import { cn } from '@/utils/ui'
 
 const ERROR_EMPTY_FIELD = 'No asset ID entered'
@@ -20,8 +21,8 @@ interface AssetLookupProps<
   form: UseFormReturn<TFieldValues>
   id: string
   name: TName
-  asset: Asset | null
-  setAsset: (asset: Asset | null) => void
+  asset: algosdk.modelsv2.Asset | null
+  setAsset: (asset: algosdk.modelsv2.Asset | null) => void
   isFetching: boolean
   setIsFetching: (isFetching: boolean) => void
   errorMessage?: string
@@ -162,7 +163,7 @@ export function AssetLookup<
                 ) : asset ? (
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-mono text-muted-foreground">
-                      {asset.params['unit-name']}
+                      {asset.params.unitName}
                     </span>
                     <Check className="h-5 w-5 text-green-500" />
                   </div>

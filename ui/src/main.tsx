@@ -14,7 +14,6 @@ import { HelmetProvider } from 'react-helmet-async'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import { Toaster } from '@/components/ui/sonner'
 import { WalletShortcutHandler } from '@/components/WalletShortcutHandler'
-import { AuthAddressProvider } from '@/providers/AuthAddressProvider'
 import { ThemeProvider } from '@/providers/ThemeProvider'
 import { routeTree } from '@/routeTree.gen'
 import '@/styles/main.css'
@@ -52,15 +51,20 @@ if (import.meta.env.VITE_ALGOD_NETWORK === 'localnet') {
 }
 
 const algodConfig = getAlgodConfigFromViteEnvironment()
-const network = getAlgodNetwork()
+const defaultNetwork = getAlgodNetwork()
 
 const walletManager = new WalletManager({
   wallets,
-  network,
-  algod: {
-    baseServer: algodConfig.server,
-    port: algodConfig.port,
-    token: algodConfig.token as string,
+  defaultNetwork,
+  networks: {
+    [defaultNetwork]: {
+      name: defaultNetwork,
+      algod: {
+        baseServer: algodConfig.server,
+        port: algodConfig.port,
+        token: algodConfig.token as string,
+      },
+    },
   },
   options: {
     resetNetwork: true,
@@ -100,10 +104,8 @@ function AppProviders() {
         <QueryClientProvider client={queryClient}>
           <SnackbarProvider maxSnack={3}>
             <WalletProvider manager={walletManager}>
-              <AuthAddressProvider>
-                <InnerApp />
-                <WalletShortcutHandler />
-              </AuthAddressProvider>
+              <InnerApp />
+              <WalletShortcutHandler />
             </WalletProvider>
           </SnackbarProvider>
         </QueryClientProvider>

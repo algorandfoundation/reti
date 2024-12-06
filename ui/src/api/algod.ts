@@ -1,17 +1,8 @@
 import { AlgoAmount } from '@algorandfoundation/algokit-utils/types/amount'
 import { ClientManager } from '@algorandfoundation/algokit-utils/types/client-manager'
-import {
-  AccountAssetInformation,
-  AccountBalance,
-  AccountInformation,
-  AlgodHttpError,
-  Asset,
-  AssetCreatorHolding,
-  AssetHolding,
-  BlockResponse,
-  Exclude,
-  NodeStatusResponse,
-} from '@/interfaces/algod'
+import algosdk from 'algosdk'
+import { AccountBalance, AlgodHttpError, AssetCreatorHolding, Exclude } from '@/interfaces/algod'
+import { BigMath } from '@/utils/bigint'
 import { getAlgodConfigFromViteEnvironment } from '@/utils/network/getAlgoClientConfigs'
 
 const algodConfig = getAlgodConfigFromViteEnvironment()
@@ -24,24 +15,24 @@ const algodClient = ClientManager.getAlgodClient({
 export async function fetchAccountInformation(
   address: string,
   exclude: Exclude = 'none',
-): Promise<AccountInformation> {
+): Promise<algosdk.modelsv2.Account> {
   const accountInfo = await algodClient.accountInformation(address).exclude(exclude).do()
-  return accountInfo as AccountInformation
+  return accountInfo
 }
 
 export async function fetchAccountBalance(
   address: string,
   availableBalance = false,
-): Promise<number> {
+): Promise<bigint> {
   const accountInfo = await fetchAccountInformation(address, 'all')
 
-  return availableBalance ? accountInfo.amount - accountInfo['min-balance'] : accountInfo.amount
+  return availableBalance ? accountInfo.amount - accountInfo.minBalance : accountInfo.amount
 }
 
-export async function fetchAsset(assetId: bigint | number): Promise<Asset> {
+export async function fetchAsset(assetId: bigint | number): Promise<algosdk.modelsv2.Asset> {
   try {
-    const asset = await algodClient.getAssetByID(Number(assetId)).do()
-    return asset as Asset
+    const asset = await algodClient.getAssetByID(assetId).do()
+    return asset
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (error.message && error.response) {
@@ -59,8 +50,8 @@ export async function fetchBalance(address: string | null): Promise<AccountBalan
   const accountInfo = await fetchAccountInformation(address, 'all')
 
   const amount = accountInfo.amount
-  const minimum = accountInfo['min-balance']
-  const available = Math.max(0, amount - minimum)
+  const minimum = accountInfo.minBalance
+  const available = BigMath.max(0n, amount - minimum)
 
   return {
     amount: AlgoAmount.MicroAlgos(amount),
@@ -69,7 +60,9 @@ export async function fetchBalance(address: string | null): Promise<AccountBalan
   }
 }
 
-export async function fetchAssetHoldings(address: string | null): Promise<AssetHolding[]> {
+export async function fetchAssetHoldings(
+  address: string | null,
+): Promise<algosdk.modelsv2.AssetHolding[]> {
   if (!address) {
     throw new Error('No address provided')
   }
@@ -80,8 +73,8 @@ export async function fetchAssetHoldings(address: string | null): Promise<AssetH
 
 export async function fetchAccountAssetInformation(
   address: string | null,
-  assetId: number,
-): Promise<AccountAssetInformation> {
+  assetId: bigint,
+): Promise<algosdk.modelsv2.AccountAssetResponse> {
   if (!address) {
     throw new Error('No address provided')
   }
@@ -90,7 +83,7 @@ export async function fetchAccountAssetInformation(
   }
   try {
     const accountAssetInfo = await algodClient.accountAssetInformation(address, assetId).do()
-    return accountAssetInfo as AccountAssetInformation
+    return accountAssetInfo
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (error.message && error.response) {
@@ -103,7 +96,7 @@ export async function fetchAccountAssetInformation(
 
 export async function isOptedInToAsset(address: string | null, assetId: bigint): Promise<boolean> {
   try {
-    await fetchAccountAssetInformation(address, Number(assetId))
+    await fetchAccountAssetInformation(address, assetId)
     return true
   } catch (error: unknown) {
     if (error instanceof AlgodHttpError && error.response.status === 404) {
@@ -137,7 +130,7 @@ export async function fetchAssetCreatorHoldings(
   const batches = chunkArray(assetHoldings, batchSize)
 
   for (const batch of batches) {
-    const promises = batch.map((holding) => fetchAsset(holding['asset-id']))
+    const promises = batch.map((holding) => fetchAsset(holding.assetId))
     const assets = await Promise.all(promises)
     const assetCreatorHoldings = assets.map((asset, index) => {
       return {
@@ -158,19 +151,19 @@ export async function fetchAssetCreatorHoldings(
  */
 export async function fetchBlockTimes(numRounds: number = 10): Promise<number[]> {
   try {
-    const status = (await algodClient.status().do()) as NodeStatusResponse
+    const status = await algodClient.status().do()
     if (!status) {
       throw new Error('Failed to fetch node status')
     }
 
-    const lastRound = Number(status['last-round'])
+    const lastRound = Number(status.lastRound)
 
     const blockTimes: number[] = []
     for (let round = lastRound - numRounds; round < lastRound; round++) {
       try {
-        const blockResponse = (await algodClient.block(round).do()) as BlockResponse
+        const blockResponse = await algodClient.block(round).do()
         const block = blockResponse.block
-        blockTimes.push(block.ts)
+        blockTimes.push(Number(block.header.timestamp))
       } catch (error) {
         throw new Error(`Unable to fetch block for round ${round}: ${error}`)
       }

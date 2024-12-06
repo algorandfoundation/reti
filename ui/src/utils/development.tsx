@@ -42,8 +42,8 @@ export async function incrementRoundNumberBy(rounds: number) {
 
   let result = {
     rounds,
-    startRound: startParams.firstRound,
-    resultRound: startParams.firstRound,
+    startRound: startParams.firstValid,
+    resultRound: startParams.firstValid,
   }
 
   if (rounds === 0) {
@@ -68,16 +68,16 @@ export async function incrementRoundNumberBy(rounds: number) {
   let txnId = ''
   for (let i = 0; i < rounds; i++) {
     const txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-      from: testAccount.addr,
-      to: testAccount.addr,
+      sender: testAccount.addr,
+      receiver: testAccount.addr,
       amount: 0,
       note: new TextEncoder().encode(`${i}`),
       suggestedParams: startParams,
     })
 
     const signedTransaction = await algokit.signTransaction(txn, testAccount)
-    const { txId } = await algodClient.sendRawTransaction(signedTransaction).do()
-    txnId = txId
+    const { txid } = await algodClient.sendRawTransaction(signedTransaction).do()
+    txnId = txid
   }
 
   await algokit.waitForConfirmation(txnId, rounds + 1, algodClient)
@@ -86,7 +86,7 @@ export async function incrementRoundNumberBy(rounds: number) {
 
   result = {
     ...result,
-    resultRound: resultParams.firstRound,
+    resultRound: resultParams.firstValid,
   }
   // console.log(`Increment round number result: ${result.resultRound}`)
 
@@ -97,7 +97,6 @@ export async function triggerPoolPayouts(
   pools: StakerPoolData[],
   signer: algosdk.TransactionSigner,
   activeAddress: string,
-  authAddr: string | undefined,
 ) {
   if (process.env.NODE_ENV !== 'development') {
     throw new Error('Triggering pool payouts is only available in development mode')
@@ -118,7 +117,7 @@ export async function triggerPoolPayouts(
 
     const isLastPool = i === pools.length - 1
 
-    const promiseFunction = epochBalanceUpdate(poolAppId, signer, activeAddress, authAddr)
+    const promiseFunction = epochBalanceUpdate(poolAppId, signer, activeAddress)
 
     const [nextItemPromise, resolveNextItem] = createNextItemPromise()
 
@@ -156,7 +155,6 @@ export async function simulateEpoch(
   rewardAmount: number,
   signer: algosdk.TransactionSigner,
   activeAddress: string,
-  authAddr: string | undefined,
   queryClient: QueryClient,
   router: ReturnType<typeof useRouter>,
 ) {
@@ -185,8 +183,8 @@ export async function simulateEpoch(
       const poolKey = pool.poolKey
 
       const paymentTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-        from: activeAddress,
-        to: algosdk.getApplicationAddress(poolKey.poolAppId),
+        sender: activeAddress,
+        receiver: algosdk.getApplicationAddress(poolKey.poolAppId),
         amount: AlgoAmount.Algos(rewardAmount).microAlgos,
         suggestedParams,
       })
@@ -213,7 +211,7 @@ export async function simulateEpoch(
         <span className="text-foreground">
           Simulated {data.rounds} rounds:{' '}
           <span className="whitespace-nowrap">
-            {data.startRound} &rarr; {data.resultRound}
+            {data.startRound.toString()} &rarr; {data.resultRound.toString()}
           </span>
         </span>
       ),
@@ -227,7 +225,7 @@ export async function simulateEpoch(
     await wait(3000)
 
     // Trigger payouts by calling epochBalanceUpdate, starting with first pool (will iterate through all pools)
-    await triggerPoolPayouts(pools, signer, activeAddress, authAddr)
+    await triggerPoolPayouts(pools, signer, activeAddress)
 
     queryClient.invalidateQueries({ queryKey: ['stakes', { staker: activeAddress }] })
     router.invalidate()
@@ -257,7 +255,7 @@ export async function sendRewardTokensToPool(
   try {
     const tokenId = validator.config.rewardTokenId
     const asset = await fetchAsset(tokenId)
-    const unitName = asset.params['unit-name']
+    const unitName = asset.params.unitName
 
     toast.loading(`Sign to send ${rewardTokenAmount} ${unitName} tokens to pool`, {
       id: toastId,
@@ -271,8 +269,8 @@ export async function sendRewardTokensToPool(
     const suggestedParams = await ParamsCache.getSuggestedParams()
 
     const assetTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-      from: activeAddress,
-      to: poolAddress,
+      sender: activeAddress,
+      receiver: poolAddress,
       assetIndex: Number(tokenId),
       amount: convertToBaseUnits(rewardTokenAmount, 6),
       suggestedParams,
@@ -281,8 +279,8 @@ export async function sendRewardTokensToPool(
     atc.addTransaction({ txn: assetTxn, signer })
     await atc.execute(algodClient, 4)
 
-    const poolAccountInfo = await fetchAccountInformation(poolAddress)
-    const assetHolding = poolAccountInfo.assets?.find((a) => a['asset-id'] === Number(tokenId))
+    const poolAccountInfo = await fetchAccountInformation(poolAddress.toString())
+    const assetHolding = poolAccountInfo.assets?.find((a) => a.assetId === tokenId)
 
     const balanceStr = formatAssetAmount(asset, assetHolding?.amount || 0)
     const balanceMsg = assetHolding?.amount ? `${balanceStr} ${unitName}` : 'unknown'

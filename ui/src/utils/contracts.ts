@@ -4,7 +4,6 @@ import { fetchAccountAssetInformation, fetchAccountInformation } from '@/api/alg
 import { fetchNfd, fetchNfdSearch } from '@/api/nfd'
 import { GatingType } from '@/constants/gating'
 import { Indicator } from '@/constants/indicator'
-import { Asset, AssetHolding } from '@/interfaces/algod'
 import { NfdSearchV2Params } from '@/interfaces/nfd'
 import { StakerValidatorData } from '@/interfaces/staking'
 import { LocalPoolInfo, NodeInfo, PoolData, Validator } from '@/interfaces/validator'
@@ -120,7 +119,7 @@ interface TransformedGatingAssets {
 export function transformEntryGatingAssets(
   type: string,
   assetIds: Array<{ value: string }>,
-  assets: Array<Asset | null>,
+  assets: Array<algosdk.modelsv2.Asset | null>,
   minBalance: string,
   nfdCreatorAppId: bigint,
   nfdParentAppId: bigint,
@@ -325,7 +324,7 @@ export function canManageValidator(activeAddress: string | null, validator: Vali
 export async function fetchValueToVerify(
   validator: Validator | null,
   activeAddress: string | null,
-  heldAssets: AssetHolding[],
+  heldAssets: algosdk.modelsv2.AssetHolding[],
 ): Promise<bigint> {
   if (!validator || !activeAddress) {
     throw new Error('Validator or active address not found')
@@ -338,8 +337,8 @@ export async function fetchValueToVerify(
     const creatorAddress = entryGatingAddress
     const accountInfo = await fetchAccountInformation(creatorAddress)
 
-    if (accountInfo['created-assets']) {
-      const assetIds = accountInfo['created-assets'].map((asset) => BigInt(asset.index))
+    if (accountInfo.createdAssets) {
+      const assetIds = accountInfo.createdAssets.map((asset) => BigInt(asset.index))
       return findValueToVerify(heldAssets, assetIds, minBalance)
     }
   }
@@ -357,7 +356,7 @@ export async function fetchValueToVerify(
     const promises = addresses.map((address) => fetchAccountInformation(address))
     const accountsInfo = await Promise.all(promises)
     const assetIds = accountsInfo
-      .map((accountInfo) => accountInfo['created-assets'])
+      .map((accountInfo) => accountInfo.createdAssets)
       .flat()
       .filter((asset) => !!asset)
       .map((asset) => BigInt(asset!.index))
@@ -398,40 +397,40 @@ export async function fetchValueToVerify(
  * @returns {number} Gating asset ID that meets the minimum balance requirement or 0 if not found
  */
 export function findValueToVerify(
-  heldAssets: AssetHolding[],
+  heldAssets: algosdk.modelsv2.AssetHolding[],
   gatingAssets: bigint[],
   minBalance: bigint,
 ): bigint {
   const asset = heldAssets.find(
-    (asset) => gatingAssets.includes(BigInt(asset['asset-id'])) && asset.amount >= minBalance,
+    (asset) => gatingAssets.includes(asset.assetId) && asset.amount >= minBalance,
   )
-  return BigInt(asset?.['asset-id'] || 0n)
+  return asset?.assetId ?? 0n
 }
 
 /**
  * Calculate the maximum amount of algo that can be staked based on the validator's configuration
  * @param {Validator} validator - Validator object
  * @param {Constraints} constraints - Protocol constraints object
- * @returns {number} Maximum amount of algo that can be staked
+ * @returns {bigint} Maximum amount of algo that can be staked
  */
 export function calculateMaxAvailableToStake(
   validator: Validator,
   constraints?: Constraints,
-): number {
+): bigint {
   let { maxAlgoPerPool } = validator.config
 
   if (maxAlgoPerPool === 0n) {
     if (!constraints) {
-      return 0
+      return 0n
     }
     maxAlgoPerPool = constraints.maxAlgoPerPool
   }
 
   // For each pool, subtract the totalAlgoStaked from maxAlgoPerPool and return the highest value
   const maxAvailableToStake = validator.pools.reduce((acc, pool) => {
-    const availableToStake = Number(maxAlgoPerPool) - Number(pool.totalAlgoStaked)
+    const availableToStake = maxAlgoPerPool - pool.totalAlgoStaked
     return availableToStake > acc ? availableToStake : acc
-  }, 0)
+  }, 0n)
 
   return maxAvailableToStake
 }
@@ -516,8 +515,8 @@ export async function fetchRemainingRewardsBalance(validator: Validator): Promis
   const poolAppId = validator.pools[0].poolAppId
   const poolAddress = algosdk.getApplicationAddress(poolAppId)
 
-  const accountAssetInfo = await fetchAccountAssetInformation(poolAddress, Number(rewardTokenId))
-  const rewardTokenAmount = BigInt(accountAssetInfo['asset-holding'].amount)
+  const accountAssetInfo = await fetchAccountAssetInformation(poolAddress.toString(), rewardTokenId)
+  const rewardTokenAmount = accountAssetInfo.assetHolding?.amount ?? 0n
 
   const remainingBalance = rewardTokenAmount - rewardTokenHeldBack
 
