@@ -14,15 +14,15 @@ Validators can define a number of parameters - some of which are immutable. More
 
 **Mandatory Parameters**
 
-* Owner address (should be a **secure wallet!  Hardware wallet or multi-sig**)
+* Thse parameters are set at creation and can never be changed once created.
+  * Owner address (should be a **secure wallet!  Hardware wallet or multi-sig**) &#x20;
+  * Epoch Length (Payout frequency) in rounds \[blocks]&#x20;
+  * Validator commission rate&#x20;
+  * Minimum amount required for staker to be in pool.
+  * Number of pools per node (participation keys) - Maximum of 3
+    * 8 is maximum number of nodes allowed, so if 3 pools per node is specified, 24 pools is maximum.
 * Manager address (hot wallet)
-* Epoch Length (Payout frequency) in rounds \[blocks]
-* Validator commission rate
 * Validator fee address (account which receives commission)
-* Minimum entry amount
-* Number of pools per node (participation keys) - Maximum of 3
-* Max number of nodes - Maximum of 8
-  * This means a maximum of 24 pools can be created.
 
 **Optional Parameters**
 
