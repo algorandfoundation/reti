@@ -18,12 +18,12 @@
         "typecheck": "tsc --noEmit"
     },
     "dependencies": {
-        "@algorandfoundation/algokit-utils": "8.0.0",
+        "@algorandfoundation/algokit-utils": "8.0.3",
         "algosdk": "3.0.0"
     },
     "devDependencies": {
-        "@algorandfoundation/algokit-client-generator": "4.0.2",
-        "@algorandfoundation/tealscript": "0.106.0",
+        "@algorandfoundation/algokit-client-generator": "4.0.6",
+        "@algorandfoundation/tealscript": "0.106.1",
         "@joe-p/algokit-generate-component": "0.2.1",
         "@typescript-eslint/eslint-plugin": "8.8.1",
         "@typescript-eslint/parser": "8.8.1",
