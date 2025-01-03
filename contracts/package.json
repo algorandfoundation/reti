@@ -14,15 +14,16 @@
         "lint": "eslint . --ext ts --max-warnings 0",
         "lint:fix": "eslint . --ext ts --max-warnings 0 --fix",
         "prettier": "pnpx prettier --check .",
-        "prettier:fix": "pnpx prettier --write ."
+        "prettier:fix": "pnpx prettier --write .",
+        "typecheck": "tsc --noEmit"
     },
     "dependencies": {
-        "@algorandfoundation/algokit-utils": "7.0.0",
-        "algosdk": "2.9.0"
+        "@algorandfoundation/algokit-utils": "8.0.3",
+        "algosdk": "3.0.0"
     },
     "devDependencies": {
-        "@algorandfoundation/algokit-client-generator": "4.0.0",
-        "@algorandfoundation/tealscript": "0.106.0",
+        "@algorandfoundation/algokit-client-generator": "4.0.6",
+        "@algorandfoundation/tealscript": "0.106.1",
         "@joe-p/algokit-generate-component": "0.2.1",
         "@typescript-eslint/eslint-plugin": "8.8.1",
         "@typescript-eslint/parser": "8.8.1",

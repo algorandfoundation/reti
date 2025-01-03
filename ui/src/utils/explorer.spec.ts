@@ -29,13 +29,13 @@ describe('ExplorerLink', () => {
   })
 
   it('should generate correct asset URL using static method', () => {
-    const id = 12345
+    const id = 12345n
     const expectedUrl = `${mockConfig.assetUrl}/${id}`
     expect(ExplorerLink.asset(id)).toBe(expectedUrl)
   })
 
   it('should generate correct app URL using static method', () => {
-    const id = 67890
+    const id = 67890n
     const expectedUrl = `${mockConfig.appUrl}/${id}`
     expect(ExplorerLink.app(id)).toBe(expectedUrl)
   })

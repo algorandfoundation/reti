@@ -13,8 +13,8 @@ export const appFixtures: FixtureData = {
     // Staking pool appId 1010
     id: 1010,
     params: {
-      'approval-program': new Uint8Array([]),
-      'clear-state-program': new Uint8Array([]),
+      'approval-program': Buffer.from('', 'utf-8').toString('base64'),
+      'clear-state-program': Buffer.from('', 'utf-8').toString('base64'),
       creator: ALGORAND_ZERO_ADDRESS_STRING,
       'global-state': [
         {

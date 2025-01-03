@@ -1,10 +1,10 @@
+import algosdk from 'algosdk'
 import * as React from 'react'
-import { Asset } from '@/interfaces/algod'
 import { ExplorerLink } from '@/utils/explorer'
 import { cn } from '@/utils/ui'
 
 interface DisplayAssetProps {
-  asset?: Asset
+  asset?: algosdk.modelsv2.Asset
   show?: 'name' | 'unit-name' | 'full'
   link?: boolean
   fallback?: React.ReactNode
@@ -22,8 +22,8 @@ export function DisplayAsset({
     return <span className="font-mono">{unitName}</span>
   }
 
-  const renderDisplayAsset = (asset: Asset) => {
-    const { name, 'unit-name': unitName } = asset.params
+  const renderDisplayAsset = (asset: algosdk.modelsv2.Asset) => {
+    const { name, unitName } = asset.params
 
     if (unitName && show === 'unit-name') {
       return renderUnitName(unitName)
@@ -51,7 +51,7 @@ export function DisplayAsset({
       return renderUnitName(unitName)
     }
 
-    return asset.index
+    return asset.index.toString()
   }
 
   if (!asset) {

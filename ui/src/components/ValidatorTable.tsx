@@ -52,7 +52,6 @@ import { ValidatorRewards } from '@/components/ValidatorRewards'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
 import { StakerValidatorData } from '@/interfaces/staking'
 import { Validator } from '@/interfaces/validator'
-import { useAuthAddress } from '@/providers/AuthAddressProvider'
 import {
   calculateMaxStake,
   calculateSaturationPercentage,
@@ -88,7 +87,6 @@ export function ValidatorTable({
   const [addPoolValidator, setAddPoolValidator] = React.useState<Validator | null>(null)
 
   const { transactionSigner, activeAddress } = useWallet()
-  const { authAddress } = useAuthAddress()
 
   const router = useRouter()
   const queryClient = useQueryClient()
@@ -326,7 +324,7 @@ export function ValidatorTable({
 
         return (
           <Tooltip content={tooltipContent}>
-            <span className="font-mono">{validator.rewardToken.params['unit-name']}</span>
+            <span className="font-mono">{validator.rewardToken.params.unitName}</span>
           </Tooltip>
         )
       },
@@ -419,7 +417,6 @@ export function ValidatorTable({
                               100,
                               transactionSigner,
                               activeAddress!,
-                              authAddress,
                               queryClient,
                               router,
                             )

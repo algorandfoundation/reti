@@ -37,7 +37,6 @@ import {
 } from '@/components/ui/select'
 import { StakerPoolData, StakerValidatorData } from '@/interfaces/staking'
 import { Validator } from '@/interfaces/validator'
-import { useAuthAddress } from '@/providers/AuthAddressProvider'
 import { InsufficientBalanceError } from '@/utils/balanceChecker'
 import { setValidatorQueriesData } from '@/utils/contracts'
 import { formatAlgoAmount } from '@/utils/format'
@@ -73,7 +72,6 @@ export function UnstakeModal({ validator, setValidator, stakesByValidator }: Uns
   const queryClient = useQueryClient()
   const router = useRouter()
   const { transactionSigner, activeAddress } = useWallet()
-  const { authAddress } = useAuthAddress()
 
   const formSchema = z.object({
     amountToUnstake: z
@@ -199,11 +197,10 @@ export function UnstakeModal({ validator, setValidator, stakesByValidator }: Uns
 
       await removeStake(
         pool.poolKey.poolAppId,
-        Number(amountToUnstake),
+        amountToUnstake,
         validator!.config.rewardTokenId,
         transactionSigner,
         activeAddress,
-        authAddress,
       )
 
       toast.success(

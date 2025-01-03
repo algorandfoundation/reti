@@ -66,7 +66,7 @@ func initApp() *RetiApp {
 		Name:    "réti node manager",
 		Usage:   "Configuration tool and background daemon for Algorand validator pools",
 		Version: getVersionInfo(),
-		Before: func(ctx context.Context, cmd *cli.Command) error {
+		Before: func(ctx context.Context, cmd *cli.Command) (context.Context, error) {
 			// This is further bootstrap of the 'app' but within context of 'cli' helper as it will
 			// have access to flags and options (network to use for eg) already set.
 			return appConfig.initClients(ctx, cmd)
@@ -143,20 +143,20 @@ type RetiApp struct {
 // initClients initializes both an algod client (to correct network - which it
 // also validates) and a nfd nfdApi client - for nfd updates or fetches if caller
 // desires
-func (ac *RetiApp) initClients(ctx context.Context, cmd *cli.Command) error {
+func (ac *RetiApp) initClients(ctx context.Context, cmd *cli.Command) (context.Context, error) {
 	network := cmd.String("network")
 
 	if envfile := cmd.String("envfile"); envfile != "" {
-		err := loadNamedEnvFile(ctx, envfile)
+		newCtx, err := loadNamedEnvFile(ctx, envfile)
 		if err != nil {
-			return err
+			return newCtx, err
 		}
 	}
 	// quick validity check on possible network names...
 	switch network {
 	case "sandbox", "fnet", "betanet", "testnet", "mainnet":
 	default:
-		return fmt.Errorf("unknown network:%s", network)
+		return ctx, fmt.Errorf("unknown network:%s", network)
 	}
 	var (
 		algoClient *algod.Client
@@ -172,7 +172,7 @@ func (ac *RetiApp) initClients(ctx context.Context, cmd *cli.Command) error {
 	cfg := algo.GetNetworkConfig(network)
 	algoClient, err = algo.GetAlgoClient(ac.logger, cfg)
 	if err != nil {
-		return err
+		return ctx, err
 	}
 	ac.retiAppID = cfg.RetiAppID
 	// allow secondary override of the IDs via the network specific .env file we just loaded which we couldn't
@@ -202,7 +202,7 @@ func (ac *RetiApp) initClients(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	if ac.retiAppID == 0 {
-		return fmt.Errorf("the id of the Reti Validator contract must be set using either -retiid or RETI_APPID env var!")
+		return ctx, fmt.Errorf("the id of the Reti Validator contract must be set using either -retiid or RETI_APPID env var!")
 	}
 
 	// This will load and initialize mnemonics from the environment - and handles all 'local' signing for the app
@@ -218,17 +218,17 @@ func (ac *RetiApp) initClients(ctx context.Context, cmd *cli.Command) error {
 	ac.nfdApi = api
 	nfdOnChain, err := nfdonchain.NewNfdApi(algoClient, cmd.String("network"))
 	if err != nil {
-		return fmt.Errorf("failed to initialize nfd onchain api client: %v", err)
+		return ctx, fmt.Errorf("failed to initialize nfd onchain api client: %v", err)
 	}
 	ac.nfdOnChain = nfdOnChain
 
 	// Initialize the 'reti' client
 	retiClient, err := reti.New(ac.retiAppID, ac.logger, ac.algoClient, ac.signer, ac.retiValidatorID, ac.retiNodeNum)
 	if err != nil {
-		return err
+		return ctx, err
 	}
 	ac.retiClient = retiClient
-	return retiClient.LoadState(ctx)
+	return ctx, retiClient.LoadState(ctx)
 }
 
 func setIntFromEnv(val *uint64, envName string) error {
@@ -242,16 +242,16 @@ func setIntFromEnv(val *uint64, envName string) error {
 	return nil
 }
 
-func checkConfigured(ctx context.Context, command *cli.Command) error {
+func checkConfigured(ctx context.Context, command *cli.Command) (context.Context, error) {
 	if !App.retiClient.IsConfigured() {
-		return errors.New("validator not configured")
+		return ctx, errors.New("validator not configured")
 	}
-	return nil
+	return ctx, nil
 }
 
-func loadNamedEnvFile(ctx context.Context, envFile string) error {
+func loadNamedEnvFile(ctx context.Context, envFile string) (context.Context, error) {
 	misc.Infof(App.logger, "loading env file:%s", envFile)
-	return godotenv.Load(envFile)
+	return ctx, godotenv.Load(envFile)
 }
 
 // Version is replaced at build time during docker builds w/ 'release' version

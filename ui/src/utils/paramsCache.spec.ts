@@ -4,10 +4,10 @@ import { ParamsCache } from '@/utils/paramsCache'
 
 const mockParams: algosdk.SuggestedParams = {
   fee: 1000,
-  firstRound: 1000,
-  lastRound: 2000,
+  minFee: 1000,
+  firstValid: 1000,
+  lastValid: 2000,
   genesisID: 'dockernet-v1',
-  genesisHash: 'v1lkQZYrxQn1XDRkIAlsUrSSECXU6OFMbPMhj/QQ9dk=',
 }
 
 // Mock getTransactionParams

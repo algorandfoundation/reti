@@ -1,4 +1,4 @@
-import { Asset } from '@/interfaces/algod'
+import algosdk from 'algosdk'
 import { Nfd } from '@/interfaces/nfd'
 import { ToStringTypes } from '@/interfaces/utils'
 import {
@@ -43,8 +43,8 @@ export type Validator = {
   nodePoolAssignment: NodePoolAssignmentConfig
   rewardsBalance?: bigint
   roundsSinceLastPayout?: bigint
-  rewardToken?: Asset
-  gatingAssets?: Asset[]
+  rewardToken?: algosdk.modelsv2.Asset
+  gatingAssets?: algosdk.modelsv2.Asset[]
   nfd?: Nfd
   apy?: number
 }

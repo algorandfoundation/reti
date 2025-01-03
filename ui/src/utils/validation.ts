@@ -3,7 +3,6 @@ import algosdk from 'algosdk'
 import { RefinementCtx, z } from 'zod'
 import { ALGORAND_ZERO_ADDRESS_STRING } from '@/constants/accounts'
 import { GatingType } from '@/constants/gating'
-import { Asset } from '@/interfaces/algod'
 import { convertToBaseUnits } from '@/utils/format'
 import { isValidName, isValidRoot } from '@/utils/nfd'
 import { Constraints } from '@/contracts/ValidatorRegistryClient'
@@ -283,7 +282,7 @@ export const entryGatingRefinement = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any,
   ctx: RefinementCtx,
-  assets: Array<Asset | null>,
+  assets: Array<algosdk.modelsv2.Asset | null>,
 ) => {
   const {
     entryGatingType,
@@ -444,7 +443,7 @@ export const entryGatingRefinement = (
           message: 'Invalid minimum balance',
         })
       } else {
-        const asset = assets.find((asset) => asset?.index === Number(entryGatingAssets[0].value))
+        const asset = assets.find((asset) => asset?.index === entryGatingAssets[0].value)
         if (asset) {
           const minBalanceBaseUnits = convertToBaseUnits(
             gatingAssetMinBalance,
@@ -454,7 +453,7 @@ export const entryGatingRefinement = (
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
               path: ['gatingAssetMinBalance'],
-              message: `Minimum balance cannot exceed ${asset.params['unit-name'] || 'gating asset'} total supply`,
+              message: `Minimum balance cannot exceed ${asset.params.unitName || 'gating asset'} total supply`,
             })
           }
         }

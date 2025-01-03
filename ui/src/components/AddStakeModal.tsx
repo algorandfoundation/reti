@@ -43,7 +43,6 @@ import { Input } from '@/components/ui/input'
 import { GatingType } from '@/constants/gating'
 import { StakerPoolData, StakerValidatorData } from '@/interfaces/staking'
 import { Validator } from '@/interfaces/validator'
-import { useAuthAddress } from '@/providers/AuthAddressProvider'
 import { InsufficientBalanceError } from '@/utils/balanceChecker'
 import {
   calculateMaxAvailableToStake,
@@ -54,6 +53,7 @@ import { ellipseAddressJsx } from '@/utils/ellipseAddress'
 import { ExplorerLink } from '@/utils/explorer'
 import { formatAlgoAmount, formatAmount } from '@/utils/format'
 import { Constraints } from '@/contracts/ValidatorRegistryClient'
+import { BigMath } from '@/utils/bigint'
 
 interface AddStakeModalProps {
   validator: Validator | null
@@ -81,7 +81,6 @@ export function AddStakeModal({
   const queryClient = useQueryClient()
   const router = useRouter()
   const { transactionSigner, activeAddress } = useWallet()
-  const { authAddress, isReady } = useAuthAddress()
 
   const accountInfoQuery = useQuery({
     queryKey: ['account-info', activeAddress],
@@ -89,13 +88,9 @@ export function AddStakeModal({
     enabled: !!activeAddress && !!validator, // wait until modal is open
   })
 
-  const {
-    amount = 0,
-    'min-balance': minBalance = 0,
-    assets: heldAssets = [],
-  } = accountInfoQuery.data || {}
+  const { amount = 0n, minBalance = 0n, assets: heldAssets = [] } = accountInfoQuery.data || {}
 
-  const availableBalance = Math.max(0, amount - minBalance)
+  const availableBalance = amount - minBalance < 0n ? 0n : amount - minBalance
 
   const heldGatingAssetQuery = useQuery({
     queryKey: ['held-gating-asset', validator?.id, activeAddress],
@@ -122,8 +117,8 @@ export function AddStakeModal({
   // @todo: make this a custom hook, call from higher up and pass down as prop
   const mbrRequiredQuery = useQuery({
     queryKey: ['mbr-required', activeAddress],
-    queryFn: () => doesStakerNeedToPayMbr(activeAddress!, authAddress),
-    enabled: !!activeAddress && isReady,
+    queryFn: () => doesStakerNeedToPayMbr(activeAddress!),
+    enabled: !!activeAddress,
   })
   const mbrRequired = mbrRequiredQuery.data || false
   const mbrAmount = mbrRequired ? addStakerMbr : 0n
@@ -132,16 +127,19 @@ export function AddStakeModal({
     () => stakesByValidator.find((data) => Number(data.validatorId) === validator?.id)?.pools || [],
     [stakesByValidator, validator],
   )
-  const minimumStake = stakerPoolsData.length === 0 ? Number(validator?.config.minEntryStake) : 0
+  const minimumStake = stakerPoolsData.length === 0 ? (validator?.config.minEntryStake ?? 0n) : 0n
 
-  const poolMaximumStake = validator ? calculateMaxAvailableToStake(validator, constraints) : 0
+  const poolMaximumStake = validator ? calculateMaxAvailableToStake(validator, constraints) : 0n
 
   const stakerMaximumStake = React.useMemo(() => {
     const estimatedFee = AlgoAmount.MicroAlgos(240_000).microAlgos
-    return Math.max(0, availableBalance - Number(mbrAmount) - Number(estimatedFee))
+    return BigMath.max(0n, availableBalance - mbrAmount - estimatedFee)
   }, [availableBalance, mbrAmount])
 
-  const maximumStake = Math.min(stakerMaximumStake, poolMaximumStake || stakerMaximumStake)
+  const maximumStake = BigMath.min(
+    stakerMaximumStake,
+    poolMaximumStake === 0n ? stakerMaximumStake : poolMaximumStake,
+  )
 
   const formSchema = z.object({
     amountToStake: z
@@ -227,7 +225,6 @@ export function AddStakeModal({
           Number(validator.id),
           BigInt(amountToStake),
           activeAddress,
-          authAddress,
         )
         setTargetPoolId(Number(poolKey.poolId))
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -235,16 +232,16 @@ export function AddStakeModal({
         console.error(`Error fetching target pool: ${error.message}`)
       }
     },
-    [activeAddress, authAddress, minimumStake, validator],
+    [activeAddress, minimumStake, validator],
   )
 
   React.useEffect(() => {
-    if (validator?.id && isReady) {
+    if (validator?.id) {
       fetchTargetPoolId()
     } else {
       setTargetPoolId(null)
     }
-  }, [fetchTargetPoolId, isReady, validator?.id])
+  }, [fetchTargetPoolId, validator?.id])
 
   const debouncedFetchTargetPoolId = useDebouncedCallback(async (value) => {
     const isValid = await form.trigger('amountToStake')
@@ -309,7 +306,6 @@ export function AddStakeModal({
         validator!.config.rewardTokenId,
         transactionSigner,
         activeAddress,
-        authAddress,
       )
 
       toast.success(

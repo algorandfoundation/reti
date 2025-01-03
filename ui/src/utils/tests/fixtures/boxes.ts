@@ -1,10 +1,10 @@
 import { AlgoAmount } from '@algorandfoundation/algokit-utils/types/amount'
 import algosdk from 'algosdk'
 import { ALGORAND_ZERO_ADDRESS_STRING } from '@/constants/accounts'
+import { StakedInfo } from '@/contracts/StakingPoolClient'
 import { LAST_ROUND } from '@/utils/tests/constants'
 import { ACCOUNT_1, ACCOUNT_2 } from '@/utils/tests/fixtures/accounts'
 import { createStaticArray } from '@/utils/tests/utils'
-import { StakedInfo } from '@/contracts/StakingPoolClient'
 
 export const DEFAULT_STAKED_INFO: StakedInfo = {
   account: ALGORAND_ZERO_ADDRESS_STRING,
@@ -73,7 +73,7 @@ export function encodeStakersToBase64(stakers: StakedInfo[]): string {
     buffer.set(algosdk.bigIntToBytes(staker.balance, 8), index * bytesPerStaker + 32)
     buffer.set(algosdk.bigIntToBytes(staker.totalRewarded, 8), index * bytesPerStaker + 40)
     buffer.set(algosdk.bigIntToBytes(staker.rewardTokenBalance, 8), index * bytesPerStaker + 48)
-    buffer.set(algosdk.bigIntToBytes(BigInt(staker.entryRound), 8), index * bytesPerStaker + 56)
+    buffer.set(algosdk.bigIntToBytes(staker.entryRound, 8), index * bytesPerStaker + 56)
   })
 
   return Buffer.from(buffer).toString('base64')

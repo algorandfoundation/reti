@@ -178,7 +178,9 @@ export async function getStakedPoolsForAccount(
     validatorClient: ValidatorRegistryClient,
     stakerAccount: Account,
 ): Promise<ValidatorPoolKey[]> {
-    const results = await validatorClient.send.getStakedPoolsForAccount({ args: { staker: stakerAccount.addr } })
+    const results = await validatorClient.send.getStakedPoolsForAccount({
+        args: { staker: stakerAccount.addr.toString() },
+    })
 
     const retPoolKeys: ValidatorPoolKey[] = []
     results.return!.forEach((poolKey) => {
@@ -188,7 +190,7 @@ export async function getStakedPoolsForAccount(
 }
 
 export async function getStakerInfo(stakeClient: StakingPoolClient, staker: Account) {
-    return (await stakeClient.send.getStakerInfo({ args: { staker: staker.addr } })).return!
+    return (await stakeClient.send.getStakerInfo({ args: { staker: staker.addr.toString() } })).return!
 }
 
 export async function getTokenPayoutRatio(validatorClient: ValidatorRegistryClient, validatorId: number) {
@@ -208,7 +210,11 @@ export async function addStake(
             .newGroup()
             .gas()
             .findPoolForStaker({
-                args: { validatorId: vldtrId, staker: staker.addr, amountToStake: algoAmount.microAlgos },
+                args: {
+                    validatorId: vldtrId,
+                    staker: staker.addr.toString(),
+                    amountToStake: algoAmount.microAlgos,
+                },
                 staticFee: AlgoAmount.MicroAlgos(2000),
             })
             .simulate({ allowUnnamedResources: true })
@@ -300,7 +306,7 @@ export async function removeStake(
         .gas({ args: [], note: '1', staticFee: AlgoAmount.MicroAlgos(0) })
         .gas({ args: [], note: '2', staticFee: AlgoAmount.MicroAlgos(0) })
         .removeStake({
-            args: { staker: staker.addr, amountToUnstake: unstakeAmount.microAlgos },
+            args: { staker: staker.addr.toString(), amountToUnstake: unstakeAmount.microAlgos },
             staticFee: AlgoAmount.MicroAlgos(240000),
             sender: (altSender || staker).addr,
         })
@@ -317,7 +323,7 @@ export async function removeStake(
             .gas({ args: [], note: '1', staticFee: AlgoAmount.MicroAlgos(0) })
             .gas({ args: [], note: '2', staticFee: AlgoAmount.MicroAlgos(0) })
             .removeStake({
-                args: { staker: staker.addr, amountToUnstake: unstakeAmount.microAlgos },
+                args: { staker: staker.addr.toString(), amountToUnstake: unstakeAmount.microAlgos },
                 staticFee: AlgoAmount.MicroAlgos(itxnfees.microAlgo),
                 sender: (altSender || staker).addr,
             })
@@ -444,7 +450,7 @@ export async function incrementRoundNumberBy(context: AlgorandTestAutomationCont
     }
     // Send `rounds` number of 'dummy' pay self 0 transactions
     let params = await context.algod.getTransactionParams().do()
-    console.log('block before incrementRoundNumberBy:', params.firstRound)
+    console.log('block before incrementRoundNumberBy:', params.firstValid)
     for (let i = 0; i < rounds; i += 1) {
         await context.algorand.send.payment({
             sender: context.testAccount.addr,
@@ -455,5 +461,5 @@ export async function incrementRoundNumberBy(context: AlgorandTestAutomationCont
     }
 
     params = await context.algod.getTransactionParams().do()
-    console.log('block AFTER incrementRoundNumberBy:', params.firstRound)
+    console.log('block AFTER incrementRoundNumberBy:', params.firstValid)
 }

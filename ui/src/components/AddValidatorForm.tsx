@@ -2,6 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { useWallet } from '@txnlab/use-wallet-react'
+import algosdk from 'algosdk'
 import { isAxiosError } from 'axios'
 import { ArrowUpRight, Check, Monitor, MonitorCheck, WalletMinimal, X } from 'lucide-react'
 import * as React from 'react'
@@ -37,8 +38,6 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { GatingType } from '@/constants/gating'
 import { useBlockTime } from '@/hooks/useBlockTime'
-import { Asset } from '@/interfaces/algod'
-import { useAuthAddress } from '@/providers/AuthAddressProvider'
 import { InsufficientBalanceError } from '@/utils/balanceChecker'
 import {
   getEpochLengthBlocks,
@@ -66,18 +65,16 @@ export function AddValidatorForm({ constraints }: AddValidatorFormProps) {
   const [isFetchingNfdCreator, setIsFetchingNfdCreator] = React.useState(false)
   const [nfdParentAppId, setNfdParentAppId] = React.useState<bigint>(0n)
   const [isFetchingNfdParent, setIsFetchingNfdParent] = React.useState(false)
-  const [rewardToken, setRewardToken] = React.useState<Asset | null>(null)
+  const [rewardToken, setRewardToken] = React.useState<algosdk.modelsv2.Asset | null>(null)
   const [isFetchingRewardToken, setIsFetchingRewardToken] = React.useState(false)
-  const [gatingAssets, setGatingAssets] = React.useState<Array<Asset | null>>([])
+  const [gatingAssets, setGatingAssets] = React.useState<Array<algosdk.modelsv2.Asset | null>>([])
   const [isFetchingGatingAssetIndex, setIsFetchingGatingAssetIndex] = React.useState<number>(-1)
   const [epochTimeframe, setEpochTimeframe] = React.useState('blocks')
   const [isSigning, setIsSigning] = React.useState(false)
 
   const { transactionSigner, activeAddress } = useWallet()
-  const { authAddress } = useAuthAddress()
 
   const queryClient = useQueryClient()
-
   const navigate = useNavigate({ from: '/add' })
 
   const formSchema = z
@@ -155,7 +152,7 @@ export function AddValidatorForm({ constraints }: AddValidatorFormProps) {
     })
   }
 
-  const handleSetGatingAssetById = async (index: number, value: Asset | null) => {
+  const handleSetGatingAssetById = async (index: number, value: algosdk.modelsv2.Asset | null) => {
     setGatingAssets((prev) => {
       const newAssets = [...prev]
       newAssets[index] = value
@@ -322,7 +319,6 @@ export function AddValidatorForm({ constraints }: AddValidatorFormProps) {
         nfdForInfoAppId,
         transactionSigner,
         activeAddress,
-        authAddress,
       )
 
       toast.success(
