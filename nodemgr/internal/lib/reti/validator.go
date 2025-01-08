@@ -1371,6 +1371,9 @@ func (r *Reti) EmptyTokenRewards(id uint64, signer types.Address, receiver types
 	atc := transaction.AtomicTransactionComposer{}
 	emptyTokenRewards, _ := r.validatorContract.GetMethodByName("emptyTokenRewards")
 
+	params.FlatFee = true
+	params.Fee = transaction.MinTxnFee * 3
+
 	err = atc.AddMethodCall(transaction.AddMethodCallParams{
 		AppID:  r.RetiAppId,
 		Method: emptyTokenRewards,
