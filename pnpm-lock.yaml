@@ -97,14 +97,14 @@ importers:
         specifier: 8.0.3
         version: 8.0.3(algosdk@3.0.0)
       '@blockshake/defly-connect':
-        specifier: 1.1.6
-        version: 1.1.6(algosdk@3.0.0)
+        specifier: 1.2.1
+        version: 1.2.1(algosdk@3.0.0)
       '@hookform/resolvers':
         specifier: 3.9.0
         version: 3.9.0(react-hook-form@7.53.0(react@18.3.1))
       '@perawallet/connect':
-        specifier: 1.3.5
-        version: 1.3.5(algosdk@3.0.0)
+        specifier: 1.4.1
+        version: 1.4.1(algosdk@3.0.0)
       '@radix-ui/react-avatar':
         specifier: 1.1.1
         version: 1.1.1(@types/react-dom@18.3.0)(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -172,8 +172,8 @@ importers:
         specifier: 3.18.3
         version: 3.18.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(tailwindcss@3.4.13(ts-node@10.9.2(@types/node@20.16.11)(typescript@5.6.3)))
       '@txnlab/use-wallet-react':
-        specifier: 4.0.0-beta.2
-        version: 4.0.0-beta.2(@blockshake/defly-connect@1.1.6(algosdk@3.0.0))(@perawallet/connect@1.3.5(algosdk@3.0.0))(@walletconnect/modal@2.7.0(@types/react@18.3.11)(react@18.3.1))(algosdk@3.0.0)(lute-connect@1.4.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 4.0.0-beta.4
+        version: 4.0.0-beta.4(@blockshake/defly-connect@1.2.1(algosdk@3.0.0))(@perawallet/connect@1.4.1(algosdk@3.0.0))(@walletconnect/modal@2.7.0(@types/react@18.3.11)(react@18.3.1))(algosdk@3.0.0)(lute-connect@1.4.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@walletconnect/modal-sign-html':
         specifier: 2.7.0
         version: 2.7.0(@types/react@18.3.11)(react@18.3.1)
@@ -478,10 +478,10 @@ packages:
   '@bcoe/v8-coverage@0.2.3':
     resolution: {integrity: sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==}
 
-  '@blockshake/defly-connect@1.1.6':
-    resolution: {integrity: sha512-pgibHfWjTkfyjQhRVKR2mnnG7Vv/oBJGowphrIwdF62TkElRspsCrv/GcasZ2ipw+Wrqp3cdsE1W7GU0ZjgPwg==}
+  '@blockshake/defly-connect@1.2.1':
+    resolution: {integrity: sha512-T9wAjPTFdc8iRiDzTqmeBRCIroWLgXmqZHwnpzuchjYZXXqbnj+zge+HS7UaNunpxGVjDUNK1ah7OR6hEqtJoQ==}
     peerDependencies:
-      algosdk: ^2.1.0
+      algosdk: ^3.0.0
 
   '@bundled-es-modules/cookie@2.0.0':
     resolution: {integrity: sha512-Or6YHg/kamKHpxULAdSqhGqnWFneIXu1NKvvfBBzKGwpVsYuFIQ5aBPHDnnoR3ghW1nvSkALd+EF9iMtY7Vjxw==}
@@ -910,6 +910,9 @@ packages:
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
 
+  '@likecoin/qr-code-styling@1.6.6':
+    resolution: {integrity: sha512-RbGK/+20bJhFZR70r8MeDvfyz3W7U5zXpykSTYOYxZGyo6wC+Y4QnbUpL+YdAtzT2ZIFeCNOcRs2W2FNrKPoaA==}
+
   '@lit-labs/ssr-dom-shim@1.2.1':
     resolution: {integrity: sha512-wx4aBmgeGvFmOKucFKY+8VFJSYZxs9poN3SDNQFF6lT6NrQUnHiPB2PWz2sc4ieEcAaYYzN+1uWahEeTq2aRIQ==}
 
@@ -1051,10 +1054,10 @@ packages:
     resolution: {integrity: sha512-HNjmfLQEVRZmHRET336f20H/8kOozUGwk7yajvsonjNxbj2wBTK1WsQuHkD5yYh9RxFGL2EyDHryOihOwUoKDA==}
     engines: {node: '>= 10.0.0'}
 
-  '@perawallet/connect@1.3.5':
-    resolution: {integrity: sha512-JBaaS0tjipo3DcS2v5Q1lcQXqxYkVpKB3YiqV7okBnd1KQ54zcATvPwRXvpsbxttec1OpdHmkWymuTpxpx+2Ng==}
+  '@perawallet/connect@1.4.1':
+    resolution: {integrity: sha512-yXfpQ2SzblOBp0P2Xsneq4f0d1YsSuYrdpw2fSwivlTbc5a40hQfYiJMql+b3UdfSID/wcaPl9Vkb5cMSBxNwQ==}
     peerDependencies:
-      algosdk: ^2.1.0
+      algosdk: ^3.0.0
 
   '@pkgjs/parseargs@0.11.0':
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
@@ -1721,17 +1724,17 @@ packages:
       '@tanstack/router-generator':
         optional: true
 
-  '@tanstack/react-store@0.5.5':
-    resolution: {integrity: sha512-1orYXGatBqXCYKuroFwV8Ll/6aDa5E3pU6RR4h7RvRk7TmxF1+zLCsWALZaeijXkySNMGmvawSbUXRypivg2XA==}
-    peerDependencies:
-      react: ^17.0.0 || ^18.0.0
-      react-dom: ^17.0.0 || ^18.0.0
-
   '@tanstack/react-store@0.5.6':
     resolution: {integrity: sha512-SitIpS5jTj28DajjLpWbIX+YetmJL+6PRY0DKKiCGBKfYIqj3ryODQYF3jB3SNoR9ifUA/jFkqbJdBKFtWd+AQ==}
     peerDependencies:
       react: ^17.0.0 || ^18.0.0
       react-dom: ^17.0.0 || ^18.0.0
+
+  '@tanstack/react-store@0.6.1':
+    resolution: {integrity: sha512-6gOopOpPp1cAXkEyTEv6tMbAywwFunvIdCKN/SpEiButUayjXU+Q5Sp5Y3hREN3VMR4OA5+RI5SPhhJoqP9e4w==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
   '@tanstack/react-table@8.20.5':
     resolution: {integrity: sha512-WEHopKw3znbUZ61s9i0+i9g8drmDo6asTWbrQh8Us63DAk/M0FkmIqERew6P71HI75ksZ2Pxyuf4vvKh9rAkiA==}
@@ -1779,6 +1782,9 @@ packages:
 
   '@tanstack/store@0.5.5':
     resolution: {integrity: sha512-EOSrgdDAJExbvRZEQ/Xhh9iZchXpMN+ga1Bnk8Nmygzs8TfiE6hbzThF+Pr2G19uHL6+DTDTHhJ8VQiOd7l4tA==}
+
+  '@tanstack/store@0.6.0':
+    resolution: {integrity: sha512-+m2OBglsjXcLmmKOX6/9v8BDOCtyxhMmZLsRUDswOOSdIIR9mvv6i0XNKsmTh3AlYU8c1mRcodC8/Vyf+69VlQ==}
 
   '@tanstack/table-core@8.20.5':
     resolution: {integrity: sha512-P9dF7XbibHph2PFRz8gfBKEXEY/HJPOhym8CHmjF8y3q5mWpKx9xtZapXQUWCgkqvsK0R46Azuz+VaxD4Xl+Tg==}
@@ -1838,18 +1844,17 @@ packages:
   '@tsconfig/node18@18.2.4':
     resolution: {integrity: sha512-5xxU8vVs9/FNcvm3gE07fPbn9tl6tqGGWA9tSlwsUEkBxtRnTsNmwrV8gasZ9F/EobaSv9+nu8AxUKccw77JpQ==}
 
-  '@txnlab/use-wallet-react@4.0.0-beta.2':
-    resolution: {integrity: sha512-XG2paXNehv2CJyR5Q4I08JEeToz213SHpLiQJWUAC0P2/oj9NfY6bwoELaJsSe9x6h5OYyIsUFL5GNIBTZVz3g==}
+  '@txnlab/use-wallet-react@4.0.0-beta.4':
+    resolution: {integrity: sha512-SfVUiLn4mobP36Iu907CLa90LelBfBVSG3xvwczfOniYcpuev21Kw1kSGYbru9micC9f22uJsglGmk8IioQbjg==}
     peerDependencies:
-      '@blockshake/defly-connect': ^1.1.6
-      '@magic-ext/algorand': ^23.13.0
-      '@perawallet/connect': ^1.3.5
-      '@perawallet/connect-beta': ^2.0.21
+      '@blockshake/defly-connect': ^1.2.1
+      '@magic-ext/algorand': ^23.18.0
+      '@perawallet/connect': ^1.4.1
       '@walletconnect/modal': ^2.7.0
-      '@walletconnect/sign-client': ^2.17.1
+      '@walletconnect/sign-client': ^2.17.2
       algosdk: ^3.0.0
       lute-connect: ^1.4.1
-      magic-sdk: ^28.13.0
+      magic-sdk: ^28.19.0
       react: ^17.0.0 || ^18.0.0
       react-dom: ^17.0.0 || ^18.0.0
     peerDependenciesMeta:
@@ -1858,8 +1863,6 @@ packages:
       '@magic-ext/algorand':
         optional: true
       '@perawallet/connect':
-        optional: true
-      '@perawallet/connect-beta':
         optional: true
       '@walletconnect/modal':
         optional: true
@@ -1870,16 +1873,15 @@ packages:
       magic-sdk:
         optional: true
 
-  '@txnlab/use-wallet@4.0.0-beta.2':
-    resolution: {integrity: sha512-K6tYxouxibT3lo2SWbC1T1SFCcu6sI6vgbxUP1wuuAvTv9Wuae5a+WH87MSvkBqRBzK6YYD6n4hgUmZPznyrIw==}
+  '@txnlab/use-wallet@4.0.0-beta.4':
+    resolution: {integrity: sha512-5dFvUUJEUcRLP0QnG2K5cFKG7bLQzUFgAnGXNChlm1AG62BgaqxDQtWze8i8gKWfOQijXJ2mg5pnTOaVHg5dPw==}
     peerDependencies:
       '@agoralabs-sh/avm-web-provider': ^1.7.0
       '@algorandfoundation/liquid-auth-use-wallet-client': 1.1.0
-      '@blockshake/defly-connect': ^1.1.6
-      '@perawallet/connect': ^1.3.5
-      '@perawallet/connect-beta': ^2.0.21
+      '@blockshake/defly-connect': ^1.2.1
+      '@perawallet/connect': ^1.4.1
       '@walletconnect/modal': ^2.7.0
-      '@walletconnect/sign-client': ^2.17.1
+      '@walletconnect/sign-client': ^2.17.2
       algosdk: ^3.0.0
       lute-connect: ^1.4.1
     peerDependenciesMeta:
@@ -1890,8 +1892,6 @@ packages:
       '@blockshake/defly-connect':
         optional: true
       '@perawallet/connect':
-        optional: true
-      '@perawallet/connect-beta':
         optional: true
       '@walletconnect/modal':
         optional: true
@@ -5317,15 +5317,15 @@ snapshots:
 
   '@bcoe/v8-coverage@0.2.3': {}
 
-  '@blockshake/defly-connect@1.1.6(algosdk@3.0.0)':
+  '@blockshake/defly-connect@1.2.1(algosdk@3.0.0)':
     dependencies:
+      '@likecoin/qr-code-styling': 1.6.6
       '@walletconnect/client': 1.8.0
       '@walletconnect/types': 1.8.0
       algosdk: 3.0.0
       bowser: 2.11.0
       buffer: 6.0.3
       lottie-web: 5.12.2
-      qr-code-styling: 1.6.0-rc.1
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -5640,6 +5640,10 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
 
+  '@likecoin/qr-code-styling@1.6.6':
+    dependencies:
+      qrcode-generator: 1.4.4
+
   '@lit-labs/ssr-dom-shim@1.2.1': {}
 
   '@lit/reactive-element@1.6.3':
@@ -5784,7 +5788,7 @@ snapshots:
       '@parcel/watcher-win32-ia32': 2.4.1
       '@parcel/watcher-win32-x64': 2.4.1
 
-  '@perawallet/connect@1.3.5(algosdk@3.0.0)':
+  '@perawallet/connect@1.4.1(algosdk@3.0.0)':
     dependencies:
       '@evanhahn/lottie-web-light': 5.8.1
       '@walletconnect/client': 1.8.0
@@ -6464,16 +6468,16 @@ snapshots:
       tiny-invariant: 1.3.3
       tiny-warning: 1.0.3
 
-  '@tanstack/react-store@0.5.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@tanstack/react-store@0.5.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@tanstack/store': 0.5.5
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
       use-sync-external-store: 1.2.2(react@18.3.1)
 
-  '@tanstack/react-store@0.5.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@tanstack/react-store@0.6.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
-      '@tanstack/store': 0.5.5
+      '@tanstack/store': 0.6.0
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
       use-sync-external-store: 1.2.2(react@18.3.1)
@@ -6545,6 +6549,8 @@ snapshots:
 
   '@tanstack/store@0.5.5': {}
 
+  '@tanstack/store@0.6.0': {}
+
   '@tanstack/table-core@8.20.5': {}
 
   '@tanstack/virtual-core@3.10.8': {}
@@ -6614,29 +6620,29 @@ snapshots:
 
   '@tsconfig/node18@18.2.4': {}
 
-  '@txnlab/use-wallet-react@4.0.0-beta.2(@blockshake/defly-connect@1.1.6(algosdk@3.0.0))(@perawallet/connect@1.3.5(algosdk@3.0.0))(@walletconnect/modal@2.7.0(@types/react@18.3.11)(react@18.3.1))(algosdk@3.0.0)(lute-connect@1.4.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@txnlab/use-wallet-react@4.0.0-beta.4(@blockshake/defly-connect@1.2.1(algosdk@3.0.0))(@perawallet/connect@1.4.1(algosdk@3.0.0))(@walletconnect/modal@2.7.0(@types/react@18.3.11)(react@18.3.1))(algosdk@3.0.0)(lute-connect@1.4.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
-      '@tanstack/react-store': 0.5.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@txnlab/use-wallet': 4.0.0-beta.2(@blockshake/defly-connect@1.1.6(algosdk@3.0.0))(@perawallet/connect@1.3.5(algosdk@3.0.0))(@walletconnect/modal@2.7.0(@types/react@18.3.11)(react@18.3.1))(algosdk@3.0.0)(lute-connect@1.4.1)
+      '@tanstack/react-store': 0.6.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@txnlab/use-wallet': 4.0.0-beta.4(@blockshake/defly-connect@1.2.1(algosdk@3.0.0))(@perawallet/connect@1.4.1(algosdk@3.0.0))(@walletconnect/modal@2.7.0(@types/react@18.3.11)(react@18.3.1))(algosdk@3.0.0)(lute-connect@1.4.1)
       algosdk: 3.0.0
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
     optionalDependencies:
-      '@blockshake/defly-connect': 1.1.6(algosdk@3.0.0)
-      '@perawallet/connect': 1.3.5(algosdk@3.0.0)
+      '@blockshake/defly-connect': 1.2.1(algosdk@3.0.0)
+      '@perawallet/connect': 1.4.1(algosdk@3.0.0)
       '@walletconnect/modal': 2.7.0(@types/react@18.3.11)(react@18.3.1)
       lute-connect: 1.4.1
     transitivePeerDependencies:
       - '@agoralabs-sh/avm-web-provider'
       - '@algorandfoundation/liquid-auth-use-wallet-client'
 
-  '@txnlab/use-wallet@4.0.0-beta.2(@blockshake/defly-connect@1.1.6(algosdk@3.0.0))(@perawallet/connect@1.3.5(algosdk@3.0.0))(@walletconnect/modal@2.7.0(@types/react@18.3.11)(react@18.3.1))(algosdk@3.0.0)(lute-connect@1.4.1)':
+  '@txnlab/use-wallet@4.0.0-beta.4(@blockshake/defly-connect@1.2.1(algosdk@3.0.0))(@perawallet/connect@1.4.1(algosdk@3.0.0))(@walletconnect/modal@2.7.0(@types/react@18.3.11)(react@18.3.1))(algosdk@3.0.0)(lute-connect@1.4.1)':
     dependencies:
-      '@tanstack/store': 0.5.5
+      '@tanstack/store': 0.6.0
       algosdk: 3.0.0
     optionalDependencies:
-      '@blockshake/defly-connect': 1.1.6(algosdk@3.0.0)
-      '@perawallet/connect': 1.3.5(algosdk@3.0.0)
+      '@blockshake/defly-connect': 1.2.1(algosdk@3.0.0)
+      '@perawallet/connect': 1.4.1(algosdk@3.0.0)
       '@walletconnect/modal': 2.7.0(@types/react@18.3.11)(react@18.3.1)
       lute-connect: 1.4.1
 
@@ -7247,7 +7253,7 @@ snapshots:
 
   '@walletconnect/window-metadata@1.0.0':
     dependencies:
-      '@walletconnect/window-getters': 1.0.0
+      '@walletconnect/window-getters': 1.0.1
 
   '@walletconnect/window-metadata@1.0.1':
     dependencies:
