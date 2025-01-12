@@ -28,11 +28,12 @@ export function useCheckForUpdates() {
     const checkForUpdates = async () => {
       try {
         const response = await fetch(`/version.json?_=${Date.now()}`, {
-          cache: 'no-store',
+          cache: 'no-cache',
           headers: {
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Cache-Control': 'no-cache',
             Pragma: 'no-cache',
-            Expires: '0',
+            'If-None-Match': '*',
+            'If-Modified-Since': '0',
           },
         })
 
