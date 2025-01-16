@@ -6,9 +6,9 @@ Algorand developer docs:\
 Community tutorials:\
 [https://medium.com/@alexbagdadi/how-i-set-up-my-algorand-node-6ccd5209d77d](https://medium.com/@alexbagdadi/how-i-set-up-my-algorand-node-6ccd5209d77d)
 
-
-
-One click node options:&#x20;
+Node running options:
 
 * Austs One Click Node: [https://github.com/AustP/austs-one-click-node/releases/](https://github.com/AustP/austs-one-click-node/releases/)
-* Pixelnode: [https://www.pixelnode.org/](https://www.pixelnode.org/)
+* FUNC Node: [https://github.com/GalaxyPay/func](https://github.com/GalaxyPay/func)
+* CLI: [https://nodekit.run/](https://nodekit.run/)
+

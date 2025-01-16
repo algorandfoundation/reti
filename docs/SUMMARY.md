@@ -2,7 +2,8 @@
 
 ## Introduction
 
-* [Réti Pooling Overview](README.md)
+* [DISCLAIMER](README.md)
+* [Réti Pooling Overview](<README (1).md>)
 * [Key Features For Validators](introduction/key-features.md)
 * [Testnet instance](introduction/testnet-instance.md)
 
@@ -33,7 +34,6 @@
 
 ## Resources
 
-* [Disclaimer](resources/disclaimer.md)
 * [FAQ](resources/faq.md)
 * [Contribute](resources/contribute.md)
 * [Monitoring](resources/monitoring.md)
