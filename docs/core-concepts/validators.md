@@ -29,11 +29,13 @@ As a Validator you need to be [running a node](../resources/running-a-node.md) a
 * **NFD ID (Optional):** For associating validators with detailed information for transparency.
 * **Token / NFD Gating:** Validators can require that stakers hold certain types of assets in order to join their pools. This can be used to restrict validator pools to members of a particular community - NFT holders, special 'membership' tokens, etc. Supported options are:
   * **Tokens/NFTs** by Creator and Min amount (Optional): Can set a creator account such that all stakers must hold an ASA created by this account (w/ optional minimum amount for tokens).
-  * **Specific ASA ID(s)**
-    * Up to 4 different assets may be specified as gating requirements. Stakers holding any of the assets qualify. Most likely useful for gating on LP tokens from different DEXs.
-  * **Tokens/NFTs created by any address linked within a particular NFD**. This is so NFT projects with multiple creation wallets can just reference their NFD and then anyone holding an asset created by any account linked w/in the NFD is eligible.
+    * **Specific ASA ID(s)**
+      * Up to 4 different assets may be specified as gating requirements. Stakers holding any of the assets qualify. Most likely useful for gating on LP tokens from different DEXs.
+    * **Tokens/NFTs created by any address linked within a particular NFD**. This is so NFT projects with multiple creation wallets can just reference their NFD and then anyone holding an asset created by any account linked w/in the NFD is eligible.
   * **Owning a segment (including via linked addresses) of a particular NFD Root.** A project could have its own project root NFD, e.g., orange.algo, barb.algo, voi.algo, etc., and specify that only people owning a segment of a specific root can join.
-  * **Reward token and reward rate (Optional)** : A validator can define a token that users are awarded in addition to the ALGO they receive for being in the pool. This will allow projects to allow rewarding members their own token, e.g., hold at least 5000 VEST/COOP/AKTA, etc., to enter a staking pool, with 1 day epochs, and all stakers get X amount of their token as daily rewards (added to stakers' available balance) for removal at any time.
+  * ⚠️ All of the above can only be set at create time.
+* **Reward token and reward rate (Optional)** : A validator can define a token that users are awarded in addition to the ALGO they receive for being in the pool. This will allow projects to allow rewarding members their own token, e.g., hold at least 5000 VEST/COOP/AKTA, etc., to enter a staking pool, with 1 day epochs, and all stakers get X amount of their token as daily rewards (added to stakers' available balance) for removal at any time.
+  * ⚠️ The reward token can only be set at create.  The reward rate can be changed at will.
 * **Sunsetting information** : Validators will be able to sunset their validators, leaving guidance for stakers that they're going away or moving to a new validator configuration.
   * Stakers are prevented from adding more stake once a validator has reached its sunset time.
 
