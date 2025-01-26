@@ -53,7 +53,17 @@ Epochs can vary in duration, with some validators having extremely short epochs 
 
 #### Token Rewards
 
-Some validators may offer additional token rewards to incentivize staking. If a validator offers such rewards, the entire balance of any rewarded tokens is paid out to the staker when they remove any amount of stake from the pool.
+Validators have the option to define a custom reward token that users earn in addition to ALGO for participating in their pool. This feature enables projects to incentivize their community with their own tokens (e.g., VEST, COOP, AKTA) as part of their staking rewards.&#x20;
+
+**Important Notes:**
+
+{% hint style="warning" %}
+The reward token **must** be specified during the creation of the staking pool and **cannot** be changed later. The reward rate, however, can be modified at any time after the pool is created.
+
+Validators must fund Pool 1 with the reward ASA - the pool will already be opted-in.&#x20;
+
+Find the pool address in the drop-down on the Staking Details page for your Validator, or by clicking on the pie chart.
+{% endhint %}
 
 #### Stake Removal
 

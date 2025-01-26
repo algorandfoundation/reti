@@ -34,8 +34,8 @@ As a Validator you need to be [running a node](../resources/running-a-node.md) a
     * **Tokens/NFTs created by any address linked within a particular NFD**. This is so NFT projects with multiple creation wallets can just reference their NFD and then anyone holding an asset created by any account linked w/in the NFD is eligible.
   * **Owning a segment (including via linked addresses) of a particular NFD Root.** A project could have its own project root NFD, e.g., orange.algo, barb.algo, voi.algo, etc., and specify that only people owning a segment of a specific root can join.
   * ⚠️ All of the above can only be set at create time.
-* **Reward token and reward rate (Optional)** : A validator can define a token that users are awarded in addition to the ALGO they receive for being in the pool. This will allow projects to allow rewarding members their own token, e.g., hold at least 5000 VEST/COOP/AKTA, etc., to enter a staking pool, with 1 day epochs, and all stakers get X amount of their token as daily rewards (added to stakers' available balance) for removal at any time.
-  * ⚠️ The reward token can only be set at create.  The reward rate can be changed at will.
+* **Reward token and reward rate (Optional)** : A validator can define a token that users are awarded in addition to the ALGO they receive for being in the pool. This will allow projects to allow rewarding members their own token.
+  * ⚠️ The reward token can only be set at create.  The reward rate can be changed at will. The Validator needs to fund Pool 1 with the ASA. Pool 1 will already be opted in.
 * **Sunsetting information** : Validators will be able to sunset their validators, leaving guidance for stakers that they're going away or moving to a new validator configuration.
   * Stakers are prevented from adding more stake once a validator has reached its sunset time.
 
