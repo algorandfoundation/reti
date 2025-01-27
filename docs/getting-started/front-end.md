@@ -1,3 +1,5 @@
-# Front End
+# Mainnet Deployment
 
-An fnet instance of the UI in the Reti repo is running at[ ](https://reti.vercel.app)[https://reti-fnet.nodely.io/](https://reti-fnet.nodely.io/) for testing of the early consensus changes.  The Lute wallet supports fnet and can be used for testing.
+A mainnet deployment of the UI (from the Reti repo) is available here: [https://nodely.io/docs/public/reti](https://nodely.io/docs/public/reti)
+
+A direct link to the staking dashboard is at : [https://reti.nodely.io/](https://reti.nodely.io/)
