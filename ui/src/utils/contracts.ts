@@ -4,12 +4,17 @@ import { fetchAccountAssetInformation, fetchAccountInformation } from '@/api/alg
 import { fetchNfd, fetchNfdSearch } from '@/api/nfd'
 import { GatingType } from '@/constants/gating'
 import { Indicator } from '@/constants/indicator'
-import { NfdSearchV2Params } from '@/interfaces/nfd'
+import { Nfd, NfdSearchV2Params } from '@/interfaces/nfd'
 import { StakerValidatorData } from '@/interfaces/staking'
 import { LocalPoolInfo, NodeInfo, PoolData, Validator } from '@/interfaces/validator'
 import { dayjs } from '@/utils/dayjs'
 import { convertToBaseUnits, roundToFirstNonZeroDecimal, roundToWholeAlgos } from '@/utils/format'
-import { Constraints, NodePoolAssignmentConfig } from '@/contracts/ValidatorRegistryClient'
+import {
+  Constraints,
+  NodePoolAssignmentConfig,
+  ValidatorConfig,
+  ValidatorCurState,
+} from '@/contracts/ValidatorRegistryClient'
 
 /**
  * Process node pool assignment configuration data into an array with each node's available slot count
@@ -480,28 +485,41 @@ export function calculateRewardEligibility(
  * @param {Validator} data - The new validator object
  */
 export function setValidatorQueriesData(queryClient: QueryClient, data: Validator): void {
-  const { id, nodePoolAssignment, pools } = data
+  const { id, config, state, pools, nodePoolAssignment } = data
+  const validatorId = String(id)
 
-  queryClient.setQueryData<Validator[]>(['validators'], (prevData) => {
-    if (!prevData) {
-      return prevData
-    }
-
-    const validatorExists = prevData.some((validator) => validator.id === id)
-
-    if (validatorExists) {
-      return prevData.map((validator) => (validator.id === id ? data : validator))
-    } else {
-      return [...prevData, data]
-    }
+  // Update individual validator queries
+  queryClient.setQueryData<ValidatorConfig>(['validator-config', validatorId], {
+    id: BigInt(id),
+    ...config,
   })
-
-  queryClient.setQueryData<Validator>(['validator', String(id)], data)
-  queryClient.setQueryData<LocalPoolInfo[]>(['pools-info', String(id)], pools)
+  queryClient.setQueryData<ValidatorCurState>(['validator-state', validatorId], state)
+  queryClient.setQueryData<LocalPoolInfo[]>(['validator-pools', validatorId], pools)
   queryClient.setQueryData<NodePoolAssignmentConfig>(
-    ['pool-assignments', String(id)],
+    ['validator-node-pool-assignments', validatorId],
     nodePoolAssignment,
   )
+
+  // Force refetch of num-validators to trigger dashboard update
+  queryClient.invalidateQueries({ queryKey: ['num-validators'] })
+
+  // Prefetch enrichment data if available
+  if (data.rewardToken) {
+    queryClient.setQueryData<algosdk.modelsv2.Asset>(
+      ['asset', Number(data.config.rewardTokenId)],
+      data.rewardToken,
+    )
+  }
+  if (data.nfd) {
+    queryClient.setQueryData<Nfd>(['nfd', data.config.nfdForInfo.toString()], data.nfd)
+  }
+  if (data.gatingAssets) {
+    data.gatingAssets.forEach((asset) => {
+      if (asset) {
+        queryClient.setQueryData<algosdk.modelsv2.Asset>(['asset', Number(asset.index)], asset)
+      }
+    })
+  }
 }
 
 export async function fetchRemainingRewardsBalance(validator: Validator): Promise<bigint> {

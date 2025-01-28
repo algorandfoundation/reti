@@ -15,7 +15,7 @@ import {
   initStakingPoolStorage,
   linkPoolToNfd,
 } from '@/api/contracts'
-import { mbrQueryOptions, poolAssignmentQueryOptions } from '@/api/queries'
+import { mbrQueryOptions, validatorNodePoolAssignmentsQueryOptions } from '@/api/queries'
 import { AlgoDisplayAmount } from '@/components/AlgoDisplayAmount'
 import { DisplayAsset } from '@/components/DisplayAsset'
 import { NfdLookup } from '@/components/NfdLookup'
@@ -94,7 +94,9 @@ export function AddPoolModal({
   const mbrQuery = useQuery(mbrQueryOptions)
   const { addPoolMbr = 0n, poolInitMbr = 0n } = mbrQuery.data || {}
 
-  const assignmentQuery = useQuery(poolAssignmentQueryOptions(validator?.id || '', !!validator))
+  const assignmentQuery = useQuery(
+    validatorNodePoolAssignmentsQueryOptions(validator?.id || 0, !!validator),
+  )
   const poolAssignment = assignmentQuery.data || poolAssignmentProp
 
   const nodesInfo = React.useMemo(() => {
@@ -241,6 +243,11 @@ export function AddPoolModal({
       // Refetch account info to get new available balance for MBR payment
       await accountInfoQuery.refetch()
 
+      // Refetch node pool assignments for the validator
+      queryClient.invalidateQueries({
+        queryKey: ['validator-node-pool-assignments', String(validator.id)],
+      })
+
       setCurrentStep(2)
     } catch (error) {
       if (error instanceof InsufficientBalanceError) {
@@ -307,7 +314,7 @@ export function AddPoolModal({
         duration: 5000,
       })
 
-      queryClient.invalidateQueries({ queryKey: ['pools-info', validator.id] })
+      queryClient.invalidateQueries({ queryKey: ['validator-pools', String(validator.id)] })
 
       // Refetch validator data
       const newData = await fetchValidator(validator!.id)
@@ -364,7 +371,8 @@ export function AddPoolModal({
         activeAddress,
       )
 
-      queryClient.setQueryData(['nfd-lookup', poolAddress, { view: 'thumbnail' }], nfdToLink)
+      queryClient.setQueryData<Nfd>(['nfd-lookup', poolAddress, { view: 'thumbnail' }], nfdToLink)
+      queryClient.setQueryData<Nfd>(['nfd', $nfdToLink, { view: 'thumbnail' }], nfdToLink)
 
       toast.success(`Pool ${poolKey.poolId} successfully linked to ${$nfdToLink}!`, {
         id: toastId,

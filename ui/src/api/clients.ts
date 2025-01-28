@@ -7,7 +7,10 @@ import { getAlgodConfigFromViteEnvironment } from '@/utils/network/getAlgoClient
 import { AlgorandClient } from '@algorandfoundation/algokit-utils'
 
 const algodConfig = getAlgodConfigFromViteEnvironment()
-const algorandClient = AlgorandClient.fromConfig({ algodConfig }).setDefaultValidityWindow(200)
+
+export const algorandClient = AlgorandClient.fromConfig({ algodConfig })
+  .setDefaultValidityWindow(200)
+  .setSuggestedParamsCacheTimeout(1000 * 60 * 5) // 5 minutes
 
 const RETI_APP_ID = BigInt(getRetiAppIdFromViteEnvironment())
 

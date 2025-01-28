@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useWallet } from '@txnlab/use-wallet-react'
 import { CirclePlus, Coins, Percent, Users } from 'lucide-react'
 import * as React from 'react'
-import { poolAssignmentQueryOptions } from '@/api/queries'
+import { validatorNodePoolAssignmentsQueryOptions } from '@/api/queries'
 import { AddPoolModal } from '@/components/AddPoolModal'
 import { AlgoDisplayAmount } from '@/components/AlgoDisplayAmount'
 import { Button } from '@/components/ui/button'
@@ -25,7 +25,9 @@ export function Highlights({ validator, constraints }: HighlightsProps) {
   const isOwner = validator.config.owner === activeAddress
   const canEdit = isManager || isOwner
 
-  const { data: poolAssignment } = useQuery(poolAssignmentQueryOptions(validator.id, canEdit))
+  const { data: poolAssignment } = useQuery(
+    validatorNodePoolAssignmentsQueryOptions(validator.id, canEdit),
+  )
 
   const hasSlots = React.useMemo(() => {
     return poolAssignment

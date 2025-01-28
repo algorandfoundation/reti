@@ -25,7 +25,6 @@ import { AlgoSymbol } from '@/components/AlgoSymbol'
 import { DataTableColumnHeader } from '@/components/DataTableColumnHeader'
 import { DataTableViewOptions } from '@/components/DataTableViewOptions'
 import { DebouncedSearch } from '@/components/DebouncedSearch'
-import { NfdThumbnail } from '@/components/NfdThumbnail'
 import { Tooltip } from '@/components/Tooltip'
 import { TrafficLight } from '@/components/TrafficLight'
 import { Button } from '@/components/ui/button'
@@ -48,6 +47,7 @@ import {
 } from '@/components/ui/table'
 import { UnstakeModal } from '@/components/UnstakeModal'
 import { ValidatorInfoRow } from '@/components/ValidatorInfoRow'
+import { ValidatorNfdDisplay } from '@/components/ValidatorNfdDisplay'
 import { ValidatorRewards } from '@/components/ValidatorRewards'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
 import { StakerValidatorData } from '@/interfaces/staking'
@@ -198,41 +198,46 @@ export function ValidatorTable({
         const validator = row.original
         const nfd = validator.nfd
 
-        return (
-          <div className="flex items-center gap-x-2 min-w-0 max-w-[10rem] xl:max-w-[16rem]">
-            {isSunsetted(validator) ? (
-              <Tooltip
-                content={`Sunset on ${dayjs.unix(Number(validator.config.sunsettingOn)).format('ll')}`}
-              >
-                <Ban className="h-5 w-5 text-muted-foreground transition-colors" />
-              </Tooltip>
-            ) : isSunsetting(validator) ? (
-              <Tooltip
-                content={`Will sunset on ${dayjs.unix(Number(validator.config.sunsettingOn)).format('ll')}`}
-              >
-                <Sunset className="h-5 w-5 text-muted-foreground transition-colors" />
-              </Tooltip>
-            ) : null}
-            <Link
-              to="/validators/$validatorId"
-              params={{
-                validatorId: String(validator.id),
-              }}
-              className={cn('link underline-offset-4 whitespace-nowrap', { truncate: !!nfd })}
-              preload="intent"
-            >
+        // Memoize the cell content
+        const content = React.useMemo(() => {
+          return (
+            <div className="flex items-center gap-x-2 min-w-0 max-w-[10rem] xl:max-w-[16rem]">
+              {isSunsetted(validator) ? (
+                <Tooltip
+                  content={`Sunset on ${dayjs.unix(Number(validator.config.sunsettingOn)).format('ll')}`}
+                >
+                  <Ban className="h-5 w-5 text-muted-foreground transition-colors" />
+                </Tooltip>
+              ) : isSunsetting(validator) ? (
+                <Tooltip
+                  content={`Will sunset on ${dayjs.unix(Number(validator.config.sunsettingOn)).format('ll')}`}
+                >
+                  <Sunset className="h-5 w-5 text-muted-foreground transition-colors" />
+                </Tooltip>
+              ) : null}
               {nfd ? (
-                <NfdThumbnail
+                <ValidatorNfdDisplay
                   nfd={nfd}
-                  truncate
-                  className={cn(isSunsetted(validator) ? 'opacity-50' : '')}
+                  validatorId={validator.id}
+                  isSunsetted={isSunsetted(validator)}
                 />
               ) : (
-                <span className="font-mono">{ellipseAddressJsx(validator.config.owner)}</span>
+                <Link
+                  to="/validators/$validatorId"
+                  params={{
+                    validatorId: String(validator.id),
+                  }}
+                  className="link underline-offset-4 whitespace-nowrap font-mono"
+                  preload="intent"
+                >
+                  {ellipseAddressJsx(validator.config.owner)}
+                </Link>
               )}
-            </Link>
-          </div>
-        )
+            </div>
+          )
+        }, [validator, nfd])
+
+        return content
       },
     },
     {
