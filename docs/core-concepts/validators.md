@@ -10,6 +10,8 @@ Allowing them to be changed at will would be dangerous for stakers.
 
 As a Validator you need to be [running a node](../resources/running-a-node.md) and the [Réti Node Daemon](../technical-implementation/reti-node-daemon/).
 
+Staking pools will receive rewards when they propose blocks, **as long as they're above the 30K ALGO threshold** and below the maximum amount defined by the protocol (around 70M currently) and have good performance. If you plan to run a Validator, make sure you have a plan to get over the 30k ALGO minimum or it's unlikely people will ever stake to your Validator.
+
 ***
 
 **Key Elements Defined by Validators:**
