@@ -1,18 +1,20 @@
 # Validators
 
-{% hint style="warning" %}
-Many parameters can ONLY be set up front, when defining the validator.
-
-Allowing them to be changed at will would be dangerous for stakers.
+{% hint style="info" %}
+Staking pools will receive rewards when they propose blocks, **as long as they're above the 30K ALGO threshold** and below the maximum amount defined by the protocol (around 70M currently) and have good performance. If you plan to run a Validator, make sure you have a plan to get over the 30k ALGO minimum or it's unlikely people will ever stake to your Validator.
 {% endhint %}
 
 **General Process:** Anyone is able to add themselves as a Validator. The protocol has safeguards in place to ensure Validators can't amass a dangerous amount of stake in a single pool, or combined across all pools for a single Validator. It's very important that Validators take the time to understand what configurations will work best for their project before creating their Validator.
 
 As a Validator you need to be [running a node](../resources/running-a-node.md) and the [Réti Node Daemon](../technical-implementation/reti-node-daemon/).
 
-Staking pools will receive rewards when they propose blocks, **as long as they're above the 30K ALGO threshold** and below the maximum amount defined by the protocol (around 70M currently) and have good performance. If you plan to run a Validator, make sure you have a plan to get over the 30k ALGO minimum or it's unlikely people will ever stake to your Validator.
-
 ***
+
+{% hint style="warning" %}
+Many parameters can ONLY be set up front, when defining the validator.
+
+Allowing them to be changed at will would be dangerous for stakers.
+{% endhint %}
 
 **Key Elements Defined by Validators:**
 
