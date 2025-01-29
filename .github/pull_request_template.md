@@ -1,12 +1,25 @@
-### Description
+## Description
 
-> _Please explain the changes you made here_
+<!-- Provide a clear and concise description of your changes -->
 
-### Checklist
+## Details
 
-> _Please, make sure to comply with the checklist below before expecting review_
+<!-- List the specific changes, improvements, or fixes implemented -->
 
-- [ ] Code compiles correctly
-- [ ] Created tests which fail without the change (if possible)
-- [ ] All tests passing
-- [ ] Extended the README / documentation, if necessary
+-
+-
+-
+
+## Testing
+
+<!-- Describe the tests you updated or added -->
+
+- [ ] All existing tests pass
+- [ ] New tests added (if applicable)
+
+## Documentation
+
+<!-- Check if any documentation updates were required -->
+
+- [ ] README.md updated (if applicable)
+- [ ] GitBook documentation updated (if applicable)
