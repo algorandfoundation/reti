@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import * as React from 'react'
-import { nfdQueryOptions } from '@/api/queries'
+import { nfdQueryOptions, ipfsUrlQueryOptions } from '@/api/queries'
 import { Nfd } from '@/interfaces/nfd'
 import { Tooltip } from '@/components/Tooltip'
 import { getNfdAvatarUrl, getNfdProfileUrl } from '@/utils/nfd'
@@ -31,13 +31,20 @@ const NfdDisplayBase = React.memo(
     avatarOnly = false,
   }: NfdDisplayBaseProps) {
     const [imageError, setImageError] = React.useState(false)
+    const originalUrl = React.useMemo(() => getNfdAvatarUrl(nfd), [nfd])
+    const isIpfsUrl = originalUrl.startsWith('ipfs://')
+
+    const { data: resolvedIpfsUrl } = useQuery(ipfsUrlQueryOptions(originalUrl))
+
     const avatarUrl = React.useMemo(() => {
-      const url = getNfdAvatarUrl(nfd)
-      if (imageError || url.startsWith('ipfs://')) {
+      if (imageError) {
         return TRANSPARENT_PNG
       }
-      return url
-    }, [nfd.name, imageError])
+      if (isIpfsUrl) {
+        return resolvedIpfsUrl || TRANSPARENT_PNG
+      }
+      return originalUrl
+    }, [originalUrl, imageError, resolvedIpfsUrl, isIpfsUrl])
 
     const avatar = (
       <div className={cn('relative h-6 w-6 rounded-full bg-muted', avatarClassName)}>

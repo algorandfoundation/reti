@@ -20,6 +20,7 @@ import { algorandClient } from '@/api/clients'
 import { fetchNfd, fetchNfdReverseLookup } from '@/api/nfd'
 import { Nfd, NfdGetLookupParams, NfdGetNFDParams } from '@/interfaces/nfd'
 import { calculateValidatorPoolMetrics } from '@/utils/contracts'
+import { resolveIpfsUrl } from '@/utils/ipfs'
 
 ////////////////////////////////////////////////////////////
 // Core protocol data queries
@@ -214,6 +215,20 @@ export const assetHoldingQueryOptions = (address: string | null) =>
     queryFn: () => fetchAssetHoldings(address),
     enabled: !!address,
     refetchInterval: 1000 * 60 * 2, // Every 2 minutes
+  })
+
+////////////////////////////////////////////////////////////
+// IPFS queries
+////////////////////////////////////////////////////////////
+
+export const ipfsUrlQueryOptions = (ipfsUrl: string) =>
+  queryOptions({
+    queryKey: ['ipfs-url', ipfsUrl],
+    queryFn: () => resolveIpfsUrl(ipfsUrl),
+    enabled: ipfsUrl.startsWith('ipfs://'),
+    staleTime: Infinity,
+    gcTime: 1000 * 60 * 60 * 24, // 24 hours
+    retry: (failureCount) => failureCount < 2,
   })
 
 ////////////////////////////////////////////////////////////
