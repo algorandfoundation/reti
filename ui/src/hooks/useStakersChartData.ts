@@ -1,8 +1,13 @@
 import { useQueries, useQuery } from '@tanstack/react-query'
 import * as React from 'react'
-import { stakedInfoQueryOptions, validatorPoolsQueryOptions } from '@/api/queries'
-import { ExplorerLink } from '@/utils/explorer'
+import {
+  nfdLookupQueryOptions,
+  stakedInfoQueryOptions,
+  validatorPoolsQueryOptions,
+} from '@/api/queries'
 import { StakedInfo } from '@/contracts/StakingPoolClient'
+import { ExplorerLink } from '@/utils/explorer'
+import { getNfdProfileUrl } from '@/utils/nfd'
 
 interface UseChartDataProps {
   selectedPool: string
@@ -28,17 +33,35 @@ export function useStakersChartData({ selectedPool, validatorId }: UseChartDataP
     allStakedInfo.find((query) => query.error)?.error?.message ||
     defaultMessage
 
-  const stakersChartData = React.useMemo(() => {
-    if (!allStakedInfo) {
-      return []
-    }
+  const stakerAddresses = React.useMemo(() => {
+    if (!allStakedInfo) return []
 
-    const stakerTotals: Record<string, StakedInfo> = {}
+    const addresses = new Set<string>()
 
     allStakedInfo.forEach((query, i) => {
-      if (selectedPool !== 'all' && Number(selectedPool) !== i) {
-        return
-      }
+      if (selectedPool !== 'all' && Number(selectedPool) !== i) return
+
+      const stakers = query.data || []
+      stakers.forEach((staker) => addresses.add(staker.account))
+    })
+
+    return Array.from(addresses)
+  }, [allStakedInfo, selectedPool])
+
+  const nfdQueries = useQueries({
+    queries: stakerAddresses.map((address) => nfdLookupQueryOptions(address)),
+  })
+
+  const stakersChartData = React.useMemo(() => {
+    if (!allStakedInfo) return []
+
+    const stakerTotals: Record<string, StakedInfo> = {}
+    const nfdMap = new Map(
+      nfdQueries.map((query, index) => [stakerAddresses[index], query.data?.name]),
+    )
+
+    allStakedInfo.forEach((query, i) => {
+      if (selectedPool !== 'all' && Number(selectedPool) !== i) return
 
       const stakers = query.data || []
 
@@ -59,12 +82,15 @@ export function useStakersChartData({ selectedPool, validatorId }: UseChartDataP
       })
     })
 
-    return Object.values(stakerTotals).map((staker) => ({
-      name: staker.account,
-      value: Number(staker.balance),
-      href: ExplorerLink.account(staker.account),
-    }))
-  }, [allStakedInfo, selectedPool])
+    return Object.values(stakerTotals).map((staker) => {
+      const nfdName = nfdMap.get(staker.account)
+      return {
+        name: nfdName || staker.account,
+        value: Number(staker.balance),
+        href: nfdName ? getNfdProfileUrl(nfdName) : ExplorerLink.account(staker.account),
+      }
+    })
+  }, [allStakedInfo, selectedPool, nfdQueries, stakerAddresses])
 
   return {
     stakersChartData,
