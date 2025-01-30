@@ -19,7 +19,7 @@ import { mbrQueryOptions, validatorNodePoolAssignmentsQueryOptions } from '@/api
 import { AlgoDisplayAmount } from '@/components/AlgoDisplayAmount'
 import { DisplayAsset } from '@/components/DisplayAsset'
 import { NfdLookup } from '@/components/NfdLookup'
-import { NfdThumbnail } from '@/components/NfdThumbnail'
+import { NfdDisplay } from '@/components/NfdDisplay'
 import { NodeSelect } from '@/components/NodeSelect'
 import { Button } from '@/components/ui/button'
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible'
@@ -536,7 +536,7 @@ export function AddPoolModal({
                         <div className="flex items-center flex-wrap gap-x-6">
                           {nfdToLink && (
                             <p className="flex items-center gap-x-2 text-sm mb-2 py-1">
-                              <NfdThumbnail nfd={nfdToLink} link className="link" />
+                              <NfdDisplay nfd={nfdToLink} link className="link" />
                               <Button
                                 variant="ghost"
                                 size="icon"

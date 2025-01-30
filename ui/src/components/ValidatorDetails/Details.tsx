@@ -2,7 +2,7 @@ import { useWallet } from '@txnlab/use-wallet-react'
 import { AlgoDisplayAmount } from '@/components/AlgoDisplayAmount'
 import { DisplayAsset } from '@/components/DisplayAsset'
 import { Loading } from '@/components/Loading'
-import { NfdThumbnail } from '@/components/NfdThumbnail'
+import { NfdDisplay } from '@/components/NfdDisplay'
 import { Tooltip } from '@/components/Tooltip'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { EditCommissionAccount } from '@/components/ValidatorDetails/EditCommissionAccount'
@@ -114,7 +114,7 @@ export function Details({ validator }: DetailsProps) {
           <>
             <strong className="font-medium text-muted-foreground">Asset creator</strong>{' '}
             <div className="truncate">
-              <NfdThumbnail nameOrId={entryGatingAssets[0]} truncate tooltip link />
+              <NfdDisplay nameOrId={entryGatingAssets[0]} truncate tooltip link />
             </div>
           </>
         )
@@ -123,7 +123,7 @@ export function Details({ validator }: DetailsProps) {
           <>
             <strong className="font-medium text-muted-foreground">Segment of</strong>{' '}
             <div className="truncate">
-              <NfdThumbnail nameOrId={entryGatingAssets[0]} truncate tooltip link />
+              <NfdDisplay nameOrId={entryGatingAssets[0]} truncate tooltip link />
             </div>
           </>
         )

@@ -18,7 +18,7 @@ import { AddStakeModal } from '@/components/AddStakeModal'
 import { AlgoDisplayAmount } from '@/components/AlgoDisplayAmount'
 import { ClaimTokens } from '@/components/ClaimTokens'
 import { DataTableColumnHeader } from '@/components/DataTableColumnHeader'
-import { NfdThumbnail } from '@/components/NfdThumbnail'
+import { NfdDisplay } from '@/components/NfdDisplay'
 import { Tooltip } from '@/components/Tooltip'
 import { Button } from '@/components/ui/button'
 import {
@@ -118,7 +118,7 @@ export function StakingTable({
               className="link underline-offset-4"
             >
               {nfdAppId > 0 ? (
-                <NfdThumbnail nameOrId={nfdAppId} />
+                <NfdDisplay nameOrId={nfdAppId} />
               ) : (
                 <span className="font-mono whitespace-nowrap">
                   {ellipseAddressJsx(validator.config.owner)}

@@ -19,7 +19,7 @@ import {
 import { mbrQueryOptions } from '@/api/queries'
 import { AlgoDisplayAmount } from '@/components/AlgoDisplayAmount'
 import { Loading } from '@/components/Loading'
-import { NfdThumbnail } from '@/components/NfdThumbnail'
+import { NfdDisplay } from '@/components/NfdDisplay'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import {
@@ -408,7 +408,7 @@ export function AddStakeModal({
           <>
             <strong className="font-medium text-muted-foreground">Asset creator</strong>{' '}
             <div>
-              <NfdThumbnail nameOrId={entryGatingAssets[0]} link />
+              <NfdDisplay nameOrId={entryGatingAssets[0]} link />
             </div>
           </>
         )
@@ -417,7 +417,7 @@ export function AddStakeModal({
           <>
             <strong className="font-medium text-muted-foreground">Segment of</strong>{' '}
             <div className="flex">
-              <NfdThumbnail nameOrId={entryGatingAssets[0]} link />
+              <NfdDisplay nameOrId={entryGatingAssets[0]} link />
             </div>
           </>
         )

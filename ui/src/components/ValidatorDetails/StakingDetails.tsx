@@ -10,7 +10,7 @@ import { AddStakeModal } from '@/components/AddStakeModal'
 import { AlgoDisplayAmount } from '@/components/AlgoDisplayAmount'
 import { ErrorAlert } from '@/components/ErrorAlert'
 import { Loading } from '@/components/Loading'
-import { NfdThumbnail } from '@/components/NfdThumbnail'
+import { NfdDisplay } from '@/components/NfdDisplay'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
@@ -227,7 +227,7 @@ export function StakingDetails({ validator, constraints, stakesByValidator }: St
 
     return (
       <div className="truncate">
-        <NfdThumbnail nfd={poolNfd} truncate link />
+        <NfdDisplay nfd={poolNfd} truncate link />
       </div>
     )
   }
