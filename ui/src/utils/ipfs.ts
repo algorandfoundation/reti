@@ -1,15 +1,18 @@
 import * as isIPFS from 'is-ipfs'
 
-const IPFS_GATEWAYS = ['https://images.nf.domains/ipfs', 'https://ipfs.algonode.dev/ipfs'] as const
+const IMAGE_PROVIDERS = [
+  'https://images.nf.domains/ipfs',
+  'https://ipfs.algonode.dev/ipfs',
+] as const
 
-export interface IpfsGatewayResponse {
+export interface ImageProviderResponse {
   url: string
   contentType: string | null
 }
 
-async function checkGateway(gateway: string, cid: string): Promise<IpfsGatewayResponse | null> {
+async function checkProvider(provider: string, cid: string): Promise<ImageProviderResponse | null> {
   try {
-    const response = await fetch(`${gateway}/${cid}`, {
+    const response = await fetch(`${provider}/${cid}`, {
       method: 'HEAD',
     })
 
@@ -18,11 +21,11 @@ async function checkGateway(gateway: string, cid: string): Promise<IpfsGatewayRe
     }
 
     return {
-      url: `${gateway}/${cid}`,
+      url: `${provider}/${cid}`,
       contentType: response.headers.get('content-type'),
     }
   } catch (error: unknown) {
-    console.error(`Failed to check IPFS gateway ${gateway}:`, error)
+    console.error(`Failed to fetch from provider ${provider}:`, error)
     return null
   }
 }
@@ -36,9 +39,9 @@ export async function resolveIpfsUrl(ipfsUrl: string): Promise<string> {
     return ''
   }
 
-  // Try each gateway in sequence
-  for (const gateway of IPFS_GATEWAYS) {
-    const result = await checkGateway(gateway, cid)
+  // Try each provider in sequence
+  for (const provider of IMAGE_PROVIDERS) {
+    const result = await checkProvider(provider, cid)
     if (result && result.contentType?.startsWith('image/')) {
       return result.url
     }
