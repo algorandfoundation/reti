@@ -50,7 +50,7 @@ const NfdDisplayBase = React.memo(
       <div className={cn('relative h-6 w-6 rounded-full bg-muted', avatarClassName)}>
         <img
           src={avatarUrl}
-          className="absolute inset-0 rounded-full"
+          className="absolute inset-0 rounded-full object-cover"
           alt={nfd.name}
           onError={() => setImageError(true)}
         />
