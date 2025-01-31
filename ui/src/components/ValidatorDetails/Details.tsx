@@ -1,6 +1,7 @@
 import { useWallet } from '@txnlab/use-wallet-react'
 import { AlgoDisplayAmount } from '@/components/AlgoDisplayAmount'
 import { DisplayAsset } from '@/components/DisplayAsset'
+import { InfoPopover } from '@/components/InfoPopover'
 import { Loading } from '@/components/Loading'
 import { NfdDisplay } from '@/components/NfdDisplay'
 import { Tooltip } from '@/components/Tooltip'
@@ -37,8 +38,22 @@ export function Details({ validator }: DetailsProps) {
       return <Loading inline />
     }
 
-    if (rewardBalanceQuery.error || rewardBalanceQuery.data === undefined) {
-      return <span className="text-destructive">Error</span>
+    if (rewardBalanceQuery.error) {
+      if (rewardBalanceQuery.error.message.includes('Pool 1 not found')) {
+        return (
+          <div className="flex items-center gap-x-1">
+            <span className="text-muted-foreground">No pools found</span>
+            <InfoPopover className="mx-1.5 relative sm:mx-1 sm:top-0" label="No pools found">
+              <p>You must create a pool for your validator and send reward tokens to it.</p>
+            </InfoPopover>
+          </div>
+        )
+      }
+      return <span className="text-destructive">Error: {rewardBalanceQuery.error.message}</span>
+    }
+
+    if (rewardBalanceQuery.data === undefined) {
+      return <span className="text-destructive">Error: No data</span>
     }
 
     if (!validator.rewardToken) {

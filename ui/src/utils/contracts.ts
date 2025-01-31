@@ -530,7 +530,12 @@ export async function fetchRemainingRewardsBalance(validator: Validator): Promis
     return BigInt(0)
   }
 
-  const poolAppId = validator.pools[0].poolAppId
+  const poolAppId = validator.pools[0]?.poolAppId ?? 0n
+
+  if (poolAppId === 0n) {
+    throw new Error('Pool 1 not found')
+  }
+
   const poolAddress = algosdk.getApplicationAddress(poolAppId)
 
   const accountAssetInfo = await fetchAccountAssetInformation(poolAddress.toString(), rewardTokenId)
