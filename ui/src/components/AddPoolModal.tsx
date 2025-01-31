@@ -414,12 +414,12 @@ export function AddPoolModal({
         onInteractOutside={(event: Event) => event.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle>Add a Pool</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-left">Add a Pool</DialogTitle>
+          <DialogDescription className="text-left">
             Create and fund a new staking pool for Validator {Number(validator?.id)}
           </DialogDescription>
         </DialogHeader>
-        <div>
+        <div className="mt-2">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleCreatePool)}>
               <div className="[&>div>label]:step steps ml-4 pl-8 pb-4 [counter-reset:step] max-w-full">
@@ -435,9 +435,7 @@ export function AddPoolModal({
                       name="nodeNum"
                       render={({ field }) => (
                         <FormItem
-                          className={cn(
-                            currentStep == 2 || !poolAssignment || !validator ? 'hidden' : '',
-                          )}
+                          className={cn(currentStep == 2 || !poolAssignment ? 'hidden' : '')}
                         >
                           <NodeSelect
                             nodesInfo={nodesInfo}
@@ -580,7 +578,7 @@ export function AddPoolModal({
                 )}
               </div>
 
-              <div className={cn('my-4')}>
+              <div className={cn('my-6')}>
                 <ProgressBar
                   value={currentStep * (100 / totalSteps)}
                   color="rose"
