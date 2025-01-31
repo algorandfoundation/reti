@@ -459,19 +459,17 @@ export async function addStake(
 
   const simulateComposer = simulateValidatorClient
     .newGroup()
-    .gas({ args: {} })
-    .addStake(
-      // This the actual send of stake to the ac
-      {
-        args: {
-          stakedAmountPayment: stakeTransferPayment,
-          validatorId,
-          valueToVerify,
-        },
-        staticFee: AlgoAmount.MicroAlgos(240_000),
-        validityWindow: 200,
+    .gas({ args: [], note: '1' })
+    .gas({ args: [], note: '2' })
+    .addStake({
+      args: {
+        stakedAmountPayment: stakeTransferPayment,
+        validatorId,
+        valueToVerify,
       },
-    )
+      staticFee: AlgoAmount.MicroAlgos(240_000),
+      validityWindow: 200,
+    })
 
   if (needsOptInTxn) {
     const rewardTokenOptInTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
@@ -505,7 +503,8 @@ export async function addStake(
 
   const composer = validatorClient
     .newGroup()
-    .gas({ args: [] })
+    .gas({ args: [], note: '1' })
+    .gas({ args: [], note: '2' })
     .addStake({
       args: {
         // --
@@ -537,7 +536,7 @@ export async function addStake(
 
   const result = await composer.send({ populateAppCallResources: true })
 
-  return result.returns![1]!
+  return result.returns![2]!
 }
 
 export async function callFindPoolForStaker(
