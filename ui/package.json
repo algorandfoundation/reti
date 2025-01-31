@@ -41,6 +41,7 @@
     "@blockshake/defly-connect": "1.2.1",
     "@hookform/resolvers": "3.9.0",
     "@perawallet/connect": "1.4.1",
+    "@radix-ui/react-alert-dialog": "^1.1.5",
     "@radix-ui/react-avatar": "1.1.1",
     "@radix-ui/react-checkbox": "1.1.2",
     "@radix-ui/react-collapsible": "1.1.1",
