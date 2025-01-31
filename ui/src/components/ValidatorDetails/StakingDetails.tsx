@@ -50,7 +50,9 @@ interface StakingDetailsProps {
 }
 
 export function StakingDetails({ validator, constraints, stakesByValidator }: StakingDetailsProps) {
-  const [selectedPool, setSelectedPool] = React.useState<string>('all')
+  const [selectedPool, setSelectedPool] = React.useState<string>(
+    validator?.pools.length > 0 ? '0' : 'all',
+  )
   const [addStakeValidator, setAddStakeValidator] = React.useState<Validator | null>(null)
   const [unstakeValidator, setUnstakeValidator] = React.useState<Validator | null>(null)
 
