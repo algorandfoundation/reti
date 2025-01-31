@@ -5,12 +5,14 @@ import { BarList, EventProps, ProgressBar } from '@tremor/react'
 import { useWallet } from '@txnlab/use-wallet-react'
 import { Ban, Copy, Signpost } from 'lucide-react'
 import * as React from 'react'
-import { nfdLookupQueryOptions } from '@/api/queries'
+import { nfdLookupQueryOptions, validatorNodePoolAssignmentsQueryOptions } from '@/api/queries'
+import { AddPoolModal } from '@/components/AddPoolModal'
 import { AddStakeModal } from '@/components/AddStakeModal'
 import { AlgoDisplayAmount } from '@/components/AlgoDisplayAmount'
 import { ErrorAlert } from '@/components/ErrorAlert'
 import { Loading } from '@/components/Loading'
 import { NfdDisplay } from '@/components/NfdDisplay'
+import { PoolIcon } from '@/components/PoolIcon'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
@@ -25,6 +27,7 @@ import {
 import { UnstakeModal } from '@/components/UnstakeModal'
 import { LinkPoolToNfdModal } from '@/components/ValidatorDetails/LinkPoolToNfdModal'
 import { PoolsChart } from '@/components/ValidatorDetails/PoolsChart'
+import { Constraints, NodePoolAssignmentConfig } from '@/contracts/ValidatorRegistryClient'
 import { useStakersChartData } from '@/hooks/useStakersChartData'
 import { StakerValidatorData } from '@/interfaces/staking'
 import { Validator } from '@/interfaces/validator'
@@ -34,6 +37,7 @@ import {
   isSunsetted,
   isSunsetting,
   isUnstakingDisabled,
+  validatorHasAvailableSlots,
 } from '@/utils/contracts'
 import { copyToClipboard } from '@/utils/copyToClipboard'
 import { dayjs } from '@/utils/dayjs'
@@ -41,7 +45,6 @@ import { ellipseAddressJsx } from '@/utils/ellipseAddress'
 import { ExplorerLink } from '@/utils/explorer'
 import { convertFromBaseUnits, roundToFirstNonZeroDecimal } from '@/utils/format'
 import { cn } from '@/utils/ui'
-import { Constraints, NodePoolAssignmentConfig } from '@/contracts/ValidatorRegistryClient'
 
 interface StakingDetailsProps {
   validator: Validator
@@ -53,14 +56,29 @@ export function StakingDetails({ validator, constraints, stakesByValidator }: St
   const [selectedPool, setSelectedPool] = React.useState<string>(
     validator?.pools.length > 0 ? '0' : 'all',
   )
+  const [addPoolValidator, setAddPoolValidator] = React.useState<Validator | null>(null)
   const [addStakeValidator, setAddStakeValidator] = React.useState<Validator | null>(null)
   const [unstakeValidator, setUnstakeValidator] = React.useState<Validator | null>(null)
 
   const { activeAddress } = useWallet()
 
+  const isManager = validator.config.manager === activeAddress
+  const isOwner = validator.config.owner === activeAddress
+  const canEdit = isManager || isOwner
+
+  const { data: poolAssignment } = useQuery(
+    validatorNodePoolAssignmentsQueryOptions(validator.id, canEdit),
+  )
+
+  const hasSlots = React.useMemo(() => {
+    return poolAssignment
+      ? validatorHasAvailableSlots(poolAssignment, validator.config.poolsPerNode)
+      : false
+  }, [poolAssignment, validator.config.poolsPerNode])
+
+  const canAddPool = canEdit && hasSlots
   const stakingDisabled = isStakingDisabled(activeAddress, validator, constraints)
   const unstakingDisabled = isUnstakingDisabled(activeAddress, validator, stakesByValidator)
-  const isOwner = validator.config.owner === activeAddress
   const isLocalnet = import.meta.env.VITE_ALGOD_NETWORK === 'localnet'
 
   // If pool has no stake, set value to 1 microalgo so it appears in the donut chart (as a 1px sliver)
@@ -474,7 +492,14 @@ export function StakingDetails({ validator, constraints, stakesByValidator }: St
                 />
               ) : (
                 <div className="flex items-center justify-center w-52 h-52 sm:w-64 sm:h-64 rounded-tremor-default border border-tremor-border dark:border-dark-tremor-border">
-                  <span className="text-sm text-muted-foreground">No data</span>
+                  {canAddPool ? (
+                    <Button onClick={() => setAddPoolValidator(validator)} disabled={!hasSlots}>
+                      <PoolIcon className="-ml-0.5 mr-1.5 h-4 w-4" />
+                      Add Pool 1
+                    </Button>
+                  ) : (
+                    <span className="text-sm text-muted-foreground">No data</span>
+                  )}
                 </div>
               )}
             </div>
@@ -552,6 +577,13 @@ export function StakingDetails({ validator, constraints, stakesByValidator }: St
         </CardFooter>
       </Card>
 
+      {canAddPool && (
+        <AddPoolModal
+          validator={addPoolValidator}
+          setValidator={setAddPoolValidator}
+          poolAssignment={poolAssignment}
+        />
+      )}
       <AddStakeModal
         validator={addStakeValidator}
         setValidator={setAddStakeValidator}
