@@ -32,14 +32,18 @@ export function useValidator(validatorId: number): Validator | undefined {
       ],
     })
 
-  // Enrichment queries
-  const [rewardTokenQuery, ...gatingAssetQueries] = useSuspenseQueries({
+  // Reward token query
+  const [rewardTokenQuery] = useSuspenseQueries({
     queries: [
-      // Reward token query
       ...(configQuery.data?.rewardTokenId && configQuery.data.rewardTokenId > 0n
         ? [assetQueryOptions(Number(configQuery.data.rewardTokenId))]
         : []),
-      // Gating asset queries
+    ],
+  })
+
+  // Gating asset queries
+  const gatingAssetQueries = useSuspenseQueries({
+    queries: [
       ...(configQuery.data?.entryGatingType === GatingType.AssetId
         ? configQuery.data.entryGatingAssets
             .filter((id): id is bigint => id > 0n)
