@@ -1,4 +1,4 @@
-import { useQueryClient, useSuspenseQueries } from '@tanstack/react-query'
+import { useQuery, useQueryClient, useSuspenseQueries } from '@tanstack/react-query'
 import algosdk from 'algosdk'
 import * as React from 'react'
 import { createBaseValidator } from '@/api/contracts'
@@ -33,12 +33,9 @@ export function useValidator(validatorId: number): Validator | undefined {
     })
 
   // Reward token query
-  const [rewardTokenQuery] = useSuspenseQueries({
-    queries: [
-      ...(configQuery.data?.rewardTokenId && configQuery.data.rewardTokenId > 0n
-        ? [assetQueryOptions(Number(configQuery.data.rewardTokenId))]
-        : []),
-    ],
+  const rewardTokenQuery = useQuery({
+    ...assetQueryOptions(Number(configQuery.data?.rewardTokenId)),
+    enabled: Boolean(configQuery.data?.rewardTokenId && configQuery.data.rewardTokenId > 0n),
   })
 
   // Gating asset queries
@@ -76,7 +73,7 @@ export function useValidator(validatorId: number): Validator | undefined {
     })
 
     // Add enrichment data
-    if (rewardTokenQuery?.data) {
+    if (rewardTokenQuery.data) {
       baseValidator.rewardToken = rewardTokenQuery.data
     }
 
@@ -104,7 +101,7 @@ export function useValidator(validatorId: number): Validator | undefined {
     stateQuery.data,
     poolsQuery.data,
     nodePoolAssignmentQuery.data,
-    rewardTokenQuery?.data,
+    rewardTokenQuery.data,
     gatingAssetQueries,
     nfdQuery?.data,
     metricsQuery.data,
