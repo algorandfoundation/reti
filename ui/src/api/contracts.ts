@@ -259,7 +259,7 @@ export async function addValidator(
     rewardTokenId: BigInt(values.rewardTokenId) ?? 0n,
     rewardPerPayout: BigInt(values.rewardPerPayout) ?? 0n,
     epochRoundLength: Number(values.epochRoundLength),
-    percentToValidator: Number(values.percentToValidator) * 10000,
+    percentToValidator: Math.round(Number(values.percentToValidator) * 10000),
     validatorCommissionAddress: values.validatorCommissionAddress,
     minEntryStake: AlgoAmount.Algos(BigInt(values.minEntryStake)).microAlgos,
     maxAlgoPerPool: 0n,
