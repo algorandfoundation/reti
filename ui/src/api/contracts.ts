@@ -261,7 +261,7 @@ export async function addValidator(
     epochRoundLength: Number(values.epochRoundLength),
     percentToValidator: Math.round(Number(values.percentToValidator) * 10000),
     validatorCommissionAddress: values.validatorCommissionAddress,
-    minEntryStake: AlgoAmount.Algos(BigInt(values.minEntryStake)).microAlgos,
+    minEntryStake: AlgoAmount.Algos(Number(values.minEntryStake)).microAlgos,
     maxAlgoPerPool: 0n,
     poolsPerNode: Number(values.poolsPerNode),
     sunsettingOn: 0n,
