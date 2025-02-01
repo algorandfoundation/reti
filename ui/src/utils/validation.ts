@@ -186,7 +186,7 @@ export const validatorSchemas = {
       })
       .refine(
         (val) => {
-          const match = val.match(/^\d+(\.\d{1,6})?$/)
+          const match = val.match(/^(\d*\.?\d{1,6}|\d+)$/)
           return match !== null
         },
         {
@@ -251,7 +251,7 @@ export const rewardTokenRefinement = (
         message: 'Required field',
       })
     } else if (decimals) {
-      const regex = new RegExp(`^\\d+(\\.\\d{1,${Number(decimals)}})?$`)
+      const regex = new RegExp(`^(\\d*\\.?\\d{1,${Number(decimals)}}|\\d+)$`)
 
       if (!regex.test(rewardPerPayout)) {
         ctx.addIssue({
