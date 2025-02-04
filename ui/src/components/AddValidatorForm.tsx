@@ -1176,7 +1176,7 @@ export function AddValidatorForm({ constraints }: AddValidatorFormProps) {
           <AlertDialogHeader className="text-left">
             <AlertDialogTitle>Important: Reward Token Setup</AlertDialogTitle>
             <AlertDialogDescription className="space-y-4 text-left">
-              <div>To complete the reward token setup, you will need to:</div>
+              <span>To complete the reward token setup, you will need to:</span>
               <ol className="list-decimal list-inside space-y-3 border rounded-md p-4 my-2 bg-muted/50">
                 <li>Create Pool 1 for your validator</li>
                 <li>
