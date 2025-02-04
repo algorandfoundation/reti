@@ -53,7 +53,7 @@ export function useValidator(validatorId: number): Validator | undefined {
   const [nfdQuery] = useSuspenseQueries({
     queries: [
       ...(configQuery.data?.nfdForInfo && configQuery.data.nfdForInfo > 0
-        ? [nfdQueryOptions(Number(configQuery.data.nfdForInfo))]
+        ? [nfdQueryOptions(Number(configQuery.data.nfdForInfo), { view: 'full' })]
         : []),
     ],
   })
