@@ -81,14 +81,17 @@ export async function fetchValidatorPools(validatorId: number | bigint): Promise
   }
 
   // Transform raw pool data into LocalPoolInfo[]
-  return poolsData.map((poolInfo: [bigint, number, bigint], i: number) => ({
-    poolId: BigInt(i + 1),
-    poolAppId: poolInfo[0],
-    totalStakers: poolInfo[1],
-    totalAlgoStaked: poolInfo[2],
-    poolAddress: poolAddresses[i],
-    poolAlgodVersion: poolAlgodVersions[i],
-  }))
+  return poolsData.map(
+    (poolInfo: [bigint, number, bigint], i: number) =>
+      ({
+        poolId: BigInt(i + 1),
+        poolAppId: poolInfo[0],
+        totalStakers: poolInfo[1],
+        totalAlgoStaked: poolInfo[2],
+        poolAddress: poolAddresses[i],
+        algodVersion: poolAlgodVersions[i],
+      }) satisfies LocalPoolInfo,
+  )
 }
 
 export async function fetchValidatorNodePoolAssignments(
