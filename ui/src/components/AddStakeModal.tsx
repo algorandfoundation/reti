@@ -443,6 +443,14 @@ export function AddStakeModal({
     if (isLoading) {
       return (
         <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-left">
+              Add Stake to Validator {Number(validator.id)}
+            </DialogTitle>
+            <DialogDescription className="text-left">
+              Loading account information...
+            </DialogDescription>
+          </DialogHeader>
           <div className="flex items-center justify-center my-8">
             <Loading size="lg" className="opacity-50" />
           </div>
@@ -454,7 +462,7 @@ export function AddStakeModal({
       return (
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-left">Error</DialogTitle>
+            <DialogTitle className="text-left">Account Error</DialogTitle>
             <DialogDescription className="text-left">
               {accountInfoQuery.error.message || 'Failed to fetch account information'}
             </DialogDescription>
@@ -467,7 +475,7 @@ export function AddStakeModal({
       return (
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-left">Error</DialogTitle>
+            <DialogTitle className="text-left">Gating Asset Error</DialogTitle>
             <DialogDescription className="text-left">
               {heldGatingAssetQuery.error.message || 'Failed to fetch gating assets'}
             </DialogDescription>
@@ -512,7 +520,7 @@ export function AddStakeModal({
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="text-left">
-            Add Stake to Validator {Number(validator?.id)}
+            Add Stake to Validator {Number(validator.id)}
           </DialogTitle>
           <DialogDescription className="text-left">
             This will add ALGO stake to{' '}
