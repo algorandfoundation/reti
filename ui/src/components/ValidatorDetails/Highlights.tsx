@@ -1,43 +1,25 @@
-import { useQuery } from '@tanstack/react-query'
-import { useWallet } from '@txnlab/use-wallet-react'
 import { CirclePlus, Coins, Percent, Users } from 'lucide-react'
-import * as React from 'react'
-import { validatorNodePoolAssignmentsQueryOptions } from '@/api/queries'
-import { AddPoolModal } from '@/components/AddPoolModal'
 import { AlgoDisplayAmount } from '@/components/AlgoDisplayAmount'
 import { PoolIcon } from '@/components/PoolIcon'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Constraints } from '@/contracts/ValidatorRegistryClient'
 import { Validator } from '@/interfaces/validator'
-import { calculateMaxStakers, validatorHasAvailableSlots } from '@/utils/contracts'
+import { calculateMaxStakers } from '@/utils/contracts'
 
 interface HighlightsProps {
   validator: Validator
   constraints: Constraints
+  setAddPoolValidator: (validator: Validator | null) => void
+  canAddPool: boolean
 }
 
-export function Highlights({ validator, constraints }: HighlightsProps) {
-  const [addPoolValidator, setAddPoolValidator] = React.useState<Validator | null>(null)
-
-  const { activeAddress } = useWallet()
-
-  const isManager = validator.config.manager === activeAddress
-  const isOwner = validator.config.owner === activeAddress
-  const canEdit = isManager || isOwner
-
-  const { data: poolAssignment } = useQuery(
-    validatorNodePoolAssignmentsQueryOptions(validator.id, canEdit),
-  )
-
-  const hasSlots = React.useMemo(() => {
-    return poolAssignment
-      ? validatorHasAvailableSlots(poolAssignment, validator.config.poolsPerNode)
-      : false
-  }, [poolAssignment, validator.config.poolsPerNode])
-
-  const canAddPool = canEdit && hasSlots
-
+export function Highlights({
+  validator,
+  constraints,
+  setAddPoolValidator,
+  canAddPool,
+}: HighlightsProps) {
   const totalStakers = validator.state.totalStakers
   const maxStakers = calculateMaxStakers(validator, constraints)
   const { poolsPerNode } = validator.config
@@ -119,14 +101,6 @@ export function Highlights({ validator, constraints }: HighlightsProps) {
           </CardContent>
         </Card>
       </div>
-
-      {poolAssignment && (
-        <AddPoolModal
-          validator={addPoolValidator}
-          setValidator={setAddPoolValidator}
-          poolAssignment={poolAssignment}
-        />
-      )}
     </>
   )
 }
