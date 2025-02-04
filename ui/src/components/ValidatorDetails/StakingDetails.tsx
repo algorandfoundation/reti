@@ -88,10 +88,22 @@ export function StakingDetails({ validator, constraints, stakesByValidator }: St
       value: convertFromBaseUnits(Number(pool.totalAlgoStaked || 1n), 6),
     })) || []
 
-  const { stakersChartData, poolsInfo, isLoading, errorMessage } = useStakersChartData({
+  const { stakersChartData, poolsInfo, isLoading, errorMessage, refetchAll } = useStakersChartData({
     selectedPool,
     validatorId: validator.id,
+    pauseRefetch: !!addPoolValidator, // Pause refetch when adding pool
   })
+
+  // After successfully adding a pool
+  const handleAddPoolClose = React.useCallback(
+    async (success?: boolean) => {
+      if (success) {
+        await refetchAll() // Invalidate/refetch stakers chart data
+        setSelectedPool('0') // Select the first pool
+      }
+    },
+    [refetchAll],
+  )
 
   const selectedPoolInfo = selectedPool === 'all' ? null : poolsInfo[Number(selectedPool)]
 
@@ -492,13 +504,13 @@ export function StakingDetails({ validator, constraints, stakesByValidator }: St
                 />
               ) : (
                 <div className="flex items-center justify-center w-52 h-52 sm:w-64 sm:h-64 rounded-tremor-default border border-tremor-border dark:border-dark-tremor-border">
-                  {canAddPool ? (
+                  {canAddPool && validator.pools.length === 0 ? (
                     <Button onClick={() => setAddPoolValidator(validator)} disabled={!hasSlots}>
                       <PoolIcon className="-ml-0.5 mr-1.5 h-4 w-4" />
                       Add Pool 1
                     </Button>
                   ) : (
-                    <span className="text-sm text-muted-foreground">No data</span>
+                    <span className="text-sm text-muted-foreground">No ALGO staked</span>
                   )}
                 </div>
               )}
@@ -582,6 +594,7 @@ export function StakingDetails({ validator, constraints, stakesByValidator }: St
           validator={addPoolValidator}
           setValidator={setAddPoolValidator}
           poolAssignment={poolAssignment}
+          onClose={handleAddPoolClose}
         />
       )}
       <AddStakeModal

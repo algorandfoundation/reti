@@ -39,6 +39,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
+import { NodePoolAssignmentConfig, ValidatorPoolKey } from '@/contracts/ValidatorRegistryClient'
 import { Nfd } from '@/interfaces/nfd'
 import { Validator } from '@/interfaces/validator'
 import { BalanceChecker, InsufficientBalanceError } from '@/utils/balanceChecker'
@@ -53,18 +54,19 @@ import { ExplorerLink } from '@/utils/explorer'
 import { formatAlgoAmount } from '@/utils/format'
 import { isValidName } from '@/utils/nfd'
 import { cn } from '@/utils/ui'
-import { NodePoolAssignmentConfig, ValidatorPoolKey } from '@/contracts/ValidatorRegistryClient'
 
 interface AddPoolModalProps {
   validator: Validator | null
   setValidator: React.Dispatch<React.SetStateAction<Validator | null>>
   poolAssignment?: NodePoolAssignmentConfig
+  onClose?: (success?: boolean) => void
 }
 
 export function AddPoolModal({
   validator,
   setValidator,
   poolAssignment: poolAssignmentProp,
+  onClose,
 }: AddPoolModalProps) {
   const [isSigning, setIsSigning] = React.useState<boolean>(false)
   const [currentStep, setCurrentStep] = React.useState<number>(0)
@@ -178,6 +180,13 @@ export function AddPoolModal({
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
+      // Determine if pool was created and MBR paid (steps 1 and 2)
+      const isSuccess = currentStep >= 3
+
+      // Call onClose with success status
+      onClose?.(isSuccess)
+
+      // Reset modal state
       if (validator) setValidator(null)
       setTimeout(() => handleResetForm(), 500)
     } else {
@@ -242,11 +251,6 @@ export function AddPoolModal({
 
       // Refetch account info to get new available balance for MBR payment
       await accountInfoQuery.refetch()
-
-      // Refetch node pool assignments for the validator
-      queryClient.invalidateQueries({
-        queryKey: ['validator-node-pool-assignments', String(validator.id)],
-      })
 
       setCurrentStep(2)
     } catch (error) {
@@ -313,8 +317,6 @@ export function AddPoolModal({
         id: toastId,
         duration: 5000,
       })
-
-      queryClient.invalidateQueries({ queryKey: ['validator-pools', String(validator.id)] })
 
       // Refetch validator data
       const newData = await fetchValidator(validator!.id)
