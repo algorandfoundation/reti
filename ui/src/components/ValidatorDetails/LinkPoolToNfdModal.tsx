@@ -110,8 +110,10 @@ export function LinkPoolToNfdModal({
       })
 
       const poolAppAddress = algosdk.getApplicationAddress(poolAppId)
-      // queryClient.invalidateQueries({ queryKey: ['nfd-lookup', poolAppAddress] })
-      queryClient.setQueryData(['nfd-lookup', poolAppAddress, { view: 'thumbnail' }], nfd)
+      queryClient.setQueryData(
+        ['nfd-lookup', poolAppAddress.toString(), { view: 'thumbnail' }],
+        nfd,
+      )
 
       handleOpenChange(false)
     } catch (error) {
