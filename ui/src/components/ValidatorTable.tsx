@@ -25,6 +25,7 @@ import { AlgoSymbol } from '@/components/AlgoSymbol'
 import { DataTableColumnHeader } from '@/components/DataTableColumnHeader'
 import { DataTableViewOptions } from '@/components/DataTableViewOptions'
 import { DebouncedSearch } from '@/components/DebouncedSearch'
+import { Loading } from '@/components/Loading'
 import { Tooltip } from '@/components/Tooltip'
 import { TrafficLight } from '@/components/TrafficLight'
 import { Button } from '@/components/ui/button'
@@ -49,6 +50,7 @@ import { UnstakeModal } from '@/components/UnstakeModal'
 import { ValidatorInfoRow } from '@/components/ValidatorInfoRow'
 import { ValidatorNfdDisplay } from '@/components/ValidatorNfdDisplay'
 import { ValidatorRewards } from '@/components/ValidatorRewards'
+import { Constraints } from '@/contracts/ValidatorRegistryClient'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
 import { StakerValidatorData } from '@/interfaces/staking'
 import { Validator } from '@/interfaces/validator'
@@ -69,18 +71,19 @@ import { ellipseAddressJsx } from '@/utils/ellipseAddress'
 import { formatAssetAmount } from '@/utils/format'
 import { globalFilterFn, sunsetFilter } from '@/utils/table'
 import { cn } from '@/utils/ui'
-import { Constraints } from '@/contracts/ValidatorRegistryClient'
 
 interface ValidatorTableProps {
   validators: Validator[]
   stakesByValidator: StakerValidatorData[]
   constraints: Constraints
+  isLoading: boolean
 }
 
 export function ValidatorTable({
   validators,
   stakesByValidator,
   constraints,
+  isLoading,
 }: ValidatorTableProps) {
   const [addStakeValidator, setAddStakeValidator] = React.useState<Validator | null>(null)
   const [unstakeValidator, setUnstakeValidator] = React.useState<Validator | null>(null)
@@ -511,7 +514,9 @@ export function ValidatorTable({
     <>
       <div>
         <div className="sm:flex items-center sm:gap-x-3 py-3">
-          <h2 className="mb-2 text-lg font-semibold sm:flex-1 sm:my-1">Validators</h2>
+          <h2 className="flex items-center mb-2 text-lg font-semibold sm:flex-1 sm:my-1">
+            Validators {isLoading && <Loading size="sm" inline className="ml-3" />}
+          </h2>
           <div
             className={cn('flex items-center gap-x-2 h-7 sm:h-9 px-3 mb-3 sm:mb-0', {
               hidden: sunsetCount === 0,
@@ -588,7 +593,7 @@ export function ValidatorTable({
               ) : (
                 <TableRow className="hover:bg-transparent">
                   <TableCell colSpan={columns.length} className="h-24 text-center">
-                    No results
+                    {isLoading ? 'Loading...' : 'No results'}
                   </TableCell>
                 </TableRow>
               )}

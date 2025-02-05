@@ -39,8 +39,12 @@ export function useQueuedQueries<
 ) {
   const queryClient = useQueryClient()
   const [activeQueries, setActiveQueries] = React.useState<typeof queries>([])
+  const [isComplete, setIsComplete] = React.useState(false)
 
   React.useEffect(() => {
+    // Reset complete state when queries change
+    setIsComplete(false)
+
     // Check which queries already have cached data
     const initialQueries = queries.filter((query) => {
       return queryClient.getQueryData(query.queryKey!) !== undefined
@@ -59,6 +63,7 @@ export function useQueuedQueries<
         const nextBatchStart = prev.length
         if (nextBatchStart >= queries.length) {
           clearInterval(timer)
+          setIsComplete(true)
           return prev
         }
         return [...prev, ...queries.slice(nextBatchStart, nextBatchStart + batchSize)]
@@ -73,12 +78,13 @@ export function useQueuedQueries<
     combine: combineResults,
   })
 
-  // Pad results with placeholder queries
+  // Pad results with placeholder queries and override isLoading
   return React.useMemo(
     () => ({
       ...results,
       data: Array.from({ length: queries.length }, (_, i) => results.data[i] ?? undefined),
+      isLoading: !isComplete || results.isLoading,
     }),
-    [results, queries.length],
+    [results, queries.length, isComplete],
   )
 }

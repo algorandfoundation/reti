@@ -64,6 +64,7 @@ function Dashboard() {
             validators={validators}
             stakesByValidator={stakesByValidator}
             constraints={constraints}
+            isLoading={validatorsLoading}
           />
         </div>
       </PageMain>
