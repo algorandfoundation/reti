@@ -390,77 +390,81 @@ export function ValidatorTable({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-40">
-                <DropdownMenuGroup>
-                  <DropdownMenuItem
-                    onClick={() => setAddStakeValidator(validator)}
-                    disabled={stakingDisabled}
-                  >
-                    Stake
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setUnstakeValidator(validator)}
-                    disabled={unstakingDisabled}
-                  >
-                    Unstake
-                  </DropdownMenuItem>
+                {!!activeAddress && (
+                  <>
+                    <DropdownMenuGroup>
+                      <DropdownMenuItem
+                        onClick={() => setAddStakeValidator(validator)}
+                        disabled={stakingDisabled}
+                      >
+                        Stake
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => setUnstakeValidator(validator)}
+                        disabled={unstakingDisabled}
+                      >
+                        Unstake
+                      </DropdownMenuItem>
 
-                  {canManage && (
-                    <DropdownMenuItem
-                      onClick={() => setAddPoolValidator(validator)}
-                      disabled={addingPoolDisabled}
-                    >
-                      Add Staking Pool
-                    </DropdownMenuItem>
-                  )}
-
-                  {canSimulateEpoch && (
-                    <>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuGroup>
+                      {canManage && (
                         <DropdownMenuItem
-                          onClick={async () => {
-                            await simulateEpoch(
-                              validator,
-                              stakerPoolData,
-                              100,
-                              transactionSigner,
-                              activeAddress!,
-                              queryClient,
-                              router,
-                            )
-                          }}
-                          disabled={unstakingDisabled}
+                          onClick={() => setAddPoolValidator(validator)}
+                          disabled={addingPoolDisabled}
                         >
-                          <FlaskConical className="h-4 w-4 mr-2 text-muted-foreground" />
-                          Simulate Epoch
+                          Add Staking Pool
                         </DropdownMenuItem>
-                      </DropdownMenuGroup>
-                    </>
-                  )}
+                      )}
 
-                  {canSendRewardTokens && (
-                    <>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuGroup>
-                        <DropdownMenuItem
-                          onClick={async () => {
-                            await sendRewardTokensToPool(
-                              validator,
-                              5000,
-                              transactionSigner,
-                              activeAddress!,
-                            )
-                          }}
-                          disabled={sendRewardTokensDisabled}
-                        >
-                          <FlaskConical className="h-4 w-4 mr-2 text-muted-foreground" />
-                          Send Tokens
-                        </DropdownMenuItem>
-                      </DropdownMenuGroup>
-                    </>
-                  )}
-                </DropdownMenuGroup>
-                <DropdownMenuSeparator />
+                      {canSimulateEpoch && (
+                        <>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuGroup>
+                            <DropdownMenuItem
+                              onClick={async () => {
+                                await simulateEpoch(
+                                  validator,
+                                  stakerPoolData,
+                                  100,
+                                  transactionSigner,
+                                  activeAddress!,
+                                  queryClient,
+                                  router,
+                                )
+                              }}
+                              disabled={unstakingDisabled}
+                            >
+                              <FlaskConical className="h-4 w-4 mr-2 text-muted-foreground" />
+                              Simulate Epoch
+                            </DropdownMenuItem>
+                          </DropdownMenuGroup>
+                        </>
+                      )}
+
+                      {canSendRewardTokens && (
+                        <>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuGroup>
+                            <DropdownMenuItem
+                              onClick={async () => {
+                                await sendRewardTokensToPool(
+                                  validator,
+                                  5000,
+                                  transactionSigner,
+                                  activeAddress!,
+                                )
+                              }}
+                              disabled={sendRewardTokensDisabled}
+                            >
+                              <FlaskConical className="h-4 w-4 mr-2 text-muted-foreground" />
+                              Send Tokens
+                            </DropdownMenuItem>
+                          </DropdownMenuGroup>
+                        </>
+                      )}
+                    </DropdownMenuGroup>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
                 <DropdownMenuGroup>
                   <DropdownMenuItem asChild>
                     <Link

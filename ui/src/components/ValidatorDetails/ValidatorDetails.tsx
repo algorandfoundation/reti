@@ -24,6 +24,7 @@ import {
 } from '@/utils/contracts'
 import { convertFromBaseUnits } from '@/utils/format'
 import { getPoolIndexFromName, getPoolNameFromIndex } from '@/utils/pools'
+import { cn } from '@/utils/ui'
 import { Details } from './Details'
 import { Highlights } from './Highlights'
 import { PoolsChart } from './PoolsChart'
@@ -128,7 +129,7 @@ export function ValidatorDetails({
             )}
           </CardTitle>
         </CardHeader>
-        <CardContent className="mt-2.5 space-y-6">
+        <CardContent className="mt-2.5 mb-4 space-y-6">
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             <div
               ref={poolsChartContainerRef}
@@ -168,7 +169,11 @@ export function ValidatorDetails({
 
           <StakersList chartData={stakersChartData} />
         </CardContent>
-        <CardFooter className="flex flex-col items-stretch gap-2 sm:flex-row sm:justify-end mt-4">
+        <CardFooter
+          className={cn('flex flex-col items-stretch gap-2 sm:flex-row sm:justify-end', {
+            hidden: !activeAddress,
+          })}
+        >
           {!isSunsetted(validator) && (
             <Button onClick={() => setAddStakeValidator(validator)} disabled={stakingDisabled}>
               Add Stake
