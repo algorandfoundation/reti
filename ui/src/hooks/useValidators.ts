@@ -104,17 +104,24 @@ export function useValidators(): {
     const result: Validator[] = []
 
     for (let i = 0; i < validatorIds.length; i++) {
-      const config = configQueries.data[i]
-      const state = stateQueries.data[i]
-      const pools = poolsQueries.data[i]
-      const nodePoolAssignment = nodePoolAssignmentQueries.data[i]
-      const metrics = queuedMetricsQueries.data[i]
+      const validatorId = validatorIds[i]
+
+      // Find the data for this validator ID in each query result
+      const config = queryClient.getQueryData(validatorConfigQueryOptions(validatorId).queryKey)
+      const state = queryClient.getQueryData(validatorStateQueryOptions(validatorId).queryKey)
+      const pools = queryClient.getQueryData(validatorPoolsQueryOptions(validatorId).queryKey)
+      const nodePoolAssignment = queryClient.getQueryData(
+        validatorNodePoolAssignmentsQueryOptions(validatorId).queryKey,
+      )
+      const metrics = queryClient.getQueryData(
+        validatorMetricsQueryOptions(validatorId, queryClient).queryKey,
+      )
 
       if (!config || !state || !pools || !nodePoolAssignment) continue
 
       // Create base validator
       const baseValidator = createBaseValidator({
-        id: validatorIds[i],
+        id: validatorId,
         config,
         state,
         pools,
