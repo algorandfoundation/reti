@@ -50,4 +50,8 @@ Allowing them to be changed at will would be dangerous for stakers.
 **Maximum Stake Per Pool:** The default maximum is based on taking the LESSER of:
 
 * 15% of online stake / number of pools
-* The max Algo per account allowed that still receives incentive rewards. This amount is currently 70 million algo but will likely change over time
+  * Current 'online' microAlgo amount can be seen via the algod supply endpoint:\
+    [https://mainnet-api.4160.nodely.dev/v2/ledger/supply](https://mainnet-api.4160.nodely.dev/v2/ledger/supply))
+  * ie: if current online stake is 1.5B and a validator has 4 pools currently, then the 'hard max' allowed per pool is 56.25 million.  When stakers want to add more stake it will go to the next pool.
+* The maximum per-pool amount the validator configured at initialization (the UI unfortunately does not currently expose this). &#x20;
+  * If set to 0, then the current protocol limit that still receives incentive rewards is usde. This amount is currently 70 million algo but _may_ change over time.
