@@ -12,12 +12,7 @@ import {
 import { fetchNfd } from '@/api/nfd'
 import { ALGORAND_ZERO_ADDRESS_STRING } from '@/constants/accounts'
 import { GatingType } from '@/constants/gating'
-import {
-  StakedInfo,
-  StakedInfoFromTuple,
-  StakingPoolClient,
-  ValidatorPoolKey,
-} from '@/contracts/StakingPoolClient'
+import { StakedInfo, StakedInfoFromTuple, ValidatorPoolKey } from '@/contracts/StakingPoolClient'
 import {
   Constraints,
   MbrAmounts,
@@ -595,13 +590,6 @@ export async function fetchStakedPoolsForAccount(staker: string): Promise<Valida
   }
 }
 
-export async function callGetStakerInfo(staker: string, stakingPoolClient: StakingPoolClient) {
-  return stakingPoolClient.getStakerInfo({
-    args: { staker },
-    extraFee: AlgoAmount.MicroAlgos(3000),
-  })
-}
-
 export async function fetchStakerPoolData(
   poolKey: ValidatorPoolKey,
   staker: string,
@@ -616,7 +604,10 @@ export async function fetchStakerPoolData(
       lastPayoutRound = BigInt(stakingPoolGS.lastPayout.value)
     }
 
-    const stakedInfo = await callGetStakerInfo(staker, stakingPoolClient)!
+    const stakedInfo = await stakingPoolClient.getStakerInfo({
+      args: { staker },
+      extraFee: AlgoAmount.MicroAlgos(20000),
+    })
 
     return {
       ...stakedInfo,
