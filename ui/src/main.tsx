@@ -58,7 +58,6 @@ const walletManager = new WalletManager({
   defaultNetwork,
   networks: {
     [defaultNetwork]: {
-      name: defaultNetwork,
       algod: {
         baseServer: algodConfig.server,
         port: algodConfig.port,
