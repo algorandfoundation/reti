@@ -127,20 +127,14 @@ export function createBaseValidator({
 
 export async function processPoolData(pool: LocalPoolInfo): Promise<PoolData> {
   const poolAddress = algosdk.getApplicationAddress(pool.poolAppId)
-  const poolBalance = await fetchAccountBalance(poolAddress.toString(), true)
 
-  const poolData: PoolData = { balance: poolBalance }
-
-  if (poolData.balance === 0n) {
-    return poolData
-  }
+  const poolData: PoolData = { balance: 0n }
 
   const stakingPoolClient = await getSimulateStakingPoolClient(pool.poolAppId)
   const stakingPoolGS = await stakingPoolClient.state.global.getAll()
-  poolData.lastPayout = stakingPoolGS.lastPayout
+  poolData.lastPayout = stakingPoolGS.lastPayout!
+  poolData.balance = stakingPoolGS.totalAlgoStaked!
 
-  // const ewma = stakingPoolGS.weightedMovingAverage
-  // poolData.apy = ewma ? (Number(ewma) / 10000) * 100 : undefined
   const { apy } = await fetchNodelyVotingPerf(poolAddress.toString())
   poolData.apy = apy
 
