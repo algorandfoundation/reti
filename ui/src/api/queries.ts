@@ -1,6 +1,6 @@
-import { QueryClient, keepPreviousData, queryOptions } from '@tanstack/react-query'
+import { keepPreviousData, QueryClient, queryOptions } from '@tanstack/react-query'
 import algosdk from 'algosdk'
-import Axios, { AxiosError } from 'axios'
+import { AxiosError } from 'axios'
 import { CacheRequestConfig } from 'axios-cache-interceptor'
 import { fetchAsset, fetchAssetHoldings, fetchBalance, fetchBlockTimes } from '@/api/algod'
 import {
@@ -21,8 +21,7 @@ import { fetchNfd, fetchNfdReverseLookup } from '@/api/nfd'
 import { Nfd, NfdGetLookupParams, NfdGetNFDParams } from '@/interfaces/nfd'
 import { calculateValidatorPoolMetrics } from '@/utils/contracts'
 import { resolveIpfsUrl } from '@/utils/ipfs'
-import { NodelyRetiPerf } from '@/interfaces/nodely'
-import queryString from 'query-string'
+import { fetchNodely24hPerf } from '@/api/nodely'
 
 ////////////////////////////////////////////////////////////
 // Core protocol data queries
@@ -234,25 +233,6 @@ export const ipfsUrlQueryOptions = (ipfsUrl: string) =>
   })
 
 ////////////////////////////////////////////////////////////
-// Nodely queries
-////////////////////////////////////////////////////////////
-export const nodelyPerfMetricsQueryOptions = () =>
-  queryOptions({
-    queryKey: ['nodely-perf'],
-    queryFn: () => fetchNodelyPerf(),
-    placeholderData: keepPreviousData,
-    staleTime: 1000 * 60 * 30, // 30 mins
-    retry: (failureCount, error) => {
-      if (error instanceof AxiosError) {
-        return error.response?.status !== 404 && failureCount < 3
-      }
-      return false
-    },
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-  })
-
-////////////////////////////////////////////////////////////
 // Miscellaneous queries
 ////////////////////////////////////////////////////////////
 
@@ -270,17 +250,21 @@ export const poolApyQueryOptions = (poolAppId: bigint, staleTime?: number) =>
     staleTime: staleTime || 1000 * 60 * 60, // 1 hour
   })
 
-export async function fetchNodelyPerf(): Promise<NodelyRetiPerf> {
-  const axiosInstance = Axios.create({
-    baseURL: 'https://afmetrics.api.nodely.io',
-    paramsSerializer: (params) => queryString.stringify(params),
+////////////////////////////////////////////////////////////
+// Nodely queries
+////////////////////////////////////////////////////////////
+export const nodelyPerfMetricsQueryOptions = () =>
+  queryOptions({
+    queryKey: ['nodely-perf'],
+    queryFn: () => fetchNodely24hPerf(),
+    placeholderData: keepPreviousData,
+    staleTime: 1000 * 60 * 30, // 30 mins
+    retry: (failureCount, error) => {
+      if (error instanceof AxiosError) {
+        return error.response?.status !== 404 && failureCount < 3
+      }
+      return false
+    },
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   })
-  const { data: perfData } = await axiosInstance.get<NodelyRetiPerf>(
-    '/v1/delayed/reti/poolvotingperformance/24hr',
-    { params: { format: 'JSON' } },
-  )
-  console.log(
-    `${perfData.data.length} records fetched from Nodely API for 7 day performance metrics.`,
-  )
-  return perfData
-}

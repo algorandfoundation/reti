@@ -15,6 +15,8 @@ import {
   ValidatorConfig,
   ValidatorCurState,
 } from '@/contracts/ValidatorRegistryClient'
+import { fetchPoolApy } from '@/api/contracts'
+import { fetchNodelyVotingPerf } from '@/api/nodely'
 
 /**
  * Process node pool assignment configuration data into an array with each node's available slot count

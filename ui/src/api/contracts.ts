@@ -33,6 +33,7 @@ import {
 } from '@/interfaces/validator'
 import { BalanceChecker } from '@/utils/balanceChecker'
 import { encodeCallParams } from '@/utils/tests/abi'
+import { fetchNodelyVotingPerf } from '@/api/nodely'
 
 export async function fetchNumValidators(): Promise<number> {
   const validatorClient = await getSimulateValidatorClient()
@@ -138,8 +139,10 @@ export async function processPoolData(pool: LocalPoolInfo): Promise<PoolData> {
   const stakingPoolGS = await stakingPoolClient.state.global.getAll()
   poolData.lastPayout = stakingPoolGS.lastPayout
 
-  const ewma = stakingPoolGS.weightedMovingAverage
-  poolData.apy = ewma ? (Number(ewma) / 10000) * 100 : undefined
+  // const ewma = stakingPoolGS.weightedMovingAverage
+  // poolData.apy = ewma ? (Number(ewma) / 10000) * 100 : undefined
+  const { apy } = await fetchNodelyVotingPerf(poolAddress.toString())
+  poolData.apy = apy
 
   return poolData
 }

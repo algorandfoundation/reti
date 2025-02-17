@@ -22,3 +22,14 @@ export interface NodelyRetiPerf {
   // meta: Meta[]
   data: NodelyRetiPerfData[]
 }
+
+export interface NodelyRetiPoolApyData {
+  pool_addr: string
+  total_interest: number
+  total_block_fees: number
+  weighted_balance: number
+  live_seconds: number
+  live_years: number
+  simple_rate: number
+  apy: number
+}

@@ -1,11 +1,10 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { validatorMetricsQueryOptions } from '@/api/queries'
-import { AlgoDisplayAmount } from '@/components/AlgoDisplayAmount'
-import { Indicator } from '@/constants/indicator'
-import { TrafficLight } from '@/components/TrafficLight'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Validator } from '@/interfaces/validator'
-import { calculateValidatorHealth } from '@/utils/contracts'
+import { useBlockTime } from '@/hooks/useBlockTime'
+import { formatDuration } from '@/utils/dayjs'
+import { Tooltip } from '@/components/Tooltip'
 
 interface ValidatorRewardsProps {
   validator: Validator
@@ -15,12 +14,8 @@ export function ValidatorRewards({ validator }: ValidatorRewardsProps) {
   const queryClient = useQueryClient()
   const metricsQuery = useQuery(validatorMetricsQueryOptions(validator.id, queryClient))
 
-  const tooltipContent = {
-    [Indicator.Normal]: 'Fully operational',
-    [Indicator.Watch]: 'Payouts Lagging',
-    [Indicator.Warning]: 'Payouts Stopped',
-    [Indicator.Error]: 'Rewards not compounding',
-  }
+  const blockTime = useBlockTime()
+  // const epochLength = validator.config.epochRoundLength
 
   if (metricsQuery.isLoading) {
     return (
@@ -37,15 +32,48 @@ export function ValidatorRewards({ validator }: ValidatorRewardsProps) {
       </div>
     )
   }
+  const perfScore = Number(validator.perf)
+  let perfTooltip = `${perfScore * 100}%`
+  let perfStr = ''
+  if (perfScore >= 0.7) {
+    perfStr = '✅'
+    // } else if (perfScore >= 0.9) {
+    //   perfStr = '☑️'
+  } else if (perfScore < 0.7) {
+    perfStr = `❌`
+  } else {
+    perfStr = '❌'
+    perfTooltip = 'Not active'
+  }
+
+  const roundsSinceLastPayout = Number(metricsQuery.data?.roundsSinceLastPayout ?? 0)
+  const sincelastPayoutDuration = roundsSinceLastPayout * blockTime.ms
+  let statusStr = ''
+  let statusTooltooltip = ''
+  if (!roundsSinceLastPayout || roundsSinceLastPayout >= 1200n) {
+    statusStr = '❌'
+    statusTooltooltip = `Payouts stopped, behind ${formatDuration(
+      Number(metricsQuery.data?.roundsSinceLastPayout ?? 0) * blockTime.ms,
+    )}`
+  } else if (roundsSinceLastPayout >= 210n) {
+    statusStr = '☑️'
+    statusTooltooltip = `Payouts behind ${formatDuration(
+      Number(metricsQuery.data?.roundsSinceLastPayout ?? 0) * blockTime.ms,
+    )}`
+  } else if (roundsSinceLastPayout < 21n) {
+    statusStr = '✅'
+    statusTooltooltip = ''
+  }
 
   return (
     <div className="flex items-center">
-      <TrafficLight
-        indicator={calculateValidatorHealth(metricsQuery.data?.roundsSinceLastPayout)}
-        tooltipContent={tooltipContent}
-        className="mr-2"
-      />
-      <AlgoDisplayAmount amount={metricsQuery.data?.rewardsBalance ?? 0n} microalgos />
+      <Tooltip content={perfTooltip}>
+        <span>{perfStr}</span>
+      </Tooltip>
+      /
+      <Tooltip content={statusTooltooltip}>
+        <span>{statusStr}</span>
+      </Tooltip>
     </div>
   )
 }

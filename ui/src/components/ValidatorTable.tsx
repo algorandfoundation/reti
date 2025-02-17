@@ -68,7 +68,7 @@ import {
 import { dayjs } from '@/utils/dayjs'
 import { sendRewardTokensToPool, simulateEpoch } from '@/utils/development'
 import { ellipseAddressJsx } from '@/utils/ellipseAddress'
-import { formatAssetAmount } from '@/utils/format'
+import { formatAmount, formatAssetAmount } from '@/utils/format'
 import { globalFilterFn, sunsetFilter } from '@/utils/table'
 import { cn } from '@/utils/ui'
 
@@ -291,52 +291,56 @@ export function ValidatorTable({
       },
     },
     {
-      id: 'performance',
-      accessorFn: (row) => row.perf,
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Perf." />,
-      cell: ({ row }) => {
-        const validator = row.original
-        const perfScore = Number(validator.perf)
-        let perfStr = ''
-        let tooltipContent = `${perfScore * 100}%`
-        if (perfScore >= 0.95) {
-          perfStr = '✅'
-        } else if (perfScore >= 0.9) {
-          perfStr = '☑️'
-        } else if (perfScore < 0.9) {
-          perfStr = `❌`
-        } else {
-          perfStr = '--'
-          tooltipContent = ''
-        }
-
-        return (
-          <Tooltip content={tooltipContent}>
-            <span>{perfStr}</span>
-          </Tooltip>
-        )
-      },
-    },
-    // {
-    //   id: 'apy',
-    //   accessorFn: (row) => row.apy,
-    //   header: ({ column }) => <DataTableColumnHeader column={column} title="APY" />,
-    //   cell: ({ row }) => {
-    //     if (!row.original.apy) return <span className="text-muted-foreground">--</span>
-    //     return <span>{formatAmount(row.original.apy, { precision: 3 })}%</span>
-    //   },
-    // },
-    {
-      id: 'reward',
+      id: 'status',
       accessorFn: (row) => row.rewardsBalance,
       sortingFn: sortRewardsFn,
       sortUndefined: -1,
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Avail. Rewards" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
       cell: ({ row }) => {
         const validator = row.original
         if (validator.state.numPools == 0) return '--'
 
         return <ValidatorRewards validator={validator} />
+      },
+    },
+    // {
+    //   id: 'performance',
+    //   accessorFn: (row) => row.perf,
+    //   header: ({ column }) => <DataTableColumnHeader column={column} title="Perf." />,
+    //   cell: ({ row }) => {
+    //     const validator = row.original
+    //     const perfScore = Number(validator.perf)
+    //     let perfStr = ''
+    //     let tooltipContent = `${perfScore * 100}%`
+    //     if (perfScore >= 0.95) {
+    //       perfStr = '✅'
+    //     } else if (perfScore >= 0.9) {
+    //       perfStr = '☑️'
+    //     } else if (perfScore < 0.9) {
+    //       perfStr = `❌`
+    //     } else {
+    //       perfStr = '--'
+    //       tooltipContent = ''
+    //     }
+    //
+    //     return (
+    //       <Tooltip content={tooltipContent}>
+    //         <span>{perfStr}</span>
+    //       </Tooltip>
+    //     )
+    //   },
+    // },
+    {
+      id: 'apy',
+      accessorFn: (row) => row.apy,
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Est. APY" />,
+      cell: ({ row }) => {
+        if (!row.original.apy) return <span className="text-muted-foreground">--</span>
+        return (
+          <span>
+            {formatAmount(row.original.apy < 0 ? 0 : row.original.apy, { precision: 1 })}%
+          </span>
+        )
       },
     },
     {
