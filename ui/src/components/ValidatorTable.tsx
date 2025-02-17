@@ -290,6 +290,33 @@ export function ValidatorTable({
         )
       },
     },
+    {
+      id: 'performance',
+      accessorFn: (row) => row.perf,
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Perf." />,
+      cell: ({ row }) => {
+        const validator = row.original
+        const perfScore = Number(validator.perf)
+        let perfStr = ''
+        let tooltipContent = `${perfScore * 100}%`
+        if (perfScore >= 0.95) {
+          perfStr = '✅'
+        } else if (perfScore >= 0.9) {
+          perfStr = '☑️'
+        } else if (perfScore < 0.9) {
+          perfStr = `❌`
+        } else {
+          perfStr = '--'
+          tooltipContent = ''
+        }
+
+        return (
+          <Tooltip content={tooltipContent}>
+            <span>{perfStr}</span>
+          </Tooltip>
+        )
+      },
+    },
     // {
     //   id: 'apy',
     //   accessorFn: (row) => row.apy,
