@@ -1,5 +1,4 @@
 import Axios from 'axios'
-import { setupCache } from 'axios-cache-interceptor'
 import queryString from 'query-string'
 
 const instance = Axios.create({

@@ -1,6 +1,6 @@
 import { AlgoAmount } from '@algorandfoundation/algokit-utils/types/amount'
 import algosdk from 'algosdk'
-import { fetchAccountBalance, fetchAsset, isOptedInToAsset } from '@/api/algod'
+import { fetchAsset, isOptedInToAsset } from '@/api/algod'
 import {
   algorandClient,
   getSimulateStakingPoolClient,
