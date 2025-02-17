@@ -47,7 +47,6 @@ export function ValidatorRewards({ validator }: ValidatorRewardsProps) {
   }
 
   const roundsSinceLastPayout = Number(metricsQuery.data?.roundsSinceLastPayout ?? 0)
-  const sincelastPayoutDuration = roundsSinceLastPayout * blockTime.ms
   let statusStr = ''
   let statusTooltooltip = ''
   if (!roundsSinceLastPayout || roundsSinceLastPayout >= 1200n) {

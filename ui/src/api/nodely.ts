@@ -16,7 +16,7 @@ export async function fetchNodelyVotingPerf(address: string): Promise<NodelyReti
       { params: { format: 'JSON' } },
     )
     return apyData
-  } catch (error) {
+  } catch {
     return { apy: 0 } as NodelyRetiPoolApyData
   }
 }
