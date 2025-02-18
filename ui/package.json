@@ -69,6 +69,7 @@
     "algosdk": "3.1.0",
     "axios": "1.7.7",
     "axios-cache-interceptor": "1.6.0",
+    "axios-retry": "^4.5.0",
     "big.js": "6.2.2",
     "class-variance-authority": "0.7.0",
     "clsx": "2.1.1",
