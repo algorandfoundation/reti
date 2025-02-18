@@ -156,7 +156,7 @@ export function useValidators(): {
           baseValidator.nfd = nfd
         }
       }
-      if (nodelyPerfQuery.data) {
+      if (nodelyPerfQuery.data && nodelyPerfQuery.data.data) {
         const perfScore = nodelyPerfQuery.data.data.find(
           (q) => q.validatorid === baseValidator.id.toString(),
         )?.perf

@@ -4,18 +4,18 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Validator } from '@/interfaces/validator'
 import { useBlockTime } from '@/hooks/useBlockTime'
 import { formatDuration } from '@/utils/dayjs'
-import { Tooltip } from '@/components/Tooltip'
+import { Indicator } from '@/constants/indicator'
+import { TrafficLight } from '@/components/TrafficLight'
 
 interface ValidatorRewardsProps {
   validator: Validator
 }
 
-export function ValidatorRewards({ validator }: ValidatorRewardsProps) {
+export function ValidatorStatus({ validator }: ValidatorRewardsProps) {
   const queryClient = useQueryClient()
   const metricsQuery = useQuery(validatorMetricsQueryOptions(validator.id, queryClient))
 
   const blockTime = useBlockTime()
-  // const epochLength = validator.config.epochRoundLength
 
   if (metricsQuery.isLoading) {
     return (
@@ -34,45 +34,43 @@ export function ValidatorRewards({ validator }: ValidatorRewardsProps) {
   }
   const perfScore = Number(validator.perf)
   let perfTooltip = `${perfScore * 100}%`
-  let perfStr = ''
+  let perfIndicator = Indicator.Normal
   if (perfScore >= 0.7) {
-    perfStr = '✅'
-    // } else if (perfScore >= 0.9) {
-    //   perfStr = '☑️'
+    perfIndicator = Indicator.Normal
   } else if (perfScore < 0.7) {
-    perfStr = `❌`
+    perfIndicator = Indicator.Watch
   } else {
-    perfStr = '❌'
+    perfIndicator = Indicator.Error
     perfTooltip = 'Not active'
   }
 
   const roundsSinceLastPayout = Number(metricsQuery.data?.roundsSinceLastPayout ?? 0)
-  let statusStr = ''
+  let statusIndicator = Indicator.Normal
   let statusTooltooltip = ''
   if (!roundsSinceLastPayout || roundsSinceLastPayout >= 1200n) {
-    statusStr = '❌'
+    statusIndicator = Indicator.Error
     statusTooltooltip = `Payouts stopped, behind ${formatDuration(
       Number(metricsQuery.data?.roundsSinceLastPayout ?? 0) * blockTime.ms,
     )}`
   } else if (roundsSinceLastPayout >= 210n) {
-    statusStr = '☑️'
+    statusIndicator = Indicator.Watch
     statusTooltooltip = `Payouts behind ${formatDuration(
       Number(metricsQuery.data?.roundsSinceLastPayout ?? 0) * blockTime.ms,
     )}`
   } else if (roundsSinceLastPayout < 21n) {
-    statusStr = '✅'
+    statusIndicator = Indicator.Normal
     statusTooltooltip = ''
   }
 
   return (
-    <div className="flex items-center">
-      <Tooltip content={perfTooltip}>
-        <span>{perfStr}</span>
-      </Tooltip>
-      /
-      <Tooltip content={statusTooltooltip}>
-        <span>{statusStr}</span>
-      </Tooltip>
-    </div>
+    <span className="flex items-center space-x-2">
+      <TrafficLight tooltipContent={perfTooltip} indicator={perfIndicator} showGreen={true} />
+      <span className="h-5 w-px bg-gray-300"></span>
+      <TrafficLight
+        tooltipContent={statusTooltooltip}
+        indicator={statusIndicator}
+        showGreen={true}
+      />
+    </span>
   )
 }

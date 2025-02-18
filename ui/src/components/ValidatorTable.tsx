@@ -49,7 +49,7 @@ import {
 import { UnstakeModal } from '@/components/UnstakeModal'
 import { ValidatorInfoRow } from '@/components/ValidatorInfoRow'
 import { ValidatorNfdDisplay } from '@/components/ValidatorNfdDisplay'
-import { ValidatorRewards } from '@/components/ValidatorRewards'
+import { ValidatorStatus } from '@/components/ValidatorStatus'
 import { Constraints } from '@/contracts/ValidatorRegistryClient'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
 import { StakerValidatorData } from '@/interfaces/staking'
@@ -300,36 +300,9 @@ export function ValidatorTable({
         const validator = row.original
         if (validator.state.numPools == 0) return '--'
 
-        return <ValidatorRewards validator={validator} />
+        return <ValidatorStatus validator={validator} />
       },
     },
-    // {
-    //   id: 'performance',
-    //   accessorFn: (row) => row.perf,
-    //   header: ({ column }) => <DataTableColumnHeader column={column} title="Perf." />,
-    //   cell: ({ row }) => {
-    //     const validator = row.original
-    //     const perfScore = Number(validator.perf)
-    //     let perfStr = ''
-    //     let tooltipContent = `${perfScore * 100}%`
-    //     if (perfScore >= 0.95) {
-    //       perfStr = '✅'
-    //     } else if (perfScore >= 0.9) {
-    //       perfStr = '☑️'
-    //     } else if (perfScore < 0.9) {
-    //       perfStr = `❌`
-    //     } else {
-    //       perfStr = '--'
-    //       tooltipContent = ''
-    //     }
-    //
-    //     return (
-    //       <Tooltip content={tooltipContent}>
-    //         <span>{perfStr}</span>
-    //       </Tooltip>
-    //     )
-    //   },
-    // },
     {
       id: 'apy',
       accessorFn: (row) => row.apy,
