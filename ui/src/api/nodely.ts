@@ -21,7 +21,7 @@ export async function fetchNodely24hPerf(): Promise<NodelyRetiPerf> {
     '/v1/delayed/reti/poolvotingperformance/24hr',
     { params: { format: 'JSON' } },
   )
-  reπturn perfData
+  return perfData
 }
 
 export async function fetchNodelyVotingPerf(address: string): Promise<NodelyRetiPoolApyData> {
