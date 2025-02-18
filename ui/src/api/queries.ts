@@ -116,7 +116,7 @@ export const validatorMetricsQueryOptions = (validatorId: number, queryClient: Q
         BigInt(params.firstValid),
       )
     },
-    staleTime: 1000 * 30, // 30 seconds
+    staleTime: 1000 * 60 * 30, // 30 minutes
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   })
