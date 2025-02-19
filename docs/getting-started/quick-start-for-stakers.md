@@ -1,30 +1,38 @@
 # Quick Start For Stakers
 
-The Staking Dashboard is where you can manage your stake in various validators.
+The Staking Dashboard is where you can manage your stake in various Validators and compare various Validators.
 
-<figure><img src="../.gitbook/assets/image (6).png" alt=""><figcaption><p>Staking Dashboard</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (5).png" alt=""><figcaption><p>Dashboard</p></figcaption></figure>
 
-## Comparing Validators
+## **Comparing Validators**
 
 Validators are not all created equal! They can vary greatly in their performance, incentives, fees, payout frequency, and restrictions. It's important to do due diligence on each Validator before attempting to stake. These details can be found in the Validator details page, which can be navigated to by clicking the Validator's NFD or wallet address.
 
-**Performance**
+### **Status**
 
-If a node is slow and missing votes, those rewards are 'missed', resulting in a lower yield than if it was a healthy node participating with the same stake. Slow nodes are not 'doing their job' and so they aren't rewarded. The APY displayed is calculated on-chain and will reflect a Validator's past performance.
+In the Status column you will see the node's performance as well as the node daemon's performance.&#x20;
 
-**Incentives**
+If the node is performing poorly, you may be missing potential rewards, and this will result in a lower than expect APY. By hovering over the performance indicator you can see the estimated performance of the node. (this is still a work in progress and may not be 100% accurate)
 
-Some pools have extra token rewards distributed to stakers on top of the ALGO received from participating in consensus. If these extra rewards have any market value, these pools could be providing higher yield than pools without extra rewards. It's important to always do due diligence on any validator incentives.&#x20;
+If the node daemon isn't running, you will see a red circle in place of the green circle. This is to let stakers know that payouts aren't happening.
 
-**Fees**
+### **APY**
 
-Validators can set a commission rate which is paid out as a percentage of rewards every epoch. The record is stored in the Validator record and is immutable.
+The estimated APY column shows the estimated cumulative APY for the Validator. (this is still a work in progress and may not be 100% accurate)
 
-**Payout Frequency**
+### **Incentives**
 
-The frequency which epochs occur may effect the yield received due to txn fees and compounding returns.
+Some pools have extra token rewards distributed to stakers on top of the ALGO received from participating in consensus. If these extra rewards have any market value, these pools could be providing higher yield than pools without extra rewards. It's important to always do due diligence on any validator incentives.
 
-**Restrictions**
+### **Fees**
+
+Validators can set a commission rate which is paid out as a percentage of rewards every epoch. The record is stored in the Validator record and is **immutable**.
+
+### **Payout Frequency**
+
+The frequency which epochs occur may effect the yield received due to txn fees and compounding returns. Generally, the shorter the epoch the better from a stakers perspective, but not always.
+
+### **Restrictions**
 
 Validator's may have restrictions set on their pools including:
 
