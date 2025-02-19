@@ -47,6 +47,7 @@ export type Validator = {
   gatingAssets?: algosdk.modelsv2.Asset[]
   nfd?: Nfd
   apy?: number
+  perf?: number
 }
 
 export interface FindPoolForStakerResponse {

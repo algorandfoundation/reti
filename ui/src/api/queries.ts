@@ -1,4 +1,4 @@
-import { QueryClient, keepPreviousData, queryOptions } from '@tanstack/react-query'
+import { keepPreviousData, QueryClient, queryOptions } from '@tanstack/react-query'
 import algosdk from 'algosdk'
 import { AxiosError } from 'axios'
 import { CacheRequestConfig } from 'axios-cache-interceptor'
@@ -21,6 +21,7 @@ import { fetchNfd, fetchNfdReverseLookup } from '@/api/nfd'
 import { Nfd, NfdGetLookupParams, NfdGetNFDParams } from '@/interfaces/nfd'
 import { calculateValidatorPoolMetrics } from '@/utils/contracts'
 import { resolveIpfsUrl } from '@/utils/ipfs'
+import { fetchNodely24hPerf } from '@/api/nodely'
 
 ////////////////////////////////////////////////////////////
 // Core protocol data queries
@@ -115,7 +116,7 @@ export const validatorMetricsQueryOptions = (validatorId: number, queryClient: Q
         BigInt(params.firstValid),
       )
     },
-    staleTime: 1000 * 30, // 30 seconds
+    staleTime: 1000 * 60 * 30, // 30 minutes
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   })
@@ -247,4 +248,23 @@ export const poolApyQueryOptions = (poolAppId: bigint, staleTime?: number) =>
     queryFn: () => fetchPoolApy(poolAppId),
     enabled: !!poolAppId,
     staleTime: staleTime || 1000 * 60 * 60, // 1 hour
+  })
+
+////////////////////////////////////////////////////////////
+// Nodely queries
+////////////////////////////////////////////////////////////
+export const nodelyPerfMetricsQueryOptions = () =>
+  queryOptions({
+    queryKey: ['nodely-perf'],
+    queryFn: () => fetchNodely24hPerf(),
+    placeholderData: keepPreviousData,
+    staleTime: 1000 * 60 * 30, // 30 mins
+    retry: (failureCount, error) => {
+      if (error instanceof AxiosError) {
+        return error.response?.status !== 404 && failureCount < 3
+      }
+      return false
+    },
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   })

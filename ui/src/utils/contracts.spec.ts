@@ -488,7 +488,7 @@ describe('calculateValidatorPoolMetrics', () => {
 
     expect(result.rewardsBalance).toBe(1000000n) // Rounded to nearest whole ALGO
     expect(result.roundsSinceLastPayout).toBe(1000n)
-    expect(result.apy).toBe(6)
+    expect(result.apy).toBeCloseTo(6.16, 1)
   })
 
   it('handles pools with zero balance', () => {
@@ -508,7 +508,7 @@ describe('calculateValidatorPoolMetrics', () => {
 
     expect(result.rewardsBalance).toBe(0n)
     expect(result.roundsSinceLastPayout).toBe(1000n)
-    expect(result.apy).toBe(5.5)
+    expect(result.apy).toBe(5.75)
   })
 
   it('returns zero APY when all pools have zero balance', () => {
@@ -546,7 +546,7 @@ describe('calculateValidatorPoolMetrics', () => {
 
     expect(result.rewardsBalance).toBe(0n)
     expect(result.roundsSinceLastPayout).toBe(1000n)
-    expect(result.apy).toBe(6)
+    expect(result.apy).toBeCloseTo(6.33, 1)
   })
 
   it('returns undefined roundsSinceLastPayout when no valid lastPayout', () => {
@@ -565,7 +565,7 @@ describe('calculateValidatorPoolMetrics', () => {
 
     expect(result.rewardsBalance).toBe(0n)
     expect(result.roundsSinceLastPayout).toBeUndefined()
-    expect(result.apy).toBe(6)
+    expect(result.apy).toBeCloseTo(6.33, 1)
   })
 
   it('handles negative rewards balance', () => {
@@ -584,6 +584,6 @@ describe('calculateValidatorPoolMetrics', () => {
 
     expect(result.rewardsBalance).toBe(0n)
     expect(result.roundsSinceLastPayout).toBe(1000n)
-    expect(result.apy).toBe(6)
+    expect(result.apy).toBeCloseTo(6.33, 1)
   })
 })

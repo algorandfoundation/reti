@@ -7,6 +7,6 @@ const instance = Axios.create({
   baseURL: getNfdApiFromViteEnvironment(),
   paramsSerializer: (params) => queryString.stringify(params),
 })
-const axios = setupCache(instance)
+const axiosNfdApi = setupCache(instance)
 
-export default axios
+export default axiosNfdApi

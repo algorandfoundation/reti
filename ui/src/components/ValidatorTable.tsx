@@ -49,7 +49,7 @@ import {
 import { UnstakeModal } from '@/components/UnstakeModal'
 import { ValidatorInfoRow } from '@/components/ValidatorInfoRow'
 import { ValidatorNfdDisplay } from '@/components/ValidatorNfdDisplay'
-import { ValidatorRewards } from '@/components/ValidatorRewards'
+import { ValidatorStatus } from '@/components/ValidatorStatus'
 import { Constraints } from '@/contracts/ValidatorRegistryClient'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
 import { StakerValidatorData } from '@/interfaces/staking'
@@ -68,7 +68,7 @@ import {
 import { dayjs } from '@/utils/dayjs'
 import { sendRewardTokensToPool, simulateEpoch } from '@/utils/development'
 import { ellipseAddressJsx } from '@/utils/ellipseAddress'
-import { formatAssetAmount } from '@/utils/format'
+import { formatAmount, formatAssetAmount } from '@/utils/format'
 import { globalFilterFn, sunsetFilter } from '@/utils/table'
 import { cn } from '@/utils/ui'
 
@@ -290,26 +290,30 @@ export function ValidatorTable({
         )
       },
     },
-    // {
-    //   id: 'apy',
-    //   accessorFn: (row) => row.apy,
-    //   header: ({ column }) => <DataTableColumnHeader column={column} title="APY" />,
-    //   cell: ({ row }) => {
-    //     if (!row.original.apy) return <span className="text-muted-foreground">--</span>
-    //     return <span>{formatAmount(row.original.apy, { precision: 3 })}%</span>
-    //   },
-    // },
     {
-      id: 'reward',
+      id: 'status',
       accessorFn: (row) => row.rewardsBalance,
       sortingFn: sortRewardsFn,
       sortUndefined: -1,
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Avail. Rewards" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
       cell: ({ row }) => {
         const validator = row.original
         if (validator.state.numPools == 0) return '--'
 
-        return <ValidatorRewards validator={validator} />
+        return <ValidatorStatus validator={validator} />
+      },
+    },
+    {
+      id: 'apy',
+      accessorFn: (row) => row.apy,
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Est. APY" />,
+      cell: ({ row }) => {
+        if (!row.original.apy) return <span className="text-muted-foreground">--</span>
+        return (
+          <span>
+            {formatAmount(row.original.apy < 0 ? 0 : row.original.apy, { precision: 1 })}%
+          </span>
+        )
       },
     },
     {

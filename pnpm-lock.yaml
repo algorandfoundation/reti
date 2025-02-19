@@ -189,6 +189,9 @@ importers:
       axios-cache-interceptor:
         specifier: 1.6.0
         version: 1.6.0(axios@1.7.7)
+      axios-retry:
+        specifier: ^4.5.0
+        version: 4.5.0(axios@1.7.7)
       big.js:
         specifier: 6.2.2
         version: 6.2.2
@@ -2511,6 +2514,11 @@ packages:
     peerDependencies:
       axios: ^1
 
+  axios-retry@4.5.0:
+    resolution: {integrity: sha512-aR99oXhpEDGo0UuAlYcn2iGRds30k366Zfa05XWScR9QaQD4JYiP3/1Qt1u7YlefUOK+cn0CcwoL1oefavQUlQ==}
+    peerDependencies:
+      axios: 0.x || 1.x
+
   axios@1.7.7:
     resolution: {integrity: sha512-S4kL7XrjgBmvdGut0sN3yJxqYzrDOnivkBiN0OFs6hLiUam3UPvswUo0kqGyhqUZGEOytHyumEdXsAkgCOUf3Q==}
 
@@ -3594,6 +3602,10 @@ packages:
   is-regex@1.1.4:
     resolution: {integrity: sha512-kvRdxDsxZjhzUX07ZnLydzS1TU/TJlTUHHY4YLL87e37oUA49DfkLqgy+VjFocowy29cKvcSiu+kIv728jTTVg==}
     engines: {node: '>= 0.4'}
+
+  is-retry-allowed@2.2.0:
+    resolution: {integrity: sha512-XVm7LOeLpTW4jV19QSH38vkswxoLud8sQ57YwJVTPWdiaI9I8keEhGFpBlslyVsgdQy4Opg8QOLb8YRgsyZiQg==}
+    engines: {node: '>=10'}
 
   is-shared-array-buffer@1.0.3:
     resolution: {integrity: sha512-nA2hv5XIhLR3uVzDDfCIknerhx8XUKnstuOERPNNIinXG7v9u+ohXF67vxm4TPTEPU6lm61ZkwP3c9PCB97rhg==}
@@ -7806,6 +7818,11 @@ snapshots:
       fast-defer: 1.1.8
       object-code: 1.3.3
 
+  axios-retry@4.5.0(axios@1.7.7):
+    dependencies:
+      axios: 1.7.7
+      is-retry-allowed: 2.2.0
+
   axios@1.7.7:
     dependencies:
       follow-redirects: 1.15.9
@@ -9019,6 +9036,8 @@ snapshots:
     dependencies:
       call-bind: 1.0.7
       has-tostringtag: 1.0.2
+
+  is-retry-allowed@2.2.0: {}
 
   is-shared-array-buffer@1.0.3:
     dependencies:

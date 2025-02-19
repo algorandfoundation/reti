@@ -1,10 +1,11 @@
-import { useQueries, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
+import { useQueries, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import algosdk from 'algosdk'
 import * as React from 'react'
 import { createBaseValidator } from '@/api/contracts'
 import {
   assetQueryOptions,
   nfdQueryOptions,
+  nodelyPerfMetricsQueryOptions,
   numValidatorsQueryOptions,
   validatorConfigQueryOptions,
   validatorMetricsQueryOptions,
@@ -96,6 +97,9 @@ export function useValidators(): {
     [validatorIds, stateQueries.isFetching, poolsQueries.isFetching],
   )
 
+  // nodely performance data
+  const nodelyPerfQuery = useQuery(nodelyPerfMetricsQueryOptions())
+
   // Use queued queries for metrics
   const queuedMetricsQueries = useQueuedQueries(metricsQueries, 4) // Process 4 validators every second
 
@@ -151,6 +155,12 @@ export function useValidators(): {
         if (nfd) {
           baseValidator.nfd = nfd
         }
+      }
+      if (nodelyPerfQuery.data && nodelyPerfQuery.data.data) {
+        const perfScore = nodelyPerfQuery.data.data.find(
+          (q) => q.validatorid === baseValidator.id.toString(),
+        )?.perf
+        baseValidator.perf = perfScore
       }
 
       // Add metrics if available

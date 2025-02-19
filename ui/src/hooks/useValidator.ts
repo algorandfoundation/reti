@@ -3,13 +3,13 @@ import algosdk from 'algosdk'
 import * as React from 'react'
 import { createBaseValidator } from '@/api/contracts'
 import {
-  validatorConfigQueryOptions,
-  validatorStateQueryOptions,
-  validatorPoolsQueryOptions,
-  validatorNodePoolAssignmentsQueryOptions,
   assetQueryOptions,
   nfdQueryOptions,
+  validatorConfigQueryOptions,
   validatorMetricsQueryOptions,
+  validatorNodePoolAssignmentsQueryOptions,
+  validatorPoolsQueryOptions,
+  validatorStateQueryOptions,
 } from '@/api/queries'
 import { GatingType } from '@/constants/gating'
 import { Validator } from '@/interfaces/validator'
