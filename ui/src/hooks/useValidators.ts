@@ -168,6 +168,7 @@ export function useValidators(): {
         baseValidator.rewardsBalance = metrics.rewardsBalance
         baseValidator.roundsSinceLastPayout = metrics.roundsSinceLastPayout
         baseValidator.apy = metrics.apy
+        baseValidator.extDeposits = metrics.extDeposits
       }
 
       result.push(baseValidator)

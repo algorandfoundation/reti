@@ -27,6 +27,7 @@ export interface NodelyRetiPoolApyData {
   pool_addr: string
   total_interest: number
   total_block_fees: number
+  total_external_deposits: number
   weighted_balance: number
   live_seconds: number
   live_years: number

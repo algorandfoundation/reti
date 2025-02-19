@@ -36,6 +36,6 @@ export async function fetchNodelyVotingPerf(address: string): Promise<NodelyReti
     console.error('Error fetching Nodely APR Data:', error)
 
     // Return a default fallback value
-    return { apy: 0 } as NodelyRetiPoolApyData
+    return { apy: 0, total_external_deposits: 0 } as NodelyRetiPoolApyData
   }
 }

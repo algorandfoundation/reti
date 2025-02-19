@@ -135,8 +135,9 @@ export async function processPoolData(pool: LocalPoolInfo): Promise<PoolData> {
   poolData.lastPayout = stakingPoolGS.lastPayout!
   poolData.balance = stakingPoolGS.totalAlgoStaked!
 
-  const { apy } = await fetchNodelyVotingPerf(poolAddress.toString())
+  const { apy, total_external_deposits } = await fetchNodelyVotingPerf(poolAddress.toString())
   poolData.apy = apy
+  poolData.extDeposits = total_external_deposits
 
   return poolData
 }
