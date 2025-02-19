@@ -1,11 +1,12 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { validatorMetricsQueryOptions } from '@/api/queries'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Validator } from '@/interfaces/validator'
-import { useBlockTime } from '@/hooks/useBlockTime'
-import { formatDuration } from '@/utils/dayjs'
-import { Indicator } from '@/constants/indicator'
+import { PerfIndicator } from '@/components/PerfIndicator'
 import { TrafficLight } from '@/components/TrafficLight'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Indicator } from '@/constants/indicator'
+import { useBlockTime } from '@/hooks/useBlockTime'
+import { Validator } from '@/interfaces/validator'
+import { formatDuration } from '@/utils/dayjs'
 
 interface ValidatorRewardsProps {
   validator: Validator
@@ -64,8 +65,8 @@ export function ValidatorStatus({ validator }: ValidatorRewardsProps) {
 
   return (
     <span className="flex items-center space-x-2">
-      <TrafficLight tooltipContent={perfTooltip} indicator={perfIndicator} showGreen={true} />
-      <span className="h-5 w-px bg-gray-300"></span>
+      <PerfIndicator tooltipContent={perfTooltip} indicator={perfIndicator} showGreen={true} />
+      <span className="h-5 w-px bg-gray-300 dark:bg-gray-700"></span>
       <TrafficLight
         tooltipContent={statusTooltooltip}
         indicator={statusIndicator}
