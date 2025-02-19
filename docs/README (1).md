@@ -22,18 +22,15 @@ The Réti Pooling protocol facilitates the creation of decentralized staking poo
 * The protocol is completely decentralized and non-custodial.
 * Validators can configure pools to suit varied needs while maintaining core immutable parameters.
 
-<figure><img src=".gitbook/assets/image (3).png" alt=""><figcaption><p>Réti Pooling Dashboard</p></figcaption></figure>
+<figure><img src=".gitbook/assets/image.png" alt=""><figcaption><p>Dashboard</p></figcaption></figure>
 
 ***
 
 #### Key Objectives
 
-1. **Increase Participation in Algorand Consensus:**
-   * Provides an option for permissionless staking pools.
-   * Allows small stakeholders to directly participate in consensus by pooling stake.
-   * Users and validators can earn yield and secure the network.
-2. **Enhance Overall Security with Decentralization:**
-   * Promotes a variety of independent validators.
-   * Offers a decentralized alternative to more centralized solutions.
-   * Helps diversify stake across numerous nodes for better network security.
-   * Provides a reliable revenue stream for projects to benefit from staking.
+* Provides an option for permissionless staking pools.
+* Allows small stakeholders to directly participate in consensus by pooling stake.
+* Users and validators can earn yield and secure the network.
+* Promotes a variety of independent validators.
+* Helps diversify stake across numerous nodes for better network security.
+* Provides a reliable revenue stream for projects to benefit from staking.
