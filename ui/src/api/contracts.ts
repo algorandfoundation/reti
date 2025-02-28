@@ -258,7 +258,7 @@ export async function addValidator(
     percentToValidator: Math.round(Number(values.percentToValidator) * 10000),
     validatorCommissionAddress: values.validatorCommissionAddress,
     minEntryStake: AlgoAmount.Algos(Number(values.minEntryStake)).microAlgos,
-    maxAlgoPerPool: 0n,
+    maxAlgoPerPool: AlgoAmount.Algos(Number(values.maxAlgoPerPool || 0) * 1_000_000).microAlgos,
     poolsPerNode: Number(values.poolsPerNode),
     sunsettingOn: 0n,
     sunsettingTo: 0n,
