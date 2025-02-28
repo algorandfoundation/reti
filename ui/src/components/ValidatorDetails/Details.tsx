@@ -245,6 +245,22 @@ export function Details({ validator }: DetailsProps) {
                   />
                 </dd>
               </div>
+
+              {validator.config.maxAlgoPerPool > 0n && (
+                <div className="py-4 grid grid-cols-[2fr_3fr] gap-4 xl:grid-cols-2">
+                  <dt className="text-sm font-medium leading-normal text-muted-foreground">
+                    Max Stake Per Pool
+                  </dt>
+                  <dd className="flex items-center justify-between gap-x-2 text-sm leading-normal">
+                    <AlgoDisplayAmount
+                      amount={validator.config.maxAlgoPerPool}
+                      microalgos
+                      className="font-mono"
+                    />
+                  </dd>
+                </div>
+              )}
+
               <div className="py-4 grid grid-cols-[2fr_3fr] gap-4 xl:grid-cols-2">
                 <dt className="text-sm font-medium leading-normal text-muted-foreground">
                   Epoch Length
