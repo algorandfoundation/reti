@@ -13,10 +13,12 @@ import { EditNfdForInfo } from '@/components/ValidatorDetails/EditNfdForInfo'
 import { EditRewardPerPayout } from '@/components/ValidatorDetails/EditRewardPerPayout'
 import { EditSunsettingInfo } from '@/components/ValidatorDetails/EditSunsettingInfo'
 import { GatingType } from '@/constants/gating'
+import { Constraints } from '@/contracts/ValidatorRegistryClient'
 import { Validator } from '@/interfaces/validator'
 import { useRewardBalance } from '@/hooks/useRewardBalance'
 import { dayjs } from '@/utils/dayjs'
 import { ellipseAddressJsx } from '@/utils/ellipseAddress'
+import { calculateMaxAlgoPerPool } from '@/utils/contracts'
 import { ExplorerLink } from '@/utils/explorer'
 import { convertFromBaseUnits, formatAmount, formatAssetAmount } from '@/utils/format'
 import { getNfdAppFromViteEnvironment } from '@/utils/network/getNfdConfig'
@@ -25,13 +27,15 @@ const nfdAppUrl = getNfdAppFromViteEnvironment()
 
 interface DetailsProps {
   validator: Validator
+  constraints: Constraints
 }
 
-export function Details({ validator }: DetailsProps) {
+export function Details({ validator, constraints }: DetailsProps) {
   const { activeAddress } = useWallet()
   const isOwner = activeAddress === validator.config.owner
 
   const rewardBalanceQuery = useRewardBalance(validator)
+  const calculatedMaxAlgoPerPool = calculateMaxAlgoPerPool(validator, constraints)
 
   const renderRewardBalance = () => {
     if (rewardBalanceQuery.isLoading) {
@@ -246,20 +250,18 @@ export function Details({ validator }: DetailsProps) {
                 </dd>
               </div>
 
-              {validator.config.maxAlgoPerPool > 0n && (
-                <div className="py-4 grid grid-cols-[2fr_3fr] gap-4 xl:grid-cols-2">
-                  <dt className="text-sm font-medium leading-normal text-muted-foreground">
-                    Max Stake Per Pool
-                  </dt>
-                  <dd className="flex items-center justify-between gap-x-2 text-sm leading-normal">
-                    <AlgoDisplayAmount
-                      amount={validator.config.maxAlgoPerPool}
-                      microalgos
-                      className="font-mono"
-                    />
-                  </dd>
-                </div>
-              )}
+              <div className="py-4 grid grid-cols-[2fr_3fr] gap-4 xl:grid-cols-2">
+                <dt className="text-sm font-medium leading-normal text-muted-foreground">
+                  Max Stake Per Pool
+                </dt>
+                <dd className="flex items-center justify-between gap-x-2 text-sm leading-normal">
+                  <AlgoDisplayAmount
+                    amount={calculatedMaxAlgoPerPool}
+                    microalgos
+                    className="font-mono"
+                  />
+                </dd>
+              </div>
 
               <div className="py-4 grid grid-cols-[2fr_3fr] gap-4 xl:grid-cols-2">
                 <dt className="text-sm font-medium leading-normal text-muted-foreground">

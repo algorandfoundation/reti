@@ -441,6 +441,37 @@ export function calculateMaxAvailableToStake(
 }
 
 /**
+ * Calculate the effective maximum ALGO per pool based on validator config and protocol constraints
+ * @param {Validator} validator - Validator object
+ * @param {Constraints} constraints - Protocol constraints object
+ * @returns {bigint} Effective maximum ALGO per pool in microAlgos
+ */
+export function calculateMaxAlgoPerPool(validator: Validator, constraints: Constraints): bigint {
+  const numPools = validator.state.numPools
+
+  // When there are no pools yet, we should still display the configured or protocol max value
+  if (numPools === 0) {
+    // If validator has a custom limit, use that, otherwise use the protocol constraint
+    return validator.config.maxAlgoPerPool > 0n
+      ? validator.config.maxAlgoPerPool
+      : constraints.maxAlgoPerPool
+  }
+
+  const hardMaxDividedBetweenPools = constraints.maxAlgoPerValidator / BigInt(numPools)
+
+  // If maxAlgoPerPool is 0, use the protocol constraint
+  // Otherwise, use the minimum of the validator's config and the hard max divided between pools
+  const maxMicroalgoPerPool =
+    validator.config.maxAlgoPerPool === 0n
+      ? hardMaxDividedBetweenPools
+      : hardMaxDividedBetweenPools < validator.config.maxAlgoPerPool
+        ? hardMaxDividedBetweenPools
+        : validator.config.maxAlgoPerPool
+
+  return maxMicroalgoPerPool
+}
+
+/**
  * Calculate rewards eligibility percentage for a staker based on their entry round and last pool payout round.
  * @param {number} epochRoundLength - Validator payout frequency in rounds
  * @param {number} lastPoolPayoutRound - Last pool payout round number
