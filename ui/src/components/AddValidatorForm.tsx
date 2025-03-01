@@ -1,3 +1,4 @@
+import { AlgoAmount } from '@algorandfoundation/algokit-utils/types/amount'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
@@ -105,6 +106,7 @@ export function AddValidatorForm({ constraints }: AddValidatorFormProps) {
       percentToValidator: validatorSchemas.percentToValidator(constraints),
       validatorCommissionAddress: validatorSchemas.validatorCommissionAddress(),
       minEntryStake: validatorSchemas.minEntryStake(constraints),
+      maxAlgoPerPool: validatorSchemas.maxAlgoPerPool(constraints),
       poolsPerNode: validatorSchemas.poolsPerNode(constraints),
     })
     .superRefine((data, ctx) => rewardTokenRefinement(data, ctx, rewardToken?.params.decimals))
@@ -130,6 +132,7 @@ export function AddValidatorForm({ constraints }: AddValidatorFormProps) {
       percentToValidator: '',
       validatorCommissionAddress: '',
       minEntryStake: '',
+      maxAlgoPerPool: '',
       poolsPerNode: '1',
     },
   })
@@ -554,6 +557,44 @@ export function AddValidatorForm({ constraints }: AddValidatorFormProps) {
                       </div>
                     </FormControl>
                     <FormMessage>{errors.minEntryStake?.message}</FormMessage>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="maxAlgoPerPool"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel htmlFor="max-algo-per-pool-input">
+                      Max stake per pool
+                      <InfoPopover className={infoPopoverClassName} label="Max stake per pool">
+                        Maximum total stake allowed in a pool in millions of ALGO (e.g., 50 for 50M
+                        ALGO). Protocol maximum will be used if left blank.
+                      </InfoPopover>
+                    </FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                          <AlgoSymbol
+                            verticalOffset={1}
+                            className="text-muted-foreground"
+                            aria-hidden="true"
+                          />
+                        </div>
+                        <Input
+                          id="max-algo-per-pool-input"
+                          className="pl-7"
+                          placeholder="Enter millions (e.g., 50)"
+                          {...field}
+                        />
+                      </div>
+                    </FormControl>
+                    <FormDescription>
+                      Leave blank to use protocol maximum (
+                      {AlgoAmount.MicroAlgos(constraints.maxAlgoPerPool).algos / 1_000_000}M).
+                    </FormDescription>
+                    <FormMessage>{errors.maxAlgoPerPool?.message}</FormMessage>
                   </FormItem>
                 )}
               />

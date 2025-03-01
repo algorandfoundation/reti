@@ -13,7 +13,7 @@ export type EntryGatingAssets = [bigint, bigint, bigint, bigint]
 
 export type ValidatorConfigInput = Omit<
   ToStringTypes<ValidatorConfig>,
-  'id' | 'maxAlgoPerPool' | 'sunsettingOn' | 'sunsettingTo'
+  'id' | 'sunsettingOn' | 'sunsettingTo'
 >
 
 export interface LocalPoolInfo {

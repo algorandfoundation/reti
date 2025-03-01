@@ -197,6 +197,34 @@ export const validatorSchemas = {
         message: `Must be at least ${AlgoAmount.MicroAlgos(Number(constraints.minEntryStake)).algos} ALGO`,
       })
   },
+  maxAlgoPerPool: (constraints: Constraints) => {
+    return z
+      .string()
+      .refine((val) => val === '' || (!isNaN(Number(val)) && Number(val) > 0), {
+        message: 'Must be a positive number or empty',
+      })
+      .refine(
+        (val) => {
+          if (val === '') return true
+          const match = val.match(/^(\d+)$/)
+          return match !== null
+        },
+        {
+          message: 'Must be a whole number (no decimals)',
+        },
+      )
+      .refine(
+        (val) => {
+          if (val === '') return true
+          // Convert the input (in millions) to microAlgos for comparison
+          const inputMicroAlgos = AlgoAmount.Algos(Number(val) * 1_000_000).microAlgos
+          return inputMicroAlgos <= constraints.maxAlgoPerPool
+        },
+        {
+          message: `Cannot exceed ${Number(AlgoAmount.MicroAlgos(constraints.maxAlgoPerPool).algos) / 1_000_000}M ALGO (protocol maximum)`,
+        },
+      )
+  },
   poolsPerNode: (constraints: Constraints) => {
     return z
       .string()
