@@ -92,6 +92,7 @@ export function useValidator(validatorId: number): Validator | undefined {
       baseValidator.rewardsBalance = metricsQuery.data.rewardsBalance
       baseValidator.roundsSinceLastPayout = metricsQuery.data.roundsSinceLastPayout
       baseValidator.apy = metricsQuery.data.apy
+      baseValidator.extDeposits = metricsQuery.data.extDeposits
     }
 
     return baseValidator

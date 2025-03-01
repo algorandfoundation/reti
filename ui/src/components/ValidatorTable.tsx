@@ -310,9 +310,13 @@ export function ValidatorTable({
       cell: ({ row }) => {
         if (!row.original.apy) return <span className="text-muted-foreground">--</span>
         return (
-          <span>
-            {formatAmount(row.original.apy < 0 ? 0 : row.original.apy, { precision: 1 })}%
-          </span>
+          <Tooltip
+            content={`${formatAmount(Number(row.original.extDeposits), { precision: 2 })} in extra deposits`}
+          >
+            <span>
+              {formatAmount(row.original.apy < 0 ? 0 : row.original.apy, { precision: 1 })}%
+            </span>
+          </Tooltip>
         )
       },
     },

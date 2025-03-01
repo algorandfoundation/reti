@@ -13,7 +13,7 @@ export type EntryGatingAssets = [bigint, bigint, bigint, bigint]
 
 export type ValidatorConfigInput = Omit<
   ToStringTypes<ValidatorConfig>,
-  'id' | 'maxAlgoPerPool' | 'sunsettingOn' | 'sunsettingTo'
+  'id' | 'sunsettingOn' | 'sunsettingTo'
 >
 
 export interface LocalPoolInfo {
@@ -47,6 +47,7 @@ export type Validator = {
   gatingAssets?: algosdk.modelsv2.Asset[]
   nfd?: Nfd
   apy?: number
+  extDeposits?: number
   perf?: number
 }
 
@@ -61,4 +62,5 @@ export type PoolData = {
   balance: bigint
   lastPayout?: bigint
   apy?: number
+  extDeposits?: number
 }
