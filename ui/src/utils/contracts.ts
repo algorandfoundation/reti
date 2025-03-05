@@ -4,18 +4,18 @@ import { fetchAccountAssetInformation, fetchAccountInformation } from '@/api/alg
 import { fetchNfd, fetchNfdSearch } from '@/api/nfd'
 import { GatingType } from '@/constants/gating'
 import { Indicator } from '@/constants/indicator'
-import { Nfd, NfdSearchV2Params } from '@/interfaces/nfd'
-import { StakerValidatorData } from '@/interfaces/staking'
-import { LocalPoolInfo, NodeInfo, PoolData, Validator } from '@/interfaces/validator'
-import { dayjs } from '@/utils/dayjs'
-import { convertToBaseUnits, roundToFirstNonZeroDecimal, roundToWholeAlgos } from '@/utils/format'
 import {
   Constraints,
   NodePoolAssignmentConfig,
   ValidatorConfig,
   ValidatorCurState,
 } from '@/contracts/ValidatorRegistryClient'
-import { BigMath } from './bigint'
+import { Nfd, NfdSearchV2Params } from '@/interfaces/nfd'
+import { StakerValidatorData } from '@/interfaces/staking'
+import { LocalPoolInfo, NodeInfo, PoolData, Validator } from '@/interfaces/validator'
+import { BigMath } from '@/utils/bigint'
+import { dayjs } from '@/utils/dayjs'
+import { convertToBaseUnits, roundToFirstNonZeroDecimal, roundToWholeAlgos } from '@/utils/format'
 
 /**
  * Process node pool assignment configuration data into an array with each node's available slot count
