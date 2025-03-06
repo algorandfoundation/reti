@@ -1,4 +1,3 @@
-import { AlgoAmount } from '@algorandfoundation/algokit-utils/types/amount'
 import { useQuery } from '@tanstack/react-query'
 import { ProgressBar } from '@tremor/react'
 import { Copy } from 'lucide-react'
@@ -9,6 +8,7 @@ import { NfdDisplay } from '@/components/NfdDisplay'
 import { Button } from '@/components/ui/button'
 import { Constraints } from '@/contracts/ValidatorRegistryClient'
 import { LocalPoolInfo, Validator } from '@/interfaces/validator'
+import { calculateMaxAlgoPerPool } from '@/utils/contracts'
 import { copyToClipboard } from '@/utils/copyToClipboard'
 import { ellipseAddressJsx } from '@/utils/ellipseAddress'
 import { ExplorerLink } from '@/utils/explorer'
@@ -35,25 +35,18 @@ export function StakingPoolInfo({
     nfdLookupQueryOptions(poolInfo?.poolAddress || null, { view: 'thumbnail' }, { cache: false }),
   )
 
-  // @todo: clean this way up
   const numPools = validator.state.numPools
-  const hardMaxDividedBetweenPools =
-    numPools > 0 ? constraints.maxAlgoPerValidator / BigInt(numPools) : BigInt(0)
-  const maxMicroalgoPerPool =
-    validator.config.maxAlgoPerPool == BigInt(0)
-      ? hardMaxDividedBetweenPools
-      : hardMaxDividedBetweenPools < validator.config.maxAlgoPerPool
-        ? hardMaxDividedBetweenPools
-        : validator.config.maxAlgoPerPool
-  const maxAlgoPerPool = Number(maxMicroalgoPerPool / BigInt(1e6))
-  const selectedPoolAlgoStake =
-    poolInfo === null ? 0 : AlgoAmount.MicroAlgos(poolInfo.totalAlgoStaked).algos
-  const selectedPoolPercent =
-    poolInfo === null
-      ? 0
-      : roundToFirstNonZeroDecimal((selectedPoolAlgoStake / maxAlgoPerPool) * 100)
-  const totalPercent = roundToFirstNonZeroDecimal(
-    (Number(validator.state.totalAlgoStaked) / Number(constraints.maxAlgoPerValidator)) * 100,
+  const maxStakePerPool = calculateMaxAlgoPerPool(validator, constraints)
+  const maxTotalStake = maxStakePerPool * BigInt(numPools)
+  const currentTotalStake = validator.state.totalAlgoStaked
+
+  const totalPercentFull = roundToFirstNonZeroDecimal(
+    (Number(currentTotalStake) / Number(maxTotalStake)) * 100,
+  )
+
+  const selectedPoolCurrentStake = poolInfo === null ? 0n : poolInfo.totalAlgoStaked
+  const selectedPoolPercentFull = roundToFirstNonZeroDecimal(
+    (Number(selectedPoolCurrentStake) / Number(maxStakePerPool)) * 100,
   )
 
   const renderSeparator = () => {
@@ -147,10 +140,10 @@ export function StakingPoolInfo({
                         mutedRemainder
                         className="font-mono text-foreground"
                       />{' '}
-                      &bull; {totalPercent}%
+                      <span className="mx-0.5">({totalPercentFull}%)</span>
                     </span>
                     <AlgoDisplayAmount
-                      amount={constraints.maxAlgoPerValidator}
+                      amount={maxTotalStake}
                       microalgos
                       maxLength={5}
                       compactPrecision={2}
@@ -158,7 +151,7 @@ export function StakingPoolInfo({
                       className="font-mono"
                     />
                   </p>
-                  <ProgressBar value={totalPercent} color="rose" className="mt-3" />
+                  <ProgressBar value={totalPercentFull} color="rose" className="mt-3" />
                 </div>
               </dd>
             </div>
@@ -250,27 +243,28 @@ export function StakingPoolInfo({
             <dt className="text-sm font-medium leading-6 text-muted-foreground">Staked</dt>
             <dd className="flex items-center gap-x-2 text-sm leading-6">
               <div className="w-full mt-1">
-                <p className="text-tremor-default text-tremor-content dark:text-dark-tremor-content flex items-center justify-between">
+                <p className="text-tremor-default text-stone-500 dark:text-stone-400 flex items-center justify-between">
                   <span>
                     <AlgoDisplayAmount
-                      amount={poolInfo.totalAlgoStaked}
+                      amount={selectedPoolCurrentStake}
                       microalgos
                       maxLength={5}
                       compactPrecision={2}
                       mutedRemainder
                       className="font-mono text-foreground"
                     />{' '}
-                    &bull; {selectedPoolPercent}%
+                    <span className="mx-0.5">({selectedPoolPercentFull}%)</span>
                   </span>
                   <AlgoDisplayAmount
-                    amount={maxAlgoPerPool}
+                    amount={maxStakePerPool}
+                    microalgos
                     maxLength={5}
                     compactPrecision={2}
                     mutedRemainder
                     className="font-mono"
                   />
                 </p>
-                <ProgressBar value={selectedPoolPercent} color="rose" className="mt-3" />
+                <ProgressBar value={selectedPoolPercentFull} color="rose" className="mt-3" />
               </div>
             </dd>
           </div>
