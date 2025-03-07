@@ -133,7 +133,8 @@ export function AddStakeModal({
 
   const stakerMaximumStake = React.useMemo(() => {
     const estimatedFee = AlgoAmount.MicroAlgos(240_000).microAlgos
-    return BigMath.max(0n, availableBalance - mbrAmount - estimatedFee)
+    const buffer = AlgoAmount.MicroAlgos(260_000).microAlgos // Totaling 0.5 ALGO to cover fees
+    return BigMath.max(0n, availableBalance - mbrAmount - estimatedFee - buffer)
   }, [availableBalance, mbrAmount])
 
   const maximumStake = BigMath.min(
