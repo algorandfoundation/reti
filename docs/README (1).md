@@ -19,6 +19,7 @@ layout:
 The Réti Pooling protocol facilitates the creation of decentralized staking pools on the Algorand network, enabling groups of individuals to participate in consensus together. Users are able to trustlessly stake to a Validator and earn yield based on the rewards the Validator receives.
 
 * The protocol allows anyone to create or join staking pools.
+  * Validator **creators** are assumed to be technically capable of creating, maintaining and monitoring an Algorand node as well as having an understanding of background services.  The Algorand node should run 24x7 and the Reti node daemon must be properly configured to run 24x7 as well.  There is an assumption of technical understanding of command-line use and general server operations.
 * The protocol is completely decentralized and non-custodial.
 * Validators can configure pools to suit varied needs while maintaining core immutable parameters.
 
