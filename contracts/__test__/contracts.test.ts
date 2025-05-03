@@ -4656,4 +4656,97 @@ describe('reti', () => {
             })
         })
     })
+
+    describe('V2FullPoolVerify', () => {
+        let validatorId: number
+        let validatorOwnerAccount: Account
+        const poolKey: ValidatorPoolKey[] = []
+
+        // add validator and 2 pool for testing of filling a pool (not filled out w/ max algo) so that the
+        // 'reached max number of stakers' checks kick in and the 'new' staker flows to the next pool.
+        beforeAll(async () => {
+            // Fund a 'validator account' that will be the validator owner.
+            validatorOwnerAccount = await fixture.context.generateAccount({
+                initialFunds: AlgoAmount.Algos(500),
+                suppressLog: true,
+            })
+            const config = createValidatorConfig({
+                owner: validatorOwnerAccount.addr.toString(),
+                manager: validatorOwnerAccount.addr.toString(),
+                minEntryStake: AlgoAmount.Algos(1000).microAlgos,
+                maxAlgoPerPool: 0n,
+                percentToValidator: 50000,
+                validatorCommissionAddress: validatorOwnerAccount.addr.toString(),
+            })
+            validatorId = await addValidator(
+                fixture.context,
+                validatorMasterClient,
+                validatorOwnerAccount,
+                config,
+                mbrs.addValidatorMbr,
+            )
+
+            // Just do a simple add of two pools so we can test new stakers flowing into second pool
+            for (let i = 0; i < 2; i += 1) {
+                poolKey.push(
+                    await addStakingPool(
+                        fixture.context,
+                        validatorMasterClient,
+                        validatorId,
+                        1,
+                        validatorOwnerAccount,
+                        mbrs.addPoolMbr,
+                        mbrs.poolInitMbr,
+                    ),
+                )
+                expect(poolKey[i].id).toEqual(BigInt(validatorId))
+                expect(poolKey[i].poolId).toEqual(BigInt(i) + 1n)
+            }
+        })
+
+        // Creates maxStakersPerPool stakers:
+        test(
+            'addStakers',
+            async () => {
+                for (let i = 0; i < Number(MaxStakersPerPool) + 2; i += 1) {
+                    const stakerAccount = await fixture.context.generateAccount({
+                        initialFunds: AlgoAmount.Algos(5000),
+                        suppressLog: true,
+                    })
+
+                    // now stake 1000(+mbr), min for this pool - for the first time - which means actual stake amount will be reduced
+                    // by 'first time staker' fee to cover MBR (which goes to VALIDATOR contract account, not staker contract account!)
+                    // we pay the extra here so the final staked amount should be exactly 1000
+                    const stakeAmount1 = AlgoAmount.MicroAlgos(
+                        AlgoAmount.Algos(1000).microAlgos + AlgoAmount.MicroAlgos(mbrs.addStakerMbr).microAlgos,
+                    )
+                    const [stakedPoolKey] = await addStake(
+                        fixture.context,
+                        validatorMasterClient,
+                        validatorId,
+                        stakerAccount,
+                        stakeAmount1,
+                        0n,
+                    )
+                    let expectedKey: ValidatorPoolKey
+                    if (i < Number(MaxStakersPerPool)) {
+                        // eslint-disable-next-line prefer-destructuring
+                        expectedKey = poolKey[0]
+                    } else {
+                        // eslint-disable-next-line prefer-destructuring
+                        expectedKey = poolKey[1]
+                    }
+                    // should match info from the first staking pool
+                    expect(stakedPoolKey.id).toEqual(expectedKey.id)
+                    expect(stakedPoolKey.poolId).toEqual(expectedKey.poolId)
+                    expect(stakedPoolKey.poolAppId).toEqual(expectedKey.poolAppId)
+
+                    expect((await getValidatorState(validatorMasterClient, validatorId)).totalStakers).toEqual(
+                        BigInt(i + 1),
+                    )
+                }
+            },
+            4 * 60 * 1000, // 4 mins
+        )
+    })
 })

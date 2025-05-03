@@ -842,11 +842,14 @@ export class ValidatorRegistry extends Contract {
             'must stake at least the minimum for this pool',
         )
 
-        // Walk their desired validators pools and find free space
+        // Walk the pools of their desired validator and find free space
         const pools = clone(this.validatorList(validatorId).value.pools)
         const curNumPools = this.validatorList(validatorId).value.state.numPools as uint64
         for (let i = 0; i < curNumPools; i += 1) {
-            if (pools[i].totalAlgoStaked + amountToStake <= maxPerPool) {
+            if (
+                pools[i].totalStakers < MAX_STAKERS_PER_POOL &&
+                pools[i].totalAlgoStaked + amountToStake <= maxPerPool
+            ) {
                 return [
                     { id: validatorId, poolId: i + 1, poolAppId: pools[i].poolAppId },
                     isNewStakerToValidator,
