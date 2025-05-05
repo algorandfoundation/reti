@@ -521,7 +521,7 @@ describe('calculateValidatorPoolMetrics', () => {
     )
 
     expect(result.rewardsBalance).toBe(0n)
-    expect(result.roundsSinceLastPayout).toBe(1000n)
+    expect(result.roundsSinceLastPayout).toBe(0n)
     expect(result.apy).toBe(5.75)
   })
 
@@ -540,7 +540,7 @@ describe('calculateValidatorPoolMetrics', () => {
     )
 
     expect(result.rewardsBalance).toBe(0n)
-    expect(result.roundsSinceLastPayout).toBe(1000n)
+    expect(result.roundsSinceLastPayout).toBe(undefined)
     expect(result.apy).toBe(0)
   })
 
