@@ -2,6 +2,9 @@ import { FilterFn } from '@tanstack/react-table'
 import { Validator } from '@/interfaces/validator'
 import { isSunsetted } from '@/utils/contracts'
 
+// Minimum staking amount for eligible validators (30,000 ALGO in microALGOs)
+export const MIN_ELIGIBLE_STAKE = 30000n * 1000000n
+
 export const globalFilterFn: FilterFn<Validator> = (row, columnId, filterValue) => {
   if (filterValue === '') return true
 
@@ -45,4 +48,10 @@ export const sunsetFilter: FilterFn<Validator> = (row, columnId, showSunsetted) 
   const validator = row.original
   const isSunset = isSunsetted(validator)
   return showSunsetted ? true : !isSunset
+}
+
+export const ineligibleFilter: FilterFn<Validator> = (row, columnId, showIneligible) => {
+  const validator = row.original
+  const isIneligible = validator.state.totalAlgoStaked < MIN_ELIGIBLE_STAKE
+  return showIneligible ? true : !isIneligible
 }
