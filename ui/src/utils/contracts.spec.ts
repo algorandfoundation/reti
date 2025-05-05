@@ -201,6 +201,20 @@ describe('isStakingDisabled', () => {
     }
     expect(isStakingDisabled(activeAddress, normalValidator, constraints)).toBe(false)
   })
+
+  it('should disable staking if the first pool is full', () => {
+    const validator = {
+      ...MOCK_VALIDATOR_1,
+      pools: [
+        {
+          ...MOCK_VALIDATOR_1.pools[0],
+          totalStakers: Number(constraints.maxStakersPerPool), // First pool is full
+        },
+        ...MOCK_VALIDATOR_1.pools.slice(1),
+      ],
+    }
+    expect(isStakingDisabled(activeAddress, validator, constraints)).toBe(true)
+  })
 })
 
 describe('isUnstakingDisabled', () => {
