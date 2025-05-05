@@ -684,9 +684,9 @@ export function calculateValidatorPoolMetrics(
 ) {
   const totalBalances = poolsData.reduce((sum, data) => sum + data.balance, 0n)
   const oldestRound = poolsData.reduce((oldest, data) => {
-    if (!data.lastPayout) return oldest
+    if (!data.lastPayout || data.balance === 0n) return oldest
     const nextRound = data.lastPayout - (data.lastPayout % epochRoundLength) + epochRoundLength
-    return oldest === 0n || nextRound < oldest ? nextRound : oldest
+    return oldest === 0n || data.balance === 0n || nextRound < oldest ? nextRound : oldest
   }, 0n)
 
   const rewardsBalance = roundToWholeAlgos(totalBalances - totalAlgoStaked)
