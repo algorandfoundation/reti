@@ -563,7 +563,9 @@ export function ValidatorTable({
             >
               <Checkbox
                 checked={(table.getColumn('validator')?.getFilterValue() as boolean) ?? false}
-                onCheckedChange={(checked) => table.getColumn('validator')?.setFilterValue(!!checked)}
+                onCheckedChange={(checked) =>
+                  table.getColumn('validator')?.setFilterValue(!!checked)
+                }
               />
               <label
                 htmlFor="show-sunsetted"
