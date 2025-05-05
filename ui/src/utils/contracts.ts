@@ -689,7 +689,7 @@ export function calculateValidatorPoolMetrics(
     return oldest === 0n || data.balance === 0n || nextRound < oldest ? nextRound : oldest
   }, 0n)
 
-  const rewardsBalance = roundToWholeAlgos(totalBalances - totalAlgoStaked)
+  const rewardsBalance = totalBalances - totalAlgoStaked
   const roundsSinceLastPayout = oldestRound ? currentRound - oldestRound : undefined
 
   // Calculate APY weighted by the pool balances

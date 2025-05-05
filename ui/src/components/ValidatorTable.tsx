@@ -72,6 +72,7 @@ import { ellipseAddressJsx } from '@/utils/ellipseAddress'
 import { formatAmount, formatAssetAmount } from '@/utils/format'
 import { globalFilterFn, sunsetFilter } from '@/utils/table'
 import { cn } from '@/utils/ui'
+import { ValidatorRewards } from '@/components/ValidatorRewards'
 
 interface ValidatorTableProps {
   validators: Validator[]
@@ -319,6 +320,19 @@ export function ValidatorTable({
             </span>
           </Tooltip>
         )
+      },
+    },
+    {
+      id: 'pend. reward',
+      accessorFn: (row) => row.rewardsBalance,
+      sortingFn: sortRewardsFn,
+      sortUndefined: -1,
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Pend. Rewards" />,
+      cell: ({ row }) => {
+        const validator = row.original
+        if (validator.state.numPools == 0) return '--'
+
+        return <ValidatorRewards validator={validator} />
       },
     },
     {
