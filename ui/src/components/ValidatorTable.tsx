@@ -60,6 +60,7 @@ import {
   calculateStakeSaturation,
   canManageValidator,
   isAddingPoolDisabled,
+  isFirstPoolFull,
   isStakingDisabled,
   isSunsetted,
   isSunsetting,
@@ -359,6 +360,7 @@ export function ValidatorTable({
       id: 'actions',
       cell: ({ row }) => {
         const validator = row.original
+        const firstPoolFull = isFirstPoolFull(validator, constraints)
         const stakingDisabled = isStakingDisabled(activeAddress, validator, constraints)
         const unstakingDisabled = isUnstakingDisabled(activeAddress, validator, stakesByValidator)
         const addingPoolDisabled = isAddingPoolDisabled(activeAddress, validator, constraints)
@@ -384,10 +386,11 @@ export function ValidatorTable({
             ) : (
               <Button
                 size="sm"
-                className={cn({ hidden: stakingDisabled })}
+                disabled={firstPoolFull || stakingDisabled}
                 onClick={() => setAddStakeValidator(validator)}
+                className="min-w-[70px]"
               >
-                Stake
+                {firstPoolFull ? 'Full' : 'Stake'}
               </Button>
             )}
             <DropdownMenu>

@@ -201,6 +201,20 @@ describe('isStakingDisabled', () => {
     }
     expect(isStakingDisabled(activeAddress, normalValidator, constraints)).toBe(false)
   })
+
+  it('should disable staking if the first pool is full', () => {
+    const validator = {
+      ...MOCK_VALIDATOR_1,
+      pools: [
+        {
+          ...MOCK_VALIDATOR_1.pools[0],
+          totalStakers: Number(constraints.maxStakersPerPool), // First pool is full
+        },
+        ...MOCK_VALIDATOR_1.pools.slice(1),
+      ],
+    }
+    expect(isStakingDisabled(activeAddress, validator, constraints)).toBe(true)
+  })
 })
 
 describe('isUnstakingDisabled', () => {
@@ -507,7 +521,7 @@ describe('calculateValidatorPoolMetrics', () => {
     )
 
     expect(result.rewardsBalance).toBe(0n)
-    expect(result.roundsSinceLastPayout).toBe(1000n)
+    expect(result.roundsSinceLastPayout).toBe(0n)
     expect(result.apy).toBe(5.75)
   })
 
@@ -526,7 +540,7 @@ describe('calculateValidatorPoolMetrics', () => {
     )
 
     expect(result.rewardsBalance).toBe(0n)
-    expect(result.roundsSinceLastPayout).toBe(1000n)
+    expect(result.roundsSinceLastPayout).toBe(undefined)
     expect(result.apy).toBe(0)
   })
 

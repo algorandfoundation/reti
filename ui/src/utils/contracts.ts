@@ -201,6 +201,22 @@ export function calculateMaxStakers(validator: Validator, constraints?: Constrai
 }
 
 /**
+ * Check if the first pool of a validator is full
+ * @param {Validator} validator - Validator object
+ * @param {Constraints} constraints - Protocol constraints object
+ * @returns {boolean} Whether the first pool is full
+ */
+export function isFirstPoolFull(validator: Validator, constraints?: Constraints): boolean {
+  if (!constraints) {
+    return false
+  }
+
+  const maxStakersPerPool = constraints.maxStakersPerPool || 0n
+
+  return validator.pools.length > 0 && validator.pools[0].totalStakers >= Number(maxStakersPerPool)
+}
+
+/**
  * Check if staking is disabled based on the validator's state and protocol constraints
  * @param {string | null} activeAddress - Active wallet address
  * @param {Validator} validator - Validator object
@@ -226,7 +242,10 @@ export function isStakingDisabled(
   const maxStakers = maxStakersPerPool * BigInt(numPools)
   const maxStakersReached = totalStakers >= maxStakers
 
-  return noPools || maxStakersReached || maxStakeReached || isSunsetted(validator)
+  // Check if the first pool is full
+  const firstPoolFull = isFirstPoolFull(validator, constraints)
+
+  return noPools || maxStakersReached || maxStakeReached || isSunsetted(validator) || firstPoolFull
 }
 
 /**
@@ -665,9 +684,9 @@ export function calculateValidatorPoolMetrics(
 ) {
   const totalBalances = poolsData.reduce((sum, data) => sum + data.balance, 0n)
   const oldestRound = poolsData.reduce((oldest, data) => {
-    if (!data.lastPayout) return oldest
+    if (!data.lastPayout || data.balance === 0n) return oldest
     const nextRound = data.lastPayout - (data.lastPayout % epochRoundLength) + epochRoundLength
-    return oldest === 0n || nextRound < oldest ? nextRound : oldest
+    return oldest === 0n || data.balance === 0n || nextRound < oldest ? nextRound : oldest
   }, 0n)
 
   const rewardsBalance = roundToWholeAlgos(totalBalances - totalAlgoStaked)
