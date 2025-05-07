@@ -14,6 +14,7 @@ import { HelmetProvider } from 'react-helmet-async'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import { Toaster } from '@/components/ui/sonner'
 import { WalletShortcutHandler } from '@/components/WalletShortcutHandler'
+import { WALLETCONNECT_PROJECT_ID } from '@/constants/env'
 import { ThemeProvider } from '@/providers/ThemeProvider'
 import { routeTree } from '@/routeTree.gen'
 import '@/styles/main.css'
@@ -44,9 +45,10 @@ if (import.meta.env.VITE_ALGOD_NETWORK === 'localnet') {
   wallets = [
     WalletId.DEFLY,
     WalletId.PERA,
+    { id: WalletId.LUTE, options: { siteName } },
+    { id: WalletId.WALLETCONNECT, options: { projectId: WALLETCONNECT_PROJECT_ID } },
     WalletId.KIBISIS,
     WalletId.EXODUS,
-    { id: WalletId.LUTE, options: { siteName } },
   ]
 }
 
