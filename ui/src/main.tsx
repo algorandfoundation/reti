@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import {
+  NetworkConfigBuilder,
   SupportedWallet,
   WalletId,
   WalletManager,
@@ -55,12 +56,16 @@ if (import.meta.env.VITE_ALGOD_NETWORK === 'localnet') {
 const algodConfig = getAlgodConfigFromViteEnvironment()
 const defaultNetwork = getAlgodNetwork()
 
+const defaultConfig = new NetworkConfigBuilder().build()
+
 const walletManager = new WalletManager({
   wallets,
   defaultNetwork,
   networks: {
     [defaultNetwork]: {
+      ...defaultConfig[defaultNetwork],
       algod: {
+        ...defaultConfig[defaultNetwork].algod,
         baseServer: algodConfig.server,
         port: algodConfig.port,
         token: algodConfig.token as string,
