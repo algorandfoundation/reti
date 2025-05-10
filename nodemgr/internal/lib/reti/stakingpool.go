@@ -244,6 +244,24 @@ func (r *Reti) EpochBalanceUpdate(poolID int, poolAppID uint64, caller types.Add
 		if err != nil {
 			return atc, err
 		}
+		err = atc.AddMethodCall(transaction.AddMethodCallParams{
+			AppID:         poolAppID,
+			Method:        gasMethod,
+			ForeignAssets: extraAssets,
+			ForeignApps:   extraApps,
+			ForeignAccounts: []string{
+				info.Config.ValidatorCommissionAddress,
+				r.info.Config.Manager,
+			},
+			SuggestedParams: newParams,
+			OnComplete:      types.NoOpOC,
+			Sender:          caller,
+			Signer:          algo.SignWithAccountForATC(r.signer, caller.String()),
+			Note:            []byte(fmt.Sprintf("hello world")),
+		})
+		if err != nil {
+			return atc, err
+		}
 		if feesToUse == 0 {
 			// we're simulating so go with super high budget
 			feesToUse = 240 * transaction.MinTxnFee
