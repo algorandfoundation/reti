@@ -257,7 +257,7 @@ func (r *Reti) EpochBalanceUpdate(poolID int, poolAppID uint64, caller types.Add
 			OnComplete:      types.NoOpOC,
 			Sender:          caller,
 			Signer:          algo.SignWithAccountForATC(r.signer, caller.String()),
-			Note:            []byte(fmt.Sprintf("hello world")),
+			Note:            []byte("1"), // short note to differentiate from other gas
 		})
 		if err != nil {
 			return atc, err
