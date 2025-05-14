@@ -142,7 +142,7 @@ export function ValidatorTable({
   // Persistent column visibility state
   const [columnVisibility, setColumnVisibility] = useLocalStorage<VisibilityState>(
     'validator-columns',
-    {},
+    { 'pend. reward': false },
   )
 
   const handleColumnVisibilityChange = (updaterOrValue: Updater<VisibilityState>) => {
@@ -157,10 +157,7 @@ export function ValidatorTable({
   // Persistent column filters state
   const [columnFilters, setColumnFilters] = useLocalStorage<ColumnFiltersState>(
     'validator-column-filters',
-    [
-      { id: 'validator', value: false },
-      { id: 'stake', value: false },
-    ],
+    [{ id: 'validator', value: false }],
   )
 
   const handleColumnFiltersChange = (updaterOrValue: Updater<ColumnFiltersState>) => {
