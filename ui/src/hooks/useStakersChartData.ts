@@ -1,5 +1,6 @@
 import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
+import { processPoolData } from '@/api/contracts'
 import {
   nfdLookupQueryOptions,
   stakedInfoQueryOptions,
@@ -27,7 +28,36 @@ export function useStakersChartData({
     ...validatorPoolsQueryOptions(validatorId),
     enabled: !pauseRefetch,
   })
-  const poolsInfo = poolsInfoQuery.data || []
+  const rawPoolsInfo = poolsInfoQuery.data || []
+
+  // Process each pool to get APY data
+  const [poolsInfo, setPoolsInfo] = React.useState<LocalPoolInfo[]>(rawPoolsInfo)
+
+  React.useEffect(() => {
+    if (rawPoolsInfo.length > 0) {
+      const fetchPoolData = async () => {
+        try {
+          const processedPools = await Promise.all(
+            rawPoolsInfo.map(async (pool) => {
+              const poolData = await processPoolData(pool)
+              return {
+                ...pool,
+                apy: poolData.apy,
+              }
+            }),
+          )
+          setPoolsInfo(processedPools)
+        } catch (error) {
+          console.error('Error processing pool data:', error)
+          setPoolsInfo(rawPoolsInfo)
+        }
+      }
+
+      fetchPoolData()
+    } else {
+      setPoolsInfo([])
+    }
+  }, [rawPoolsInfo])
 
   const allStakedInfo = useQueries({
     queries: poolsInfo.map((pool) => ({

@@ -23,6 +23,7 @@ export interface LocalPoolInfo {
   totalAlgoStaked: bigint
   poolAddress?: string
   algodVersion?: string
+  apy?: number
 }
 
 export interface NodeConfig {
