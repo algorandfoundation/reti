@@ -159,7 +159,7 @@ export function ValidatorTable({
     'validator-column-filters',
     [
       { id: 'validator', value: false },
-      { id: 'stake', value: false }
+      { id: 'stake', value: false },
     ],
   )
 
