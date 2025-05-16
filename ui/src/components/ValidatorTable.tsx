@@ -157,7 +157,10 @@ export function ValidatorTable({
   // Persistent column filters state
   const [columnFilters, setColumnFilters] = useLocalStorage<ColumnFiltersState>(
     'validator-column-filters',
-    [{ id: 'validator', value: false }],
+    [
+      { id: 'validator', value: false },
+      { id: 'stake', value: false },
+    ],
   )
 
   const handleColumnFiltersChange = (updaterOrValue: Updater<ColumnFiltersState>) => {

@@ -693,22 +693,14 @@ export function calculateValidatorPoolMetrics(
   const roundsSinceLastPayout = oldestRound ? currentRound - oldestRound : undefined
 
   // Calculate APY weighted by the pool balances
-  let apy: number
-  let extDeposits: number
   const nonZeroBalancePools = poolsData.filter((data) => data.balance > 0n)
-  // see if the apy for any of the nonZeroBalancePools is 0, if so, the calc is broken and return 0 apy
-  if (nonZeroBalancePools.some((data) => data.apy === 0)) {
-    apy = 0
-    extDeposits = 0
-  } else {
-    const totalWeightedApy = nonZeroBalancePools.reduce((sum, data) => {
-      return sum + (data.apy || 0) * Number(data.balance)
-    }, 0)
-    const totalBalance = nonZeroBalancePools.reduce((sum, data) => sum + Number(data.balance), 0)
-    extDeposits = nonZeroBalancePools.reduce((sum, data) => sum + Number(data.extDeposits), 0)
+  const totalWeightedApy = nonZeroBalancePools.reduce((sum, data) => {
+    return sum + (data.apy || 0) * Number(data.balance)
+  }, 0)
+  const totalBalance = nonZeroBalancePools.reduce((sum, data) => sum + Number(data.balance), 0)
+  const extDeposits = nonZeroBalancePools.reduce((sum, data) => sum + Number(data.extDeposits), 0)
 
-    apy = totalBalance > 0 ? totalWeightedApy / totalBalance : 0
-  }
+  const apy = totalBalance > 0 ? totalWeightedApy / totalBalance : 0
 
   return { rewardsBalance, roundsSinceLastPayout, apy, extDeposits }
 }
