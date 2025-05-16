@@ -110,16 +110,16 @@ export function StakingPoolInfo({
                 {validator.state.numPools}
               </dd>
             </div>
-            {/* <div className="py-4 grid grid-cols-2 gap-4">
+            <div className="py-4 grid grid-cols-2 gap-4">
               <dt className="text-sm font-medium leading-6 text-muted-foreground">Avg APY</dt>
               <dd className="flex items-center gap-x-2 text-sm leading-6">
                 {validator.apy ? (
-                  `${validator.apy}%`
+                  `${validator.apy.toFixed(1)}%`
                 ) : (
                   <span className="text-muted-foreground">--</span>
                 )}
               </dd>
-            </div> */}
+            </div>
             <div className="py-4 grid grid-cols-2 gap-4">
               <dt className="text-sm font-medium leading-6 text-muted-foreground">Total Stakers</dt>
               <dd className="flex items-center gap-x-2 text-sm leading-6">
@@ -221,16 +221,16 @@ export function StakingPoolInfo({
             </dd>
           </div>
 
-          {/* <div className="py-4 grid grid-cols-2 gap-4">
-            <dt className="text-sm font-medium leading-6 text-muted-foreground">APY</dt>
-            <dd className="flex items-center gap-x-2 text-sm leading-6">
-              {selectedPoolApy ? (
-                `${selectedPoolApy}%`
-              ) : (
-                <span className="text-muted-foreground">--</span>
-              )}
-            </dd>
-          </div> */}
+          {/*<div className="py-4 grid grid-cols-2 gap-4">*/}
+          {/*  <dt className="text-sm font-medium leading-6 text-muted-foreground">Pool APY</dt>*/}
+          {/*  <dd className="flex items-center gap-x-2 text-sm leading-6">*/}
+          {/*    {poolInfo.apy ? (*/}
+          {/*      `${poolInfo.apy.toFixed(1)}%`*/}
+          {/*    ) : (*/}
+          {/*      <span className="text-muted-foreground">--</span>*/}
+          {/*    )}*/}
+          {/*  </dd>*/}
+          {/*</div>*/}
 
           <div className="py-4 grid grid-cols-2 gap-4">
             <dt className="text-sm font-medium leading-6 text-muted-foreground">Stakers</dt>
