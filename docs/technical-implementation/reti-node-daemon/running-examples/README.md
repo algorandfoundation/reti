@@ -20,12 +20,12 @@ For more information on the various configuration values see [configuration.md](
 
 ## Docker Images
 
-Use txnlab/reti:latest for the latest released version or a specific version can be specified as well. See [https://hub.docker.com/repository/docker/txnlab/reti/tags](https://hub.docker.com/repository/docker/txnlab/reti/tags)
+Use algorandfoundation/reti:latest for the latest released version or a specific version can be specified as well. See [https://hub.docker.com/r/algorandfoundation/reti/tags](https://hub.docker.com/r/algorandfoundation/reti/tags)
 
 A simple example:
 
 ```
-docker run --env-file .env txnlab/reti:latest d
+docker run --env-file .env algorandfoundation/reti:latest d
 ```
 
 Also see a docker compose example here: [docker-compose.md](docker-compose.md "mention")
