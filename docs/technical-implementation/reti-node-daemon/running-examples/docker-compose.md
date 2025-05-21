@@ -20,7 +20,7 @@ services:
       - ./data:/algod/data
 
   reti-testnet:
-    image: txnlab/reti:latest
+    image: algorandfoundation/reti:latest
     ports:
       - 6260:6260
     environment:
