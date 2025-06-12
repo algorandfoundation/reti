@@ -60,6 +60,7 @@ import {
   calculateStakeSaturation,
   canManageValidator,
   isAddingPoolDisabled,
+  isFirstPoolFull,
   isStakingDisabled,
   isSunsetted,
   isSunsetting,
@@ -69,8 +70,9 @@ import { dayjs } from '@/utils/dayjs'
 import { sendRewardTokensToPool, simulateEpoch } from '@/utils/development'
 import { ellipseAddressJsx } from '@/utils/ellipseAddress'
 import { formatAmount, formatAssetAmount } from '@/utils/format'
-import { globalFilterFn, sunsetFilter } from '@/utils/table'
+import { globalFilterFn, ineligibleFilter, MIN_ELIGIBLE_STAKE, sunsetFilter } from '@/utils/table'
 import { cn } from '@/utils/ui'
+import { ValidatorRewards } from '@/components/ValidatorRewards'
 
 interface ValidatorTableProps {
   validators: Validator[]
@@ -140,7 +142,7 @@ export function ValidatorTable({
   // Persistent column visibility state
   const [columnVisibility, setColumnVisibility] = useLocalStorage<VisibilityState>(
     'validator-columns',
-    {},
+    { 'pend. reward': false },
   )
 
   const handleColumnVisibilityChange = (updaterOrValue: Updater<VisibilityState>) => {
@@ -155,7 +157,10 @@ export function ValidatorTable({
   // Persistent column filters state
   const [columnFilters, setColumnFilters] = useLocalStorage<ColumnFiltersState>(
     'validator-column-filters',
-    [{ id: 'validator', value: false }],
+    [
+      { id: 'validator', value: false },
+      { id: 'stake', value: false },
+    ],
   )
 
   const handleColumnFiltersChange = (updaterOrValue: Updater<ColumnFiltersState>) => {
@@ -255,6 +260,7 @@ export function ValidatorTable({
     {
       id: 'stake',
       accessorFn: (row) => Number(row.state.totalAlgoStaked),
+      filterFn: ineligibleFilter,
       header: ({ column }) => <DataTableColumnHeader column={column} title="Stake" />,
       cell: ({ row }) => {
         const validator = row.original
@@ -321,6 +327,19 @@ export function ValidatorTable({
       },
     },
     {
+      id: 'pend. reward',
+      accessorFn: (row) => row.rewardsBalance,
+      sortingFn: sortRewardsFn,
+      sortUndefined: -1,
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Pend. Rewards" />,
+      cell: ({ row }) => {
+        const validator = row.original
+        if (validator.state.numPools == 0) return '--'
+
+        return <ValidatorRewards validator={validator} />
+      },
+    },
+    {
       id: 'token',
       accessorFn: (row) => row.config.rewardTokenId,
       header: ({ column }) => <DataTableColumnHeader column={column} title="Token" />,
@@ -359,6 +378,7 @@ export function ValidatorTable({
       id: 'actions',
       cell: ({ row }) => {
         const validator = row.original
+        const firstPoolFull = isFirstPoolFull(validator, constraints)
         const stakingDisabled = isStakingDisabled(activeAddress, validator, constraints)
         const unstakingDisabled = isUnstakingDisabled(activeAddress, validator, stakesByValidator)
         const addingPoolDisabled = isAddingPoolDisabled(activeAddress, validator, constraints)
@@ -384,10 +404,11 @@ export function ValidatorTable({
             ) : (
               <Button
                 size="sm"
-                className={cn({ hidden: stakingDisabled })}
+                disabled={firstPoolFull || stakingDisabled}
                 onClick={() => setAddStakeValidator(validator)}
+                className="min-w-[70px]"
               >
-                Stake
+                {firstPoolFull ? 'Full' : 'Stake'}
               </Button>
             )}
             <DropdownMenu>
@@ -522,6 +543,11 @@ export function ValidatorTable({
     .getPreFilteredRowModel()
     .rows.filter((row) => isSunsetted(row.original)).length
 
+  // Pre-filtered count of ineligible validators
+  const ineligibleCount = table
+    .getPreFilteredRowModel()
+    .rows.filter((row) => row.original.state.totalAlgoStaked < MIN_ELIGIBLE_STAKE).length
+
   return (
     <>
       <div>
@@ -529,21 +555,37 @@ export function ValidatorTable({
           <h2 className="flex items-center mb-2 text-lg font-semibold sm:flex-1 sm:my-1">
             Validators {isLoading && <Loading size="sm" inline className="ml-3" />}
           </h2>
-          <div
-            className={cn('flex items-center gap-x-2 h-7 sm:h-9 px-3 mb-3 sm:mb-0', {
-              hidden: sunsetCount === 0,
-            })}
-          >
-            <Checkbox
-              checked={(table.getColumn('validator')?.getFilterValue() as boolean) ?? false}
-              onCheckedChange={(checked) => table.getColumn('validator')?.setFilterValue(!!checked)}
-            />
-            <label
-              htmlFor="terms"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          <div className="flex items-center gap-x-4 mb-3 sm:mb-0">
+            <div
+              className={cn('flex items-center gap-x-2 h-7 sm:h-9 px-3', {
+                hidden: sunsetCount === 0,
+              })}
             >
-              Show sunsetted ({sunsetCount})
-            </label>
+              <Checkbox
+                checked={(table.getColumn('validator')?.getFilterValue() as boolean) ?? false}
+                onCheckedChange={(checked) =>
+                  table.getColumn('validator')?.setFilterValue(!!checked)
+                }
+              />
+              <label
+                htmlFor="show-sunsetted"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Show sunsetted ({sunsetCount})
+              </label>
+            </div>
+            <div className="flex items-center gap-x-2 h-7 sm:h-9 px-3">
+              <Checkbox
+                checked={(table.getColumn('stake')?.getFilterValue() as boolean) ?? false}
+                onCheckedChange={(checked) => table.getColumn('stake')?.setFilterValue(!!checked)}
+              />
+              <label
+                htmlFor="show-ineligible"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Show ineligible ({ineligibleCount})
+              </label>
+            </div>
           </div>
           <div className="flex items-center gap-x-3 flex-wrap sm:flex-0">
             <div className="flex items-center gap-x-3 w-full sm:w-auto">

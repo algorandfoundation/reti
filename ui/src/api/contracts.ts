@@ -1,6 +1,6 @@
 import { AlgoAmount } from '@algorandfoundation/algokit-utils/types/amount'
 import algosdk from 'algosdk'
-import { fetchAsset, isOptedInToAsset } from '@/api/algod'
+import { fetchAccountBalance, fetchAsset, isOptedInToAsset } from '@/api/algod'
 import {
   algorandClient,
   getSimulateStakingPoolClient,
@@ -128,20 +128,33 @@ export function createBaseValidator({
 export async function processPoolData(pool: LocalPoolInfo): Promise<PoolData> {
   const poolAddress = algosdk.getApplicationAddress(pool.poolAppId)
 
-  const poolData: PoolData = { balance: 0n }
+  // Define the promises for the async operations
+  const balancePromise = fetchAccountBalance(poolAddress.toString(), true)
 
-  const stakingPoolClient = await getSimulateStakingPoolClient(pool.poolAppId)
-  const stakingPoolGS = await stakingPoolClient.state.global.getAll()
-  poolData.lastPayout = stakingPoolGS.lastPayout!
-  poolData.balance = stakingPoolGS.totalAlgoStaked!
+  const lastPayoutPromise = (async () => {
+    const stakingPoolClient = await getSimulateStakingPoolClient(pool.poolAppId)
+    return stakingPoolClient.state.global.lastPayout()
+  })()
 
-  const { apy, total_external_deposits } = await fetchNodelyVotingPerf(poolAddress.toString())
-  poolData.apy = apy
-  poolData.extDeposits = total_external_deposits
+  const nodelyPerfPromise = fetchNodelyVotingPerf(poolAddress.toString())
+
+  // Execute all promises in parallel and wait for them to resolve
+  const [poolBalance, stakingPoolLastPayout, nodelyData] = await Promise.all([
+    balancePromise,
+    lastPayoutPromise,
+    nodelyPerfPromise,
+  ])
+
+  // Construct the PoolData object using the results
+  const poolData: PoolData = {
+    balance: poolBalance, // Using totalAlgoStaked from global state
+    lastPayout: stakingPoolLastPayout,
+    apy: nodelyData.apy,
+    extDeposits: nodelyData.total_external_deposits,
+  }
 
   return poolData
 }
-
 /**
  * Fetches all validator data and enrichment data in parallel. Used after adding a new validator
  * to seed the query cache with complete data.
