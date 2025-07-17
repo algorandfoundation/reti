@@ -13,9 +13,13 @@ Very few configuration parameters are actually required for running the node dae
 * Node Number (**`RETI_NODENUM`** env var, -node cmd line arg, or -usehostname flag)
   * A number from 1 - 8 (the maximum number of nodes allowed in the protocol)
   * This can be set automatically for kubernetes installations using the (--usehostname flag)
-* Mnemonics for the owner or manager address.
+* Algo25 Mnemonics for the owner or manager address.
   * The manager address is always preferred as it has fewer rights. Because the node daemon needs the keys to an address it can issue transactions to the validator/pool contracts with, and is thus a 'hot wallet', it needs to be an account with minimal rights. The manager address can only trigger epoch payouts, add new pools, and having a pool going online or offline.
   * The owner of a validator can change the manager address at any time.
+
+{% hint style="danger" %}
+The Mnemonic you provide MUST be for an Algo25 account, containing 25 words (space separated), not 24.  If using Pera, adding of these accounts is now in Settings->Developer Settings->Create Legacy Algo25 Account.
+{% endhint %}
 
 {% hint style="warning" %}
 The manager account **MUST** be initially funded with at least a few ALGO ! The manager account is what the node daemon uses to issue transactions on behalf of the validator. It issues transactions to have pools go online/offline, and most importantly, the Epoch update calls which pays the validator their commission as well compounding staker balances.
@@ -61,6 +65,6 @@ Some options are only overridden through environment variables as they're more l
 * `ALGO_ALGOD_URL`
   * The Algorand node address (ie: http://localhost:8080) to connect to for this daemon's node. Each node daemon should connect to its own independent algorand node.
 * `ALGO_ALGOD_TOKEN`
-  * The **ADMIN** token to use when making calls to the Algorand node for this daemon.  Found in algod.admin.token file in Node data directory.
+  * The **ADMIN** token to use when making calls to the Algorand node for this daemon. Found in algod.admin.token file in Node data directory.
 * `ALGO_ALGOD_HEADERS`
   * Comma delimiter key:value pairs to set in the headers passed in calls to the algod API. Seldom needed but may be required if you have additional policies defined in some type of fronting load-balancer or proxy.
