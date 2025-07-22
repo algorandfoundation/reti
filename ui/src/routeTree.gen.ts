@@ -12,6 +12,7 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as ValidatorsImport } from './routes/validators'
+import { Route as InstitutionalSupportImport } from './routes/institutional-support'
 import { Route as AddImport } from './routes/add'
 import { Route as IndexImport } from './routes/index'
 import { Route as ValidatorsValidatorIdImport } from './routes/validators_.$validatorId'
@@ -21,6 +22,12 @@ import { Route as ValidatorsValidatorIdImport } from './routes/validators_.$vali
 const ValidatorsRoute = ValidatorsImport.update({
   id: '/validators',
   path: '/validators',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const InstitutionalSupportRoute = InstitutionalSupportImport.update({
+  id: '/institutional-support',
+  path: '/institutional-support',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -60,6 +67,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AddImport
       parentRoute: typeof rootRoute
     }
+    '/institutional-support': {
+      id: '/institutional-support'
+      path: '/institutional-support'
+      fullPath: '/institutional-support'
+      preLoaderRoute: typeof InstitutionalSupportImport
+      parentRoute: typeof rootRoute
+    }
     '/validators': {
       id: '/validators'
       path: '/validators'
@@ -82,6 +96,7 @@ declare module '@tanstack/react-router' {
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/add': typeof AddRoute
+  '/institutional-support': typeof InstitutionalSupportRoute
   '/validators': typeof ValidatorsRoute
   '/validators/$validatorId': typeof ValidatorsValidatorIdRoute
 }
@@ -89,6 +104,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/add': typeof AddRoute
+  '/institutional-support': typeof InstitutionalSupportRoute
   '/validators': typeof ValidatorsRoute
   '/validators/$validatorId': typeof ValidatorsValidatorIdRoute
 }
@@ -97,22 +113,40 @@ export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
   '/add': typeof AddRoute
+  '/institutional-support': typeof InstitutionalSupportRoute
   '/validators': typeof ValidatorsRoute
   '/validators_/$validatorId': typeof ValidatorsValidatorIdRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/add' | '/validators' | '/validators/$validatorId'
+  fullPaths:
+    | '/'
+    | '/add'
+    | '/institutional-support'
+    | '/validators'
+    | '/validators/$validatorId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/add' | '/validators' | '/validators/$validatorId'
-  id: '__root__' | '/' | '/add' | '/validators' | '/validators_/$validatorId'
+  to:
+    | '/'
+    | '/add'
+    | '/institutional-support'
+    | '/validators'
+    | '/validators/$validatorId'
+  id:
+    | '__root__'
+    | '/'
+    | '/add'
+    | '/institutional-support'
+    | '/validators'
+    | '/validators_/$validatorId'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AddRoute: typeof AddRoute
+  InstitutionalSupportRoute: typeof InstitutionalSupportRoute
   ValidatorsRoute: typeof ValidatorsRoute
   ValidatorsValidatorIdRoute: typeof ValidatorsValidatorIdRoute
 }
@@ -120,6 +154,7 @@ export interface RootRouteChildren {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AddRoute: AddRoute,
+  InstitutionalSupportRoute: InstitutionalSupportRoute,
   ValidatorsRoute: ValidatorsRoute,
   ValidatorsValidatorIdRoute: ValidatorsValidatorIdRoute,
 }
@@ -138,6 +173,7 @@ export const routeTree = rootRoute
       "children": [
         "/",
         "/add",
+        "/institutional-support",
         "/validators",
         "/validators_/$validatorId"
       ]
@@ -147,6 +183,9 @@ export const routeTree = rootRoute
     },
     "/add": {
       "filePath": "add.tsx"
+    },
+    "/institutional-support": {
+      "filePath": "institutional-support.tsx"
     },
     "/validators": {
       "filePath": "validators.tsx"
