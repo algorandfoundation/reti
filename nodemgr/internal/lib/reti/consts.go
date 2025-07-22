@@ -10,7 +10,6 @@ import (
 const (
 	// Global state keys in Validator contract
 	VldtrNumValidators = "numV"
-	VldtrPoolTmplId    = "poolTemplateAppId"
 
 	// Global state keys in Staking pool contract
 	StakePoolCreatorApp    = "creatorApp"
@@ -24,6 +23,8 @@ const (
 	StakePoolAlgodVer      = "algodVer"
 	StakePoolEWMA          = "ewma"
 	StakePoolStakeAccum    = "stakeAccumulator"
+	StakePoolBinRoundStart = "binRoundStart"
+	StakePoolRoundsPerDay  = "roundsPerDay"
 
 	// Gating types
 	GatingTypeNone                  = 0

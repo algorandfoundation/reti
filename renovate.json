@@ -32,7 +32,8 @@
       "matchPackageNames": ["!vitest", "!@vitest/**"],
       "assignees": ["drichar"],
       "semanticCommitScope": "ui",
-      "rangeStrategy": "pin"
+      "rangeStrategy": "pin",
+      "ignoreDeps": ["packageManager"]
     },
     {
       "groupName": "Vitest",

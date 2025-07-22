@@ -8,7 +8,7 @@ The contracts themselves are written in Tealscript. See [Tealscript](https://tea
 
 ## Usage
 
-### Algokit
+### Algokit and Local sandbox
 
 This repository assumes you have [AlgoKit](https://github.com/algorandfoundation/algokit-cli) installed and have a local network running on your machine. Run `pnpm run localnet` to start a specially configured trunk version of the node that supports the (still unreleased AVM 11) and that also configures a smaller amount of stake for tests. This special localnet sandbox is required for the system tests as they manipulate the block time offsets.
 

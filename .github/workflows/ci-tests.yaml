@@ -61,7 +61,7 @@ jobs:
         run: pipx install algokit
 
       - name: Start local Algorand network
-        run: algokit localnet start --name master --config-dir ./contracts/localnet_config
+        run: algokit localnet start --name reti --config-dir ./contracts/localnet_config
 
       - name: Run Contract tests from already built contracts
         run: pnpm --filter ./contracts run retest

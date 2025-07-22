@@ -1,9 +1,9 @@
-name: "algokit_sandbox_master"
+name: "algokit_sandbox_reti"
 
 services:
   algod:
-    container_name: "algokit_sandbox_master_algod"
-    image: algorand/algod:master
+    container_name: "algokit_sandbox_reti_algod"
+    image: algorand/algod:latest
     ports:
       - 4001:8080
       - 4002:7833
@@ -25,7 +25,7 @@ services:
       - ./goal_mount:/root/goal_mount
 
   conduit:
-    container_name: "algokit_sandbox_master_conduit"
+    container_name: "algokit_sandbox_reti_conduit"
     image: algorand/conduit:latest
     restart: unless-stopped
     volumes:
@@ -37,7 +37,7 @@ services:
       - algod
 
   indexer-db:
-    container_name: "algokit_sandbox_master_postgres"
+    container_name: "algokit_sandbox_reti_postgres"
     image: postgres:16-alpine
     ports:
       - 5443:5432
@@ -48,7 +48,7 @@ services:
       POSTGRES_DB: indexerdb
 
   indexer:
-    container_name: "algokit_sandbox_master_indexer"
+    container_name: "algokit_sandbox_reti_indexer"
     image: algorand/indexer:latest
     ports:
       - "8980:8980"

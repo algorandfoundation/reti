@@ -65,12 +65,92 @@
 }
 
 @font-face {
+  font-family: 'InterVariable';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src:
+    url('/fonts/InterVariable.woff2') format('woff2-variations'),
+    url('/fonts/InterVariable.ttf') format('truetype-variations');
+}
+
+@font-face {
+  font-family: 'InterVariable';
+  font-style: italic;
+  font-weight: 400 700;
+  font-display: swap;
+  src:
+    url('/fonts/InterVariable-Italic.woff2') format('woff2-variations'),
+    url('/fonts/InterVariable-Italic.ttf') format('truetype-variations');
+}
+
+/* Static fonts as fallback */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src:
+    url('/fonts/Inter-Regular.woff2') format('woff2'),
+    url('/fonts/Inter-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src:
+    url('/fonts/Inter-Medium.woff2') format('woff2'),
+    url('/fonts/Inter-Medium.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src:
+    url('/fonts/Inter-SemiBold.woff2') format('woff2'),
+    url('/fonts/Inter-SemiBold.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src:
+    url('/fonts/Inter-Bold.woff2') format('woff2'),
+    url('/fonts/Inter-Bold.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src:
+    url('/fonts/Inter-Italic.woff2') format('woff2'),
+    url('/fonts/Inter-Italic.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: italic;
+  font-weight: 500;
+  font-display: swap;
+  src:
+    url('/fonts/Inter-MediumItalic.woff2') format('woff2'),
+    url('/fonts/Inter-MediumItalic.ttf') format('truetype');
+}
+
+@font-face {
   font-family: 'Algo';
   font-style: normal;
   font-weight: 400;
   src:
     url('/fonts/Algo.woff2') format('woff2'),
-    url('/fonts/Algo.woff') format('woff'),
     url('/fonts/Algo.ttf') format('truetype');
 }
 
@@ -91,8 +171,9 @@
   background-color: hsl(var(--muted));
   text-align: center;
   text-indent: -1px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
-    'Courier New', monospace;
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
+    monospace;
   font-size: 1rem;
   line-height: 1.5rem;
   font-weight: 400;

@@ -225,7 +225,7 @@ func PoolsList(ctx context.Context, command *cli.Command) error {
 			}
 		}
 		floatApr, _, _ := new(big.Float).Parse(apr.String(), 10)
-		floatApr.Quo(floatApr, big.NewFloat(10000.0))
+		floatApr.Quo(floatApr, big.NewFloat(100.0))
 
 		if !showAll {
 			fmt.Fprintf(tw, "%d %s\t%d\t%d\t%s\t%s\t%s\t%s\t%s\t\n", i+1, onlineStr, pool.PoolAppId, pool.TotalStakers,
@@ -283,6 +283,9 @@ func PoolLedger(ctx context.Context, command *cli.Command) error {
 	if adjustedEpoch < uint64(params.FirstRoundValid) {
 		adjustedEpoch = uint64(params.FirstRoundValid) - (uint64(params.FirstRoundValid) % uint64(config.EpochRoundLength))
 	}
+	binRoundStart, _ := App.retiClient.GetBinRoundStart(pools[poolId-1].PoolAppId)
+	roundsPerDay, _ := App.retiClient.GetRoundsPerDay(pools[poolId-1].PoolAppId)
+
 	pctTimeInEpoch := func(stakerEntry uint64) int {
 		if adjustedEpoch == 0 {
 			return 100
@@ -330,11 +333,11 @@ func PoolLedger(ctx context.Context, command *cli.Command) error {
 	apr, _ := App.retiClient.GetAvgApr(pools[poolId-1].PoolAppId)
 	fmt.Fprintf(tw, "Reward Avail: %s\t\n", algo.FormattedAlgoAmount(rewardAvail))
 	stakeAccum, _ := App.retiClient.GetStakeAccum(pools[poolId-1].PoolAppId)
-	stakeAccum.Div(stakeAccum, big.NewInt(30857))
+	stakeAccum.Div(stakeAccum, new(big.Int).SetUint64(roundsPerDay))
 	stakeAccum.Div(stakeAccum, big.NewInt(1e6))
 	fmt.Fprintf(tw, "Avg Stake: %s\t\n", stakeAccum.String())
 	floatApr, _, _ := new(big.Float).Parse(apr.String(), 10)
-	floatApr.Quo(floatApr, big.NewFloat(10000.0))
+	floatApr.Quo(floatApr, big.NewFloat(100.0))
 	fmt.Fprintf(tw, "APR %%: %s\t\n", floatApr.String())
 	fmt.Fprintf(tw, "Last Epoch Start: %d\t\n", lastPayout-(lastPayout%uint64(config.EpochRoundLength)))
 	fmt.Fprintf(tw, "Last Payout: %d\t\n", lastPayout-(lastPayout%uint64(config.EpochRoundLength)))
@@ -348,6 +351,9 @@ func PoolLedger(ctx context.Context, command *cli.Command) error {
 	if nextEpoch < uint64(params.FirstRoundValid) {
 		fmt.Fprintf(tw, "Missed payout by: %d\t\n", uint64(params.FirstRoundValid)-nextEpoch)
 	}
+	fmt.Fprintf(tw, "Rounds Per Day: %d\t\n", roundsPerDay)
+	fmt.Fprintf(tw, "End Of Day block: %d\t\n", binRoundStart+roundsPerDay)
+	fmt.Fprintf(tw, "in approx: %s\t\n", (time.Duration(binRoundStart+roundsPerDay-uint64(params.FirstRoundValid)) * blockTime).Round(time.Second))
 	tw.Flush()
 	slog.Info(out.String())
 	return nil

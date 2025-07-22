@@ -20,11 +20,18 @@ const replaceVersionPlugin = () => {
       outDir = config.build.outDir
     },
     generateBundle() {
-      const filePath = path.resolve(__dirname, 'public/version.json')
-      const content = fs.readFileSync(filePath, 'utf-8')
-      const updatedContent = content.replace('__APP_VERSION__', version)
-      const newFilePath = path.resolve(outDir, 'version.json')
-      fs.writeFileSync(newFilePath, updatedContent, 'utf-8')
+      try {
+        const filePath = path.resolve(__dirname, 'public/version.json')
+        if (!fs.existsSync(filePath)) {
+          throw new Error(`version.json not found at ${filePath}`)
+        }
+        const content = fs.readFileSync(filePath, 'utf-8')
+        const updatedContent = content.replace('__APP_VERSION__', version)
+        const newFilePath = path.resolve(outDir, 'version.json')
+        fs.writeFileSync(newFilePath, updatedContent, 'utf-8')
+      } catch (error) {
+        console.error('Failed to replace version in version.json file:', error)
+      }
     },
   }
 }

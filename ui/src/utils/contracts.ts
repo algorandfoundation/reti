@@ -4,13 +4,18 @@ import { fetchAccountAssetInformation, fetchAccountInformation } from '@/api/alg
 import { fetchNfd, fetchNfdSearch } from '@/api/nfd'
 import { GatingType } from '@/constants/gating'
 import { Indicator } from '@/constants/indicator'
-import { Asset, AssetHolding } from '@/interfaces/algod'
-import { NfdSearchV2Params } from '@/interfaces/nfd'
+import {
+  Constraints,
+  NodePoolAssignmentConfig,
+  ValidatorConfig,
+  ValidatorCurState,
+} from '@/contracts/ValidatorRegistryClient'
+import { Nfd, NfdSearchV2Params } from '@/interfaces/nfd'
 import { StakerValidatorData } from '@/interfaces/staking'
 import { LocalPoolInfo, NodeInfo, PoolData, Validator } from '@/interfaces/validator'
+import { BigMath } from '@/utils/bigint'
 import { dayjs } from '@/utils/dayjs'
 import { convertToBaseUnits, roundToFirstNonZeroDecimal, roundToWholeAlgos } from '@/utils/format'
-import { Constraints, NodePoolAssignmentConfig } from '@/contracts/ValidatorRegistryClient'
 
 /**
  * Process node pool assignment configuration data into an array with each node's available slot count
@@ -120,7 +125,7 @@ interface TransformedGatingAssets {
 export function transformEntryGatingAssets(
   type: string,
   assetIds: Array<{ value: string }>,
-  assets: Array<Asset | null>,
+  assets: Array<algosdk.modelsv2.Asset | null>,
   minBalance: string,
   nfdCreatorAppId: bigint,
   nfdParentAppId: bigint,
@@ -196,6 +201,22 @@ export function calculateMaxStakers(validator: Validator, constraints?: Constrai
 }
 
 /**
+ * Check if the first pool of a validator is full
+ * @param {Validator} validator - Validator object
+ * @param {Constraints} constraints - Protocol constraints object
+ * @returns {boolean} Whether the first pool is full
+ */
+export function isFirstPoolFull(validator: Validator, constraints?: Constraints): boolean {
+  if (!constraints) {
+    return false
+  }
+
+  const maxStakersPerPool = constraints.maxStakersPerPool || 0n
+
+  return validator.pools.length > 0 && validator.pools[0].totalStakers >= Number(maxStakersPerPool)
+}
+
+/**
  * Check if staking is disabled based on the validator's state and protocol constraints
  * @param {string | null} activeAddress - Active wallet address
  * @param {Validator} validator - Validator object
@@ -221,7 +242,10 @@ export function isStakingDisabled(
   const maxStakers = maxStakersPerPool * BigInt(numPools)
   const maxStakersReached = totalStakers >= maxStakers
 
-  return noPools || maxStakersReached || maxStakeReached || isSunsetted(validator)
+  // Check if the first pool is full
+  const firstPoolFull = isFirstPoolFull(validator, constraints)
+
+  return noPools || maxStakersReached || maxStakeReached || isSunsetted(validator) || firstPoolFull
 }
 
 /**
@@ -325,7 +349,7 @@ export function canManageValidator(activeAddress: string | null, validator: Vali
 export async function fetchValueToVerify(
   validator: Validator | null,
   activeAddress: string | null,
-  heldAssets: AssetHolding[],
+  heldAssets: algosdk.modelsv2.AssetHolding[],
 ): Promise<bigint> {
   if (!validator || !activeAddress) {
     throw new Error('Validator or active address not found')
@@ -338,8 +362,8 @@ export async function fetchValueToVerify(
     const creatorAddress = entryGatingAddress
     const accountInfo = await fetchAccountInformation(creatorAddress)
 
-    if (accountInfo['created-assets']) {
-      const assetIds = accountInfo['created-assets'].map((asset) => BigInt(asset.index))
+    if (accountInfo.createdAssets) {
+      const assetIds = accountInfo.createdAssets.map((asset) => BigInt(asset.index))
       return findValueToVerify(heldAssets, assetIds, minBalance)
     }
   }
@@ -357,7 +381,7 @@ export async function fetchValueToVerify(
     const promises = addresses.map((address) => fetchAccountInformation(address))
     const accountsInfo = await Promise.all(promises)
     const assetIds = accountsInfo
-      .map((accountInfo) => accountInfo['created-assets'])
+      .map((accountInfo) => accountInfo.createdAssets)
       .flat()
       .filter((asset) => !!asset)
       .map((asset) => BigInt(asset!.index))
@@ -398,42 +422,63 @@ export async function fetchValueToVerify(
  * @returns {number} Gating asset ID that meets the minimum balance requirement or 0 if not found
  */
 export function findValueToVerify(
-  heldAssets: AssetHolding[],
+  heldAssets: algosdk.modelsv2.AssetHolding[],
   gatingAssets: bigint[],
   minBalance: bigint,
 ): bigint {
   const asset = heldAssets.find(
-    (asset) => gatingAssets.includes(BigInt(asset['asset-id'])) && asset.amount >= minBalance,
+    (asset) => gatingAssets.includes(asset.assetId) && asset.amount >= minBalance,
   )
-  return BigInt(asset?.['asset-id'] || 0n)
+  return asset?.assetId ?? 0n
 }
 
 /**
  * Calculate the maximum amount of algo that can be staked based on the validator's configuration
  * @param {Validator} validator - Validator object
  * @param {Constraints} constraints - Protocol constraints object
- * @returns {number} Maximum amount of algo that can be staked
+ * @returns {bigint} Maximum amount of algo that can be staked
  */
 export function calculateMaxAvailableToStake(
   validator: Validator,
   constraints?: Constraints,
-): number {
+): bigint {
   let { maxAlgoPerPool } = validator.config
 
   if (maxAlgoPerPool === 0n) {
     if (!constraints) {
-      return 0
+      return 0n
     }
     maxAlgoPerPool = constraints.maxAlgoPerPool
   }
 
   // For each pool, subtract the totalAlgoStaked from maxAlgoPerPool and return the highest value
   const maxAvailableToStake = validator.pools.reduce((acc, pool) => {
-    const availableToStake = Number(maxAlgoPerPool) - Number(pool.totalAlgoStaked)
+    const availableToStake = maxAlgoPerPool - pool.totalAlgoStaked
     return availableToStake > acc ? availableToStake : acc
-  }, 0)
+  }, 0n)
 
   return maxAvailableToStake
+}
+
+/**
+ * Calculate the effective maximum ALGO per pool based on validator config and protocol constraints
+ * @param {Validator} validator - Validator object
+ * @param {Constraints} constraints - Protocol constraints object
+ * @returns {bigint} Effective maximum ALGO per pool in microAlgos
+ */
+export function calculateMaxAlgoPerPool(validator: Validator, constraints: Constraints): bigint {
+  const numPools = validator.state.numPools
+  const maxAlgoPerPool =
+    validator.config.maxAlgoPerPool > 0n
+      ? validator.config.maxAlgoPerPool
+      : constraints.maxAlgoPerPool
+
+  if (numPools === 0) {
+    return maxAlgoPerPool
+  }
+
+  const hardMaxAlgoPerPool = constraints.maxAlgoPerValidator / BigInt(numPools)
+  return BigMath.min(hardMaxAlgoPerPool, maxAlgoPerPool)
 }
 
 /**
@@ -481,28 +526,41 @@ export function calculateRewardEligibility(
  * @param {Validator} data - The new validator object
  */
 export function setValidatorQueriesData(queryClient: QueryClient, data: Validator): void {
-  const { id, nodePoolAssignment, pools } = data
+  const { id, config, state, pools, nodePoolAssignment } = data
+  const validatorId = String(id)
 
-  queryClient.setQueryData<Validator[]>(['validators'], (prevData) => {
-    if (!prevData) {
-      return prevData
-    }
-
-    const validatorExists = prevData.some((validator) => validator.id === id)
-
-    if (validatorExists) {
-      return prevData.map((validator) => (validator.id === id ? data : validator))
-    } else {
-      return [...prevData, data]
-    }
+  // Update individual validator queries
+  queryClient.setQueryData<ValidatorConfig>(['validator-config', validatorId], {
+    id: BigInt(id),
+    ...config,
   })
-
-  queryClient.setQueryData<Validator>(['validator', String(id)], data)
-  queryClient.setQueryData<LocalPoolInfo[]>(['pools-info', String(id)], pools)
+  queryClient.setQueryData<ValidatorCurState>(['validator-state', validatorId], state)
+  queryClient.setQueryData<LocalPoolInfo[]>(['validator-pools', validatorId], pools)
   queryClient.setQueryData<NodePoolAssignmentConfig>(
-    ['pool-assignments', String(id)],
+    ['validator-node-pool-assignments', validatorId],
     nodePoolAssignment,
   )
+
+  // Force refetch of num-validators to trigger dashboard update
+  queryClient.invalidateQueries({ queryKey: ['num-validators'] })
+
+  // Prefetch enrichment data if available
+  if (data.rewardToken) {
+    queryClient.setQueryData<algosdk.modelsv2.Asset>(
+      ['asset', Number(data.config.rewardTokenId)],
+      data.rewardToken,
+    )
+  }
+  if (data.nfd) {
+    queryClient.setQueryData<Nfd>(['nfd', data.config.nfdForInfo.toString()], data.nfd)
+  }
+  if (data.gatingAssets) {
+    data.gatingAssets.forEach((asset) => {
+      if (asset) {
+        queryClient.setQueryData<algosdk.modelsv2.Asset>(['asset', Number(asset.index)], asset)
+      }
+    })
+  }
 }
 
 export async function fetchRemainingRewardsBalance(validator: Validator): Promise<bigint> {
@@ -513,11 +571,16 @@ export async function fetchRemainingRewardsBalance(validator: Validator): Promis
     return BigInt(0)
   }
 
-  const poolAppId = validator.pools[0].poolAppId
+  const poolAppId = validator.pools[0]?.poolAppId ?? 0n
+
+  if (poolAppId === 0n) {
+    throw new Error('Pool 1 not found')
+  }
+
   const poolAddress = algosdk.getApplicationAddress(poolAppId)
 
-  const accountAssetInfo = await fetchAccountAssetInformation(poolAddress, Number(rewardTokenId))
-  const rewardTokenAmount = BigInt(accountAssetInfo['asset-holding'].amount)
+  const accountAssetInfo = await fetchAccountAssetInformation(poolAddress.toString(), rewardTokenId)
+  const rewardTokenAmount = accountAssetInfo.assetHolding?.amount ?? 0n
 
   const remainingBalance = rewardTokenAmount - rewardTokenHeldBack
 
@@ -621,18 +684,23 @@ export function calculateValidatorPoolMetrics(
 ) {
   const totalBalances = poolsData.reduce((sum, data) => sum + data.balance, 0n)
   const oldestRound = poolsData.reduce((oldest, data) => {
-    if (!data.lastPayout) return oldest
+    if (!data.lastPayout || data.balance === 0n) return oldest
     const nextRound = data.lastPayout - (data.lastPayout % epochRoundLength) + epochRoundLength
-    return oldest === 0n || nextRound < oldest ? nextRound : oldest
+    return oldest === 0n || data.balance === 0n || nextRound < oldest ? nextRound : oldest
   }, 0n)
 
   const rewardsBalance = roundToWholeAlgos(totalBalances - totalAlgoStaked)
   const roundsSinceLastPayout = oldestRound ? currentRound - oldestRound : undefined
 
-  // Calculate APY only for pools with non-zero balance
+  // Calculate APY weighted by the pool balances
   const nonZeroBalancePools = poolsData.filter((data) => data.balance > 0n)
-  const totalApy = nonZeroBalancePools.reduce((sum, data) => sum + (data.apy || 0), 0)
-  const apy = nonZeroBalancePools.length > 0 ? totalApy / nonZeroBalancePools.length : 0
+  const totalWeightedApy = nonZeroBalancePools.reduce((sum, data) => {
+    return sum + (data.apy || 0) * Number(data.balance)
+  }, 0)
+  const totalBalance = nonZeroBalancePools.reduce((sum, data) => sum + Number(data.balance), 0)
+  const extDeposits = nonZeroBalancePools.reduce((sum, data) => sum + Number(data.extDeposits), 0)
 
-  return { rewardsBalance, roundsSinceLastPayout, apy }
+  const apy = totalBalance > 0 ? totalWeightedApy / totalBalance : 0
+
+  return { rewardsBalance, roundsSinceLastPayout, apy, extDeposits }
 }

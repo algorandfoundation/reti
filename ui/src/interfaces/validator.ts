@@ -1,4 +1,4 @@
-import { Asset } from '@/interfaces/algod'
+import algosdk from 'algosdk'
 import { Nfd } from '@/interfaces/nfd'
 import { ToStringTypes } from '@/interfaces/utils'
 import {
@@ -13,7 +13,7 @@ export type EntryGatingAssets = [bigint, bigint, bigint, bigint]
 
 export type ValidatorConfigInput = Omit<
   ToStringTypes<ValidatorConfig>,
-  'id' | 'maxAlgoPerPool' | 'sunsettingOn' | 'sunsettingTo'
+  'id' | 'sunsettingOn' | 'sunsettingTo'
 >
 
 export interface LocalPoolInfo {
@@ -23,6 +23,7 @@ export interface LocalPoolInfo {
   totalAlgoStaked: bigint
   poolAddress?: string
   algodVersion?: string
+  apy?: number
 }
 
 export interface NodeConfig {
@@ -43,10 +44,12 @@ export type Validator = {
   nodePoolAssignment: NodePoolAssignmentConfig
   rewardsBalance?: bigint
   roundsSinceLastPayout?: bigint
-  rewardToken?: Asset
-  gatingAssets?: Asset[]
+  rewardToken?: algosdk.modelsv2.Asset
+  gatingAssets?: algosdk.modelsv2.Asset[]
   nfd?: Nfd
   apy?: number
+  extDeposits?: number
+  perf?: number
 }
 
 export interface FindPoolForStakerResponse {
@@ -60,4 +63,5 @@ export type PoolData = {
   balance: bigint
   lastPayout?: bigint
   apy?: number
+  extDeposits?: number
 }

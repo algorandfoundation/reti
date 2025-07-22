@@ -30,6 +30,22 @@ const navigation = [
   },
 ]
 
+export function FooterExtraItem() {
+  return (
+    <>
+      <span className="mx-1 opacity-50">|</span>{' '}
+      <a
+        href={import.meta.env.VITE_FOOTER_EXTRA_ITEM_HREF}
+        className="link hover:text-foreground"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {import.meta.env.VITE_FOOTER_EXTRA_ITEM}
+      </a>
+    </>
+  )
+}
+
 export function Footer() {
   return (
     <footer className="bg-background" aria-labelledby="footer-heading">
@@ -53,15 +69,8 @@ export function Footer() {
         </div>
         <div className="mt-8 md:order-1 md:mt-0">
           <p className="text-center text-sm leading-5 text-stone-600 dark:text-stone-400">
-            Réti Pooling v{__APP_VERSION__} <span className="mx-1 opacity-50">|</span>{' '}
-            <a
-              href="https://github.com/algorandfoundation/reti"
-              className="link hover:text-foreground"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              TxnLab/reti
-            </a>
+            Réti Pooling v{__APP_VERSION__}
+            {import.meta.env.VITE_FOOTER_EXTRA_ITEM && FooterExtraItem()}
           </p>
         </div>
       </div>

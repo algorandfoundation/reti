@@ -1,21 +1,60 @@
-import { useQueries, useQuery } from '@tanstack/react-query'
+import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
-import { stakedInfoQueryOptions, validatorPoolsQueryOptions } from '@/api/queries'
-import { ExplorerLink } from '@/utils/explorer'
+import {
+  nfdLookupQueryOptions,
+  stakedInfoQueryOptions,
+  validatorPoolsQueryOptions,
+} from '@/api/queries'
 import { StakedInfo } from '@/contracts/StakingPoolClient'
+import { LocalPoolInfo } from '@/interfaces/validator'
+import { ExplorerLink } from '@/utils/explorer'
+import { getNfdProfileUrl } from '@/utils/nfd'
 
 interface UseChartDataProps {
   selectedPool: string
   validatorId: number
+  pauseRefetch?: boolean // Pause refetching while adding a pool
 }
 
-export function useStakersChartData({ selectedPool, validatorId }: UseChartDataProps) {
-  const poolsInfoQuery = useQuery(validatorPoolsQueryOptions(validatorId))
+export function useStakersChartData({
+  selectedPool,
+  validatorId,
+  pauseRefetch = false,
+}: UseChartDataProps) {
+  const queryClient = useQueryClient()
+
+  const poolsInfoQuery = useQuery({
+    ...validatorPoolsQueryOptions(validatorId),
+    enabled: !pauseRefetch,
+  })
   const poolsInfo = poolsInfoQuery.data || []
 
   const allStakedInfo = useQueries({
-    queries: poolsInfo.map((pool) => stakedInfoQueryOptions(pool.poolAppId)),
+    queries: poolsInfo.map((pool) => ({
+      ...stakedInfoQueryOptions(pool.poolAppId),
+      enabled: !pauseRefetch,
+    })),
   })
+
+  const poolsQueryKey = React.useMemo(() => ['validator-pools', String(validatorId)], [validatorId])
+
+  // Function to invalidate/refetch pools and staked info queries
+  const refetchAll = React.useCallback(async () => {
+    await queryClient.invalidateQueries({ queryKey: poolsQueryKey })
+    // Wait for pools query to settle before refetching staked info
+    const pools = await queryClient.fetchQuery<LocalPoolInfo[]>({
+      queryKey: poolsQueryKey,
+    })
+    if (pools) {
+      await Promise.all(
+        pools.map((pool) =>
+          queryClient.invalidateQueries({
+            queryKey: ['staked-info', pool.poolAppId.toString()],
+          }),
+        ),
+      )
+    }
+  }, [queryClient, poolsQueryKey])
 
   const isLoading = poolsInfoQuery.isLoading || allStakedInfo.some((query) => query.isLoading)
   const isSuccess = poolsInfoQuery.isSuccess && allStakedInfo.every((query) => query.isSuccess)
@@ -28,17 +67,35 @@ export function useStakersChartData({ selectedPool, validatorId }: UseChartDataP
     allStakedInfo.find((query) => query.error)?.error?.message ||
     defaultMessage
 
-  const stakersChartData = React.useMemo(() => {
-    if (!allStakedInfo) {
-      return []
-    }
+  const stakerAddresses = React.useMemo(() => {
+    if (!allStakedInfo) return []
 
-    const stakerTotals: Record<string, StakedInfo> = {}
+    const addresses = new Set<string>()
 
     allStakedInfo.forEach((query, i) => {
-      if (selectedPool !== 'all' && Number(selectedPool) !== i) {
-        return
-      }
+      if (selectedPool !== 'all' && Number(selectedPool) !== i) return
+
+      const stakers = query.data || []
+      stakers.forEach((staker) => addresses.add(staker.account))
+    })
+
+    return Array.from(addresses)
+  }, [allStakedInfo, selectedPool])
+
+  const nfdQueries = useQueries({
+    queries: stakerAddresses.map((address) => nfdLookupQueryOptions(address)),
+  })
+
+  const stakersChartData = React.useMemo(() => {
+    if (!allStakedInfo) return []
+
+    const stakerTotals: Record<string, StakedInfo> = {}
+    const nfdMap = new Map(
+      nfdQueries.map((query, index) => [stakerAddresses[index], query.data?.name]),
+    )
+
+    allStakedInfo.forEach((query, i) => {
+      if (selectedPool !== 'all' && Number(selectedPool) !== i) return
 
       const stakers = query.data || []
 
@@ -59,12 +116,15 @@ export function useStakersChartData({ selectedPool, validatorId }: UseChartDataP
       })
     })
 
-    return Object.values(stakerTotals).map((staker) => ({
-      name: staker.account,
-      value: Number(staker.balance),
-      href: ExplorerLink.account(staker.account),
-    }))
-  }, [allStakedInfo, selectedPool])
+    return Object.values(stakerTotals).map((staker) => {
+      const nfdName = nfdMap.get(staker.account)
+      return {
+        name: nfdName || staker.account,
+        value: Number(staker.balance),
+        href: nfdName ? getNfdProfileUrl(nfdName) : ExplorerLink.account(staker.account),
+      }
+    })
+  }, [allStakedInfo, selectedPool, nfdQueries, stakerAddresses])
 
   return {
     stakersChartData,
@@ -73,5 +133,6 @@ export function useStakersChartData({ selectedPool, validatorId }: UseChartDataP
     isError,
     errorMessage,
     isSuccess,
+    refetchAll,
   }
 }

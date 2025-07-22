@@ -25,7 +25,7 @@ import { AlgoSymbol } from '@/components/AlgoSymbol'
 import { DataTableColumnHeader } from '@/components/DataTableColumnHeader'
 import { DataTableViewOptions } from '@/components/DataTableViewOptions'
 import { DebouncedSearch } from '@/components/DebouncedSearch'
-import { NfdThumbnail } from '@/components/NfdThumbnail'
+import { Loading } from '@/components/Loading'
 import { Tooltip } from '@/components/Tooltip'
 import { TrafficLight } from '@/components/TrafficLight'
 import { Button } from '@/components/ui/button'
@@ -48,17 +48,19 @@ import {
 } from '@/components/ui/table'
 import { UnstakeModal } from '@/components/UnstakeModal'
 import { ValidatorInfoRow } from '@/components/ValidatorInfoRow'
-import { ValidatorRewards } from '@/components/ValidatorRewards'
+import { ValidatorNfdDisplay } from '@/components/ValidatorNfdDisplay'
+import { ValidatorStatus } from '@/components/ValidatorStatus'
+import { Constraints } from '@/contracts/ValidatorRegistryClient'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
 import { StakerValidatorData } from '@/interfaces/staking'
 import { Validator } from '@/interfaces/validator'
-import { useAuthAddress } from '@/providers/AuthAddressProvider'
 import {
   calculateMaxStake,
   calculateSaturationPercentage,
   calculateStakeSaturation,
   canManageValidator,
   isAddingPoolDisabled,
+  isFirstPoolFull,
   isStakingDisabled,
   isSunsetted,
   isSunsetting,
@@ -68,27 +70,28 @@ import { dayjs } from '@/utils/dayjs'
 import { sendRewardTokensToPool, simulateEpoch } from '@/utils/development'
 import { ellipseAddressJsx } from '@/utils/ellipseAddress'
 import { formatAmount, formatAssetAmount } from '@/utils/format'
-import { globalFilterFn, sunsetFilter } from '@/utils/table'
+import { globalFilterFn, ineligibleFilter, MIN_ELIGIBLE_STAKE, sunsetFilter } from '@/utils/table'
 import { cn } from '@/utils/ui'
-import { Constraints } from '@/contracts/ValidatorRegistryClient'
+import { ValidatorRewards } from '@/components/ValidatorRewards'
 
 interface ValidatorTableProps {
   validators: Validator[]
   stakesByValidator: StakerValidatorData[]
   constraints: Constraints
+  isLoading: boolean
 }
 
 export function ValidatorTable({
   validators,
   stakesByValidator,
   constraints,
+  isLoading,
 }: ValidatorTableProps) {
   const [addStakeValidator, setAddStakeValidator] = React.useState<Validator | null>(null)
   const [unstakeValidator, setUnstakeValidator] = React.useState<Validator | null>(null)
   const [addPoolValidator, setAddPoolValidator] = React.useState<Validator | null>(null)
 
   const { transactionSigner, activeAddress } = useWallet()
-  const { authAddress } = useAuthAddress()
 
   const router = useRouter()
   const queryClient = useQueryClient()
@@ -139,7 +142,7 @@ export function ValidatorTable({
   // Persistent column visibility state
   const [columnVisibility, setColumnVisibility] = useLocalStorage<VisibilityState>(
     'validator-columns',
-    {},
+    { 'pend. reward': false },
   )
 
   const handleColumnVisibilityChange = (updaterOrValue: Updater<VisibilityState>) => {
@@ -154,7 +157,10 @@ export function ValidatorTable({
   // Persistent column filters state
   const [columnFilters, setColumnFilters] = useLocalStorage<ColumnFiltersState>(
     'validator-column-filters',
-    [{ id: 'validator', value: false }],
+    [
+      { id: 'validator', value: false },
+      { id: 'stake', value: false },
+    ],
   )
 
   const handleColumnFiltersChange = (updaterOrValue: Updater<ColumnFiltersState>) => {
@@ -200,41 +206,46 @@ export function ValidatorTable({
         const validator = row.original
         const nfd = validator.nfd
 
-        return (
-          <div className="flex items-center gap-x-2 min-w-0 max-w-[10rem] xl:max-w-[16rem]">
-            {isSunsetted(validator) ? (
-              <Tooltip
-                content={`Sunset on ${dayjs.unix(Number(validator.config.sunsettingOn)).format('ll')}`}
-              >
-                <Ban className="h-5 w-5 text-muted-foreground transition-colors" />
-              </Tooltip>
-            ) : isSunsetting(validator) ? (
-              <Tooltip
-                content={`Will sunset on ${dayjs.unix(Number(validator.config.sunsettingOn)).format('ll')}`}
-              >
-                <Sunset className="h-5 w-5 text-muted-foreground transition-colors" />
-              </Tooltip>
-            ) : null}
-            <Link
-              to="/validators/$validatorId"
-              params={{
-                validatorId: String(validator.id),
-              }}
-              className={cn('link underline-offset-4 whitespace-nowrap', { truncate: !!nfd })}
-              preload="intent"
-            >
+        // Memoize the cell content
+        const content = React.useMemo(() => {
+          return (
+            <div className="flex items-center gap-x-2 min-w-0 max-w-[10rem] xl:max-w-[16rem]">
+              {isSunsetted(validator) ? (
+                <Tooltip
+                  content={`Sunset on ${dayjs.unix(Number(validator.config.sunsettingOn)).format('ll')}`}
+                >
+                  <Ban className="h-5 w-5 text-muted-foreground transition-colors" />
+                </Tooltip>
+              ) : isSunsetting(validator) ? (
+                <Tooltip
+                  content={`Will sunset on ${dayjs.unix(Number(validator.config.sunsettingOn)).format('ll')}`}
+                >
+                  <Sunset className="h-5 w-5 text-muted-foreground transition-colors" />
+                </Tooltip>
+              ) : null}
               {nfd ? (
-                <NfdThumbnail
+                <ValidatorNfdDisplay
                   nfd={nfd}
-                  truncate
-                  className={cn(isSunsetted(validator) ? 'opacity-50' : '')}
+                  validatorId={validator.id}
+                  isSunsetted={isSunsetted(validator)}
                 />
               ) : (
-                <span className="font-mono">{ellipseAddressJsx(validator.config.owner)}</span>
+                <Link
+                  to="/validators/$validatorId"
+                  params={{
+                    validatorId: String(validator.id),
+                  }}
+                  className="link underline-offset-4 whitespace-nowrap font-mono"
+                  preload="intent"
+                >
+                  {ellipseAddressJsx(validator.config.owner)}
+                </Link>
               )}
-            </Link>
-          </div>
-        )
+            </div>
+          )
+        }, [validator, nfd])
+
+        return content
       },
     },
     {
@@ -249,6 +260,7 @@ export function ValidatorTable({
     {
       id: 'stake',
       accessorFn: (row) => Number(row.state.totalAlgoStaked),
+      filterFn: ineligibleFilter,
       header: ({ column }) => <DataTableColumnHeader column={column} title="Stake" />,
       cell: ({ row }) => {
         const validator = row.original
@@ -285,20 +297,41 @@ export function ValidatorTable({
       },
     },
     {
-      id: 'apy',
-      accessorFn: (row) => row.apy,
-      header: ({ column }) => <DataTableColumnHeader column={column} title="APY" />,
-      cell: ({ row }) => {
-        if (!row.original.apy) return <span className="text-muted-foreground">--</span>
-        return <span>{formatAmount(row.original.apy, { precision: 3 })}%</span>
-      },
-    },
-    {
-      id: 'reward',
+      id: 'status',
       accessorFn: (row) => row.rewardsBalance,
       sortingFn: sortRewardsFn,
       sortUndefined: -1,
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Avail. Rewards" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
+      cell: ({ row }) => {
+        const validator = row.original
+        if (validator.state.numPools == 0) return '--'
+
+        return <ValidatorStatus validator={validator} />
+      },
+    },
+    {
+      id: 'apy',
+      accessorFn: (row) => row.apy,
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Est. APY" />,
+      cell: ({ row }) => {
+        if (!row.original.apy) return <span className="text-muted-foreground">--</span>
+        return (
+          <Tooltip
+            content={`${formatAmount(Number(row.original.extDeposits), { precision: 2 })} in extra deposits`}
+          >
+            <span>
+              {formatAmount(row.original.apy < 0 ? 0 : row.original.apy, { precision: 1 })}%
+            </span>
+          </Tooltip>
+        )
+      },
+    },
+    {
+      id: 'pend. reward',
+      accessorFn: (row) => row.rewardsBalance,
+      sortingFn: sortRewardsFn,
+      sortUndefined: -1,
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Pend. Rewards" />,
       cell: ({ row }) => {
         const validator = row.original
         if (validator.state.numPools == 0) return '--'
@@ -326,7 +359,7 @@ export function ValidatorTable({
 
         return (
           <Tooltip content={tooltipContent}>
-            <span className="font-mono">{validator.rewardToken.params['unit-name']}</span>
+            <span className="font-mono">{validator.rewardToken.params.unitName}</span>
           </Tooltip>
         )
       },
@@ -345,6 +378,7 @@ export function ValidatorTable({
       id: 'actions',
       cell: ({ row }) => {
         const validator = row.original
+        const firstPoolFull = isFirstPoolFull(validator, constraints)
         const stakingDisabled = isStakingDisabled(activeAddress, validator, constraints)
         const unstakingDisabled = isUnstakingDisabled(activeAddress, validator, stakesByValidator)
         const addingPoolDisabled = isAddingPoolDisabled(activeAddress, validator, constraints)
@@ -370,10 +404,11 @@ export function ValidatorTable({
             ) : (
               <Button
                 size="sm"
-                className={cn({ hidden: stakingDisabled })}
+                disabled={firstPoolFull || stakingDisabled}
                 onClick={() => setAddStakeValidator(validator)}
+                className="min-w-[70px]"
               >
-                Stake
+                {firstPoolFull ? 'Full' : 'Stake'}
               </Button>
             )}
             <DropdownMenu>
@@ -384,78 +419,81 @@ export function ValidatorTable({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-40">
-                <DropdownMenuGroup>
-                  <DropdownMenuItem
-                    onClick={() => setAddStakeValidator(validator)}
-                    disabled={stakingDisabled}
-                  >
-                    Stake
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setUnstakeValidator(validator)}
-                    disabled={unstakingDisabled}
-                  >
-                    Unstake
-                  </DropdownMenuItem>
+                {!!activeAddress && (
+                  <>
+                    <DropdownMenuGroup>
+                      <DropdownMenuItem
+                        onClick={() => setAddStakeValidator(validator)}
+                        disabled={stakingDisabled}
+                      >
+                        Stake
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => setUnstakeValidator(validator)}
+                        disabled={unstakingDisabled}
+                      >
+                        Unstake
+                      </DropdownMenuItem>
 
-                  {canManage && (
-                    <DropdownMenuItem
-                      onClick={() => setAddPoolValidator(validator)}
-                      disabled={addingPoolDisabled}
-                    >
-                      Add Staking Pool
-                    </DropdownMenuItem>
-                  )}
-
-                  {canSimulateEpoch && (
-                    <>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuGroup>
+                      {canManage && (
                         <DropdownMenuItem
-                          onClick={async () => {
-                            await simulateEpoch(
-                              validator,
-                              stakerPoolData,
-                              100,
-                              transactionSigner,
-                              activeAddress!,
-                              authAddress,
-                              queryClient,
-                              router,
-                            )
-                          }}
-                          disabled={unstakingDisabled}
+                          onClick={() => setAddPoolValidator(validator)}
+                          disabled={addingPoolDisabled}
                         >
-                          <FlaskConical className="h-4 w-4 mr-2 text-muted-foreground" />
-                          Simulate Epoch
+                          Add Staking Pool
                         </DropdownMenuItem>
-                      </DropdownMenuGroup>
-                    </>
-                  )}
+                      )}
 
-                  {canSendRewardTokens && (
-                    <>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuGroup>
-                        <DropdownMenuItem
-                          onClick={async () => {
-                            await sendRewardTokensToPool(
-                              validator,
-                              5000,
-                              transactionSigner,
-                              activeAddress!,
-                            )
-                          }}
-                          disabled={sendRewardTokensDisabled}
-                        >
-                          <FlaskConical className="h-4 w-4 mr-2 text-muted-foreground" />
-                          Send Tokens
-                        </DropdownMenuItem>
-                      </DropdownMenuGroup>
-                    </>
-                  )}
-                </DropdownMenuGroup>
-                <DropdownMenuSeparator />
+                      {canSimulateEpoch && (
+                        <>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuGroup>
+                            <DropdownMenuItem
+                              onClick={async () => {
+                                await simulateEpoch(
+                                  validator,
+                                  stakerPoolData,
+                                  100,
+                                  transactionSigner,
+                                  activeAddress!,
+                                  queryClient,
+                                  router,
+                                )
+                              }}
+                              disabled={unstakingDisabled}
+                            >
+                              <FlaskConical className="h-4 w-4 mr-2 text-muted-foreground" />
+                              Simulate Epoch
+                            </DropdownMenuItem>
+                          </DropdownMenuGroup>
+                        </>
+                      )}
+
+                      {canSendRewardTokens && (
+                        <>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuGroup>
+                            <DropdownMenuItem
+                              onClick={async () => {
+                                await sendRewardTokensToPool(
+                                  validator,
+                                  5000,
+                                  transactionSigner,
+                                  activeAddress!,
+                                )
+                              }}
+                              disabled={sendRewardTokensDisabled}
+                            >
+                              <FlaskConical className="h-4 w-4 mr-2 text-muted-foreground" />
+                              Send Tokens
+                            </DropdownMenuItem>
+                          </DropdownMenuGroup>
+                        </>
+                      )}
+                    </DropdownMenuGroup>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
                 <DropdownMenuGroup>
                   <DropdownMenuItem asChild>
                     <Link
@@ -505,26 +543,49 @@ export function ValidatorTable({
     .getPreFilteredRowModel()
     .rows.filter((row) => isSunsetted(row.original)).length
 
+  // Pre-filtered count of ineligible validators
+  const ineligibleCount = table
+    .getPreFilteredRowModel()
+    .rows.filter((row) => row.original.state.totalAlgoStaked < MIN_ELIGIBLE_STAKE).length
+
   return (
     <>
       <div>
         <div className="sm:flex items-center sm:gap-x-3 py-3">
-          <h2 className="mb-2 text-lg font-semibold sm:flex-1 sm:my-1">Validators</h2>
-          <div
-            className={cn('flex items-center gap-x-2 h-7 sm:h-9 px-3 mb-3 sm:mb-0', {
-              hidden: sunsetCount === 0,
-            })}
-          >
-            <Checkbox
-              checked={(table.getColumn('validator')?.getFilterValue() as boolean) ?? false}
-              onCheckedChange={(checked) => table.getColumn('validator')?.setFilterValue(!!checked)}
-            />
-            <label
-              htmlFor="terms"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          <h2 className="flex items-center mb-2 text-lg font-semibold sm:flex-1 sm:my-1">
+            Validators {isLoading && <Loading size="sm" inline className="ml-3" />}
+          </h2>
+          <div className="flex items-center gap-x-4 mb-3 sm:mb-0">
+            <div
+              className={cn('flex items-center gap-x-2 h-7 sm:h-9 px-3', {
+                hidden: sunsetCount === 0,
+              })}
             >
-              Show sunsetted ({sunsetCount})
-            </label>
+              <Checkbox
+                checked={(table.getColumn('validator')?.getFilterValue() as boolean) ?? false}
+                onCheckedChange={(checked) =>
+                  table.getColumn('validator')?.setFilterValue(!!checked)
+                }
+              />
+              <label
+                htmlFor="show-sunsetted"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Show sunsetted ({sunsetCount})
+              </label>
+            </div>
+            <div className="flex items-center gap-x-2 h-7 sm:h-9 px-3">
+              <Checkbox
+                checked={(table.getColumn('stake')?.getFilterValue() as boolean) ?? false}
+                onCheckedChange={(checked) => table.getColumn('stake')?.setFilterValue(!!checked)}
+              />
+              <label
+                htmlFor="show-ineligible"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Show ineligible ({ineligibleCount})
+              </label>
+            </div>
           </div>
           <div className="flex items-center gap-x-3 flex-wrap sm:flex-0">
             <div className="flex items-center gap-x-3 w-full sm:w-auto">
@@ -586,7 +647,7 @@ export function ValidatorTable({
               ) : (
                 <TableRow className="hover:bg-transparent">
                   <TableCell colSpan={columns.length} className="h-24 text-center">
-                    No results
+                    {isLoading ? 'Loading...' : 'No results'}
                   </TableCell>
                 </TableRow>
               )}

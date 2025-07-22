@@ -15,11 +15,11 @@ import {
   initStakingPoolStorage,
   linkPoolToNfd,
 } from '@/api/contracts'
-import { mbrQueryOptions, poolAssignmentQueryOptions } from '@/api/queries'
+import { mbrQueryOptions, validatorNodePoolAssignmentsQueryOptions } from '@/api/queries'
 import { AlgoDisplayAmount } from '@/components/AlgoDisplayAmount'
 import { DisplayAsset } from '@/components/DisplayAsset'
 import { NfdLookup } from '@/components/NfdLookup'
-import { NfdThumbnail } from '@/components/NfdThumbnail'
+import { NfdDisplay } from '@/components/NfdDisplay'
 import { NodeSelect } from '@/components/NodeSelect'
 import { Button } from '@/components/ui/button'
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible'
@@ -39,6 +39,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
+import { NodePoolAssignmentConfig, ValidatorPoolKey } from '@/contracts/ValidatorRegistryClient'
 import { Nfd } from '@/interfaces/nfd'
 import { Validator } from '@/interfaces/validator'
 import { BalanceChecker, InsufficientBalanceError } from '@/utils/balanceChecker'
@@ -53,18 +54,19 @@ import { ExplorerLink } from '@/utils/explorer'
 import { formatAlgoAmount } from '@/utils/format'
 import { isValidName } from '@/utils/nfd'
 import { cn } from '@/utils/ui'
-import { NodePoolAssignmentConfig, ValidatorPoolKey } from '@/contracts/ValidatorRegistryClient'
 
 interface AddPoolModalProps {
   validator: Validator | null
   setValidator: React.Dispatch<React.SetStateAction<Validator | null>>
   poolAssignment?: NodePoolAssignmentConfig
+  onClose?: (success?: boolean) => void
 }
 
 export function AddPoolModal({
   validator,
   setValidator,
   poolAssignment: poolAssignmentProp,
+  onClose,
 }: AddPoolModalProps) {
   const [isSigning, setIsSigning] = React.useState<boolean>(false)
   const [currentStep, setCurrentStep] = React.useState<number>(0)
@@ -87,14 +89,16 @@ export function AddPoolModal({
     enabled: !!activeAddress && !!validator, // wait until modal is open
   })
 
-  const { amount = 0, 'min-balance': minBalance = 0 } = accountInfoQuery.data || {}
+  const { amount = 0n, minBalance = 0n } = accountInfoQuery.data || {}
 
-  const availableBalance = Math.max(0, amount - minBalance)
+  const availableBalance = amount - minBalance < 0n ? 0n : amount - minBalance
 
   const mbrQuery = useQuery(mbrQueryOptions)
   const { addPoolMbr = 0n, poolInitMbr = 0n } = mbrQuery.data || {}
 
-  const assignmentQuery = useQuery(poolAssignmentQueryOptions(validator?.id || '', !!validator))
+  const assignmentQuery = useQuery(
+    validatorNodePoolAssignmentsQueryOptions(validator?.id || 0, !!validator),
+  )
   const poolAssignment = assignmentQuery.data || poolAssignmentProp
 
   const nodesInfo = React.useMemo(() => {
@@ -176,6 +180,13 @@ export function AddPoolModal({
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
+      // Determine if pool was created and MBR paid (steps 1 and 2)
+      const isSuccess = currentStep >= 3
+
+      // Call onClose with success status
+      onClose?.(isSuccess)
+
+      // Reset modal state
       if (validator) setValidator(null)
       setTimeout(() => handleResetForm(), 500)
     } else {
@@ -231,7 +242,7 @@ export function AddPoolModal({
       setPoolKey(stakingPoolKey)
 
       const poolAppAddress = algosdk.getApplicationAddress(stakingPoolKey.poolAppId)
-      setPoolAddress(poolAppAddress)
+      setPoolAddress(poolAppAddress.toString())
 
       toast.success(`Staking pool ${stakingPoolKey.poolId} created!`, {
         id: toastId,
@@ -307,8 +318,6 @@ export function AddPoolModal({
         duration: 5000,
       })
 
-      queryClient.invalidateQueries({ queryKey: ['pools-info', validator.id] })
-
       // Refetch validator data
       const newData = await fetchValidator(validator!.id)
       setValidatorQueriesData(queryClient, newData)
@@ -364,7 +373,8 @@ export function AddPoolModal({
         activeAddress,
       )
 
-      queryClient.setQueryData(['nfd-lookup', poolAddress, { view: 'thumbnail' }], nfdToLink)
+      queryClient.setQueryData<Nfd>(['nfd-lookup', poolAddress, { view: 'thumbnail' }], nfdToLink)
+      queryClient.setQueryData<Nfd>(['nfd', $nfdToLink, { view: 'thumbnail' }], nfdToLink)
 
       toast.success(`Pool ${poolKey.poolId} successfully linked to ${$nfdToLink}!`, {
         id: toastId,
@@ -406,12 +416,12 @@ export function AddPoolModal({
         onInteractOutside={(event: Event) => event.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle>Add a Pool</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-left">Add a Pool</DialogTitle>
+          <DialogDescription className="text-left">
             Create and fund a new staking pool for Validator {Number(validator?.id)}
           </DialogDescription>
         </DialogHeader>
-        <div>
+        <div className="mt-2">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleCreatePool)}>
               <div className="[&>div>label]:step steps ml-4 pl-8 pb-4 [counter-reset:step] max-w-full">
@@ -427,9 +437,7 @@ export function AddPoolModal({
                       name="nodeNum"
                       render={({ field }) => (
                         <FormItem
-                          className={cn(
-                            currentStep == 2 || !poolAssignment || !validator ? 'hidden' : '',
-                          )}
+                          className={cn(currentStep == 2 || !poolAssignment ? 'hidden' : '')}
                         >
                           <NodeSelect
                             nodesInfo={nodesInfo}
@@ -528,7 +536,7 @@ export function AddPoolModal({
                         <div className="flex items-center flex-wrap gap-x-6">
                           {nfdToLink && (
                             <p className="flex items-center gap-x-2 text-sm mb-2 py-1">
-                              <NfdThumbnail nfd={nfdToLink} link className="link" />
+                              <NfdDisplay nfd={nfdToLink} link className="link" />
                               <Button
                                 variant="ghost"
                                 size="icon"
@@ -572,7 +580,7 @@ export function AddPoolModal({
                 )}
               </div>
 
-              <div className={cn('my-4')}>
+              <div className={cn('my-6')}>
                 <ProgressBar
                   value={currentStep * (100 / totalSteps)}
                   color="rose"

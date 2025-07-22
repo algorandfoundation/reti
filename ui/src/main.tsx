@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import {
+  NetworkConfigBuilder,
   SupportedWallet,
   WalletId,
   WalletManager,
@@ -14,7 +15,7 @@ import { HelmetProvider } from 'react-helmet-async'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import { Toaster } from '@/components/ui/sonner'
 import { WalletShortcutHandler } from '@/components/WalletShortcutHandler'
-import { AuthAddressProvider } from '@/providers/AuthAddressProvider'
+import { WALLETCONNECT_PROJECT_ID } from '@/constants/env'
 import { ThemeProvider } from '@/providers/ThemeProvider'
 import { routeTree } from '@/routeTree.gen'
 import '@/styles/main.css'
@@ -45,22 +46,39 @@ if (import.meta.env.VITE_ALGOD_NETWORK === 'localnet') {
   wallets = [
     WalletId.DEFLY,
     WalletId.PERA,
+    { id: WalletId.LUTE, options: { siteName } },
+    {
+      id: WalletId.WALLETCONNECT,
+      options: {
+        projectId: WALLETCONNECT_PROJECT_ID,
+        explorerRecommendedWalletIds: [
+          '5864e2ced7c293ed18ac35e0db085c09ed567d67346ccb6f58a0327a75137489',
+        ],
+      },
+    },
     WalletId.KIBISIS,
     WalletId.EXODUS,
-    { id: WalletId.LUTE, options: { siteName } },
   ]
 }
 
 const algodConfig = getAlgodConfigFromViteEnvironment()
-const network = getAlgodNetwork()
+const defaultNetwork = getAlgodNetwork()
+
+const defaultConfig = new NetworkConfigBuilder().build()
 
 const walletManager = new WalletManager({
   wallets,
-  network,
-  algod: {
-    baseServer: algodConfig.server,
-    port: algodConfig.port,
-    token: algodConfig.token as string,
+  defaultNetwork,
+  networks: {
+    [defaultNetwork]: {
+      ...defaultConfig[defaultNetwork],
+      algod: {
+        ...defaultConfig[defaultNetwork].algod,
+        baseServer: algodConfig.server,
+        port: algodConfig.port,
+        token: algodConfig.token as string,
+      },
+    },
   },
   options: {
     resetNetwork: true,
@@ -100,10 +118,8 @@ function AppProviders() {
         <QueryClientProvider client={queryClient}>
           <SnackbarProvider maxSnack={3}>
             <WalletProvider manager={walletManager}>
-              <AuthAddressProvider>
-                <InnerApp />
-                <WalletShortcutHandler />
-              </AuthAddressProvider>
+              <InnerApp />
+              <WalletShortcutHandler />
             </WalletProvider>
           </SnackbarProvider>
         </QueryClientProvider>

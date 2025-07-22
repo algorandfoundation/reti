@@ -993,21 +993,29 @@ export class StakingPool extends Contract {
             const approxRoundsPerYear: uint128 = currentBinSize * (365 as uint128)
             const avgStake: uint128 = this.stakeAccumulator.value / currentBinSize
             if (avgStake !== 0) {
-                // do APR in hundredths, so we multiply by 10000
+                // do APR in hundredths (final result), so we multiply by 1,000,000 (*100 for extra precision on low stake)
+                // before we divide by avgStake.  We divide by 100 at end so final apr is in hundredths.
                 // ie: reward of 100, stake of 1000 - 100/1000 = .1 - *100 = 10% - but w/ int math we can't have
                 // decimals, so we do {reward}*10000/{stake} (= 1000, .1, or 10.00%)
                 const apr: uint128 =
-                    (((this.rewardAccumulator.value as uint128) * (10000 as uint128)) / avgStake) *
-                    (approxRoundsPerYear / currentBinSize)
+                    ((((this.rewardAccumulator.value as uint128) * (1000000 as uint128)) / avgStake) *
+                        (approxRoundsPerYear / currentBinSize)) /
+                    (100 as uint128) // scale back down so in hundredths
 
                 let alpha: uint128 = 10 as uint128 // .1
                 // at 300k algo go to alpha of .9
                 if (avgStake > 300000000000) {
                     alpha = 90 as uint128 // .9
                 }
-                this.weightedMovingAverage.value =
-                    (this.weightedMovingAverage.value * ((100 as uint128) - alpha)) / (100 as uint128) +
-                    (apr * alpha) / (100 as uint128)
+                // If this is first time setting weightedMovingAverage - set to absolute percentage instead
+                // of trying to very slowly trend there.
+                if (this.weightedMovingAverage.value === 0) {
+                    this.weightedMovingAverage.value = apr
+                } else {
+                    this.weightedMovingAverage.value =
+                        (this.weightedMovingAverage.value * ((100 as uint128) - alpha)) / (100 as uint128) +
+                        (apr * alpha) / (100 as uint128)
+                }
             }
 
             // Re-calc the avg rounds per day to set new binning numbers

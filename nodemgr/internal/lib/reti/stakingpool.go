@@ -72,6 +72,22 @@ func (r *Reti) GetAvgApr(poolAppID uint64) (*big.Int, error) {
 	return algo.GetUint128FromGlobalState(appInfo.Params.GlobalState, StakePoolEWMA)
 }
 
+func (r *Reti) GetBinRoundStart(poolAppID uint64) (uint64, error) {
+	appInfo, err := r.algoClient.GetApplicationByID(poolAppID).Do(context.Background())
+	if err != nil {
+		return 0, err
+	}
+	return algo.GetUint64FromGlobalState(appInfo.Params.GlobalState, StakePoolBinRoundStart)
+}
+
+func (r *Reti) GetRoundsPerDay(poolAppID uint64) (uint64, error) {
+	appInfo, err := r.algoClient.GetApplicationByID(poolAppID).Do(context.Background())
+	if err != nil {
+		return 0, err
+	}
+	return algo.GetUint64FromGlobalState(appInfo.Params.GlobalState, StakePoolRoundsPerDay)
+}
+
 func (r *Reti) GetStakeAccum(poolAppID uint64) (*big.Int, error) {
 	appInfo, err := r.algoClient.GetApplicationByID(poolAppID).Do(context.Background())
 	if err != nil {
@@ -153,7 +169,7 @@ func (r *Reti) EpochBalanceUpdate(poolID int, poolAppID uint64, caller types.Add
 	}
 	apr, _ := r.GetAvgApr(poolAppID)
 	floatApr, _, _ := new(big.Float).Parse(apr.String(), 10)
-	floatApr.Quo(floatApr, big.NewFloat(10000.0))
+	floatApr.Quo(floatApr, big.NewFloat(100.0))
 
 	misc.Infof(r.Logger, "[EpochBalanceUpdate] pool:%d epoch update at %s for app id:%d, avail rewards:%s, pre-epoch apr:%s", poolID, epochStr, poolAppID, algo.FormattedAlgoAmount(rewardAvail), floatApr.String())
 

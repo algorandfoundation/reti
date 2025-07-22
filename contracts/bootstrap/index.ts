@@ -200,13 +200,13 @@ async function main() {
             { initialFunds: AlgoAmount.Algos(100_000_000), suppressLog: true },
             algorand,
         )
-        console.log(`Created test account 1:${staker1.addr}`)
-        console.log(`Created test account 2:${staker2.addr}`)
+        console.log(`Created test account 1: ${staker1.addr.toString()}`)
+        console.log(`Created test account 2: ${staker2.addr.toString()}`)
 
         // Write the mnemonic to a .sandbox file in ../../nodemgr directory
         fs.writeFileSync(
             '../../nodemgr/.env.sandbox',
-            `ALGO_MNEMONIC_${creatorAcct.addr.substring(0, 4)}=${secretKeyToMnemonic(creatorAcct.sk)}\nRETI_APPID=${validatorApp.appClient.appId}\nALGO_MNEMONIC_${staker1.addr.substring(0, 4)}=${secretKeyToMnemonic(staker1.sk)}\nALGO_MNEMONIC_${staker2.addr.substring(0, 4)}=${secretKeyToMnemonic(staker2.sk)}\n`,
+            `ALGO_MNEMONIC_${creatorAcct.addr.toString().substring(0, 4)}=${secretKeyToMnemonic(creatorAcct.sk)}\nRETI_APPID=${validatorApp.appClient.appId}\nALGO_MNEMONIC_${staker1.addr.toString().substring(0, 4)}=${secretKeyToMnemonic(staker1.sk)}\nALGO_MNEMONIC_${staker2.addr.toString().substring(0, 4)}=${secretKeyToMnemonic(staker2.sk)}\n`,
         )
         console.log('Modified .env.sandbox in nodemgr directory with these values for testing')
 

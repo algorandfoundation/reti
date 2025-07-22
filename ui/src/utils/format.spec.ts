@@ -1,4 +1,4 @@
-import { Asset } from '@/interfaces/algod'
+import algosdk from 'algosdk'
 import {
   convertFromBaseUnits,
   convertToBaseUnits,
@@ -158,16 +158,17 @@ describe('formatWithPrecision', () => {
 })
 
 describe('formatAssetAmount', () => {
-  const asset: Asset = {
-    params: {
-      creator: '',
-      decimals: 6,
-      name: 'Test Asset',
-      total: 1000000,
-      'unit-name': 'TEST',
-    },
-    index: 12345,
-  }
+  const params = new algosdk.modelsv2.AssetParams({
+    creator: '',
+    decimals: 6,
+    name: 'Test Asset',
+    total: 1000000n,
+    unitName: 'TEST',
+  })
+  const asset = new algosdk.modelsv2.Asset({
+    params,
+    index: 12345n,
+  })
 
   it('should format asset amount correctly with default options', () => {
     const result = formatAssetAmount(asset, 1234567890)

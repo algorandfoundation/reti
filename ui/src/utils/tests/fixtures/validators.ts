@@ -62,7 +62,16 @@ export const MOCK_VALIDATOR_1_POOLS: LocalPoolInfo[] = [
 ]
 
 export const MOCK_VALIDATOR_1_POOL_ASSIGNMENT: NodePoolAssignmentConfig = {
-  nodes: [[[70000000000000n, 0n, 0n]], [[2000000000000n, 0n, 0n]], [[0n, 0n, 0n]]],
+  nodes: [
+    [[70000000000000n, 0n, 0n]],
+    [[2000000000000n, 0n, 0n]],
+    [[0n, 0n, 0n]],
+    [[0n, 0n, 0n]],
+    [[0n, 0n, 0n]],
+    [[0n, 0n, 0n]],
+    [[0n, 0n, 0n]],
+    [[0n, 0n, 0n]],
+  ],
 }
 
 export const MOCK_VALIDATOR_2_CONFIG: ValidatorConfig = {
@@ -105,7 +114,16 @@ export const MOCK_VALIDATOR_2_POOLS: LocalPoolInfo[] = [
 ]
 
 export const MOCK_VALIDATOR_2_POOL_ASSIGNMENT: NodePoolAssignmentConfig = {
-  nodes: [[[1000n, 0n, 0n]], [[0n, 0n, 0n]]],
+  nodes: [
+    [[1000n, 0n, 0n]],
+    [[0n, 0n, 0n]],
+    [[0n, 0n, 0n]],
+    [[0n, 0n, 0n]],
+    [[0n, 0n, 0n]],
+    [[0n, 0n, 0n]],
+    [[0n, 0n, 0n]],
+    [[0n, 0n, 0n]],
+  ],
 }
 
 const { id: validator1Id, ...validator1Config } = MOCK_VALIDATOR_1_CONFIG

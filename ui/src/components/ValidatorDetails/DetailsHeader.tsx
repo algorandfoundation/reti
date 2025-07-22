@@ -1,5 +1,5 @@
 // import { useWallet } from '@txnlab/use-wallet-react'
-import { NfdAvatar } from '@/components/NfdAvatar'
+import { NfdDisplay } from '@/components/NfdDisplay'
 import { Validator } from '@/interfaces/validator'
 
 interface DetailsHeaderProps {
@@ -60,7 +60,7 @@ export function DetailsHeader({ validator }: DetailsHeaderProps) {
       )} */}
       <h1 className="flex items-center gap-3 sm:gap-4 text-center text-3xl font-bold leading-tight tracking-tighter md:text-6xl lg:leading-[1.1] text-balance">
         {validator.nfd ? (
-          <NfdAvatar nfd={validator.nfd} className="h-8 w-8 sm:h-16 sm:w-16" />
+          <NfdDisplay nfd={validator.nfd} avatarOnly avatarClassName="h-8 w-8 sm:h-16 sm:w-16" />
         ) : null}
         {validator.nfd ? validator.nfd.name : `Validator ${validator.id}`}
       </h1>

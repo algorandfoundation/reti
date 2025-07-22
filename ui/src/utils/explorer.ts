@@ -36,11 +36,11 @@ export class ExplorerLink {
     return new ExplorerLink(id).transactionUrl()
   }
 
-  static asset(id: number | bigint) {
-    return new ExplorerLink(Number(id).toString()).assetUrl()
+  static asset(id: bigint) {
+    return new ExplorerLink(id.toString()).assetUrl()
   }
 
-  static app(id: number | bigint) {
-    return new ExplorerLink(Number(id).toString()).appUrl()
+  static app(id: bigint) {
+    return new ExplorerLink(id.toString()).appUrl()
   }
 }

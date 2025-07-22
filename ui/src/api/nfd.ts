@@ -8,14 +8,14 @@ import {
   NfdSearchV2Params,
   NfdV2SearchRecords,
 } from '@/interfaces/nfd'
-import axios from '@/lib/axios'
+import axiosNfdApi from '@/lib/axiosNfdApi'
 
 export async function fetchNfd(
   nameOrID: string | bigint | number,
   params?: NfdGetNFDParams,
   options?: CacheRequestConfig,
 ): Promise<Nfd> {
-  const { data: nfd } = await axios.get<Nfd>(`/nfd/${nameOrID}`, {
+  const { data: nfd } = await axiosNfdApi.get<Nfd>(`/nfd/${nameOrID}`, {
     ...options,
     params: { ...params, ...options?.params },
   })
@@ -31,7 +31,7 @@ export async function fetchNfdSearch(
   params: NfdSearchV2Params,
   options?: CacheRequestConfig,
 ): Promise<NfdV2SearchRecords> {
-  const { data: result } = await axios.get<NfdV2SearchRecords>(`/nfd/v2/search`, {
+  const { data: result } = await axiosNfdApi.get<NfdV2SearchRecords>(`/nfd/v2/search`, {
     ...options,
     params: { ...params, ...options?.params },
   })
@@ -45,7 +45,7 @@ export async function fetchNfdReverseLookup(
   options?: CacheRequestConfig,
 ): Promise<Nfd | null> {
   try {
-    const { data } = await axios.get<NfdGetLookup200>(`/nfd/lookup`, {
+    const { data } = await axiosNfdApi.get<NfdGetLookup200>(`/nfd/lookup`, {
       ...options,
       params: { address: [address], ...params, ...options?.params },
     })
@@ -65,7 +65,7 @@ export async function fetchNfdReverseLookups(
   params: NfdGetLookupParams,
   options?: CacheRequestConfig,
 ): Promise<NfdGetLookup200> {
-  const { data } = await axios.get<NfdGetLookup200>(`/nfd/lookup`, {
+  const { data } = await axiosNfdApi.get<NfdGetLookup200>(`/nfd/lookup`, {
     ...options,
     params: { ...params, ...options?.params },
   })

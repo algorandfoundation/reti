@@ -1,8 +1,8 @@
 import { AlgoAmount } from '@algorandfoundation/algokit-utils/types/amount'
-import { QueryClient } from '@tanstack/react-query'
 import algosdk from 'algosdk'
 import { fetchAccountBalance, fetchAsset, isOptedInToAsset } from '@/api/algod'
 import {
+  algorandClient,
   getSimulateStakingPoolClient,
   getSimulateValidatorClient,
   getStakingPoolClient,
@@ -12,21 +12,16 @@ import {
 import { fetchNfd } from '@/api/nfd'
 import { ALGORAND_ZERO_ADDRESS_STRING } from '@/constants/accounts'
 import { GatingType } from '@/constants/gating'
-import {
-  StakedInfo,
-  StakedInfoFromTuple,
-  StakingPoolClient,
-  ValidatorPoolKey,
-} from '@/contracts/StakingPoolClient'
+import { StakedInfo, StakedInfoFromTuple, ValidatorPoolKey } from '@/contracts/StakingPoolClient'
 import {
   Constraints,
   MbrAmounts,
   NodePoolAssignmentConfig,
   PoolInfo,
   ValidatorConfig,
+  ValidatorCurState,
   ValidatorRegistryClient,
 } from '@/contracts/ValidatorRegistryClient'
-import { Asset } from '@/interfaces/algod'
 import { StakerPoolData, StakerValidatorData } from '@/interfaces/staking'
 import {
   EntryGatingAssets,
@@ -36,211 +31,195 @@ import {
   Validator,
   ValidatorConfigInput,
 } from '@/interfaces/validator'
-import { makeEmptyTransactionSigner } from '@/lib/makeEmptyTransactionSigner'
 import { BalanceChecker } from '@/utils/balanceChecker'
-import { calculateValidatorPoolMetrics } from '@/utils/contracts'
-import { ParamsCache } from '@/utils/paramsCache'
 import { encodeCallParams } from '@/utils/tests/abi'
+import { fetchNodelyVotingPerf } from '@/api/nodely'
 
-export function callGetNumValidators(validatorClient: ValidatorRegistryClient) {
-  return validatorClient.send.getNumValidators({
-    args: {},
-  })
+export async function fetchNumValidators(): Promise<number> {
+  const validatorClient = await getSimulateValidatorClient()
+  const numValidators = await validatorClient.getNumValidators({ args: {} })
+  return Number(numValidators)
 }
 
-export function callGetValidatorConfig(
-  validatorId: number | bigint,
-  validatorClient: ValidatorRegistryClient,
-) {
-  return validatorClient.send.getValidatorConfig({
+export async function fetchValidatorConfig(validatorId: number | bigint): Promise<ValidatorConfig> {
+  const validatorClient = await getSimulateValidatorClient()
+  const config = await validatorClient.getValidatorConfig({
     args: { validatorId },
   })
+  return config
 }
 
-export function callGetValidatorState(
+export async function fetchValidatorState(
   validatorId: number | bigint,
-  validatorClient: ValidatorRegistryClient,
-) {
-  return validatorClient.send.getValidatorState({ args: { validatorId } })
+): Promise<ValidatorCurState> {
+  const validatorClient = await getSimulateValidatorClient()
+  const state = await validatorClient.getValidatorState({
+    args: { validatorId },
+  })
+  return state
 }
 
-async function processPool(pool: LocalPoolInfo): Promise<PoolData> {
-  const poolBalance = await fetchAccountBalance(algosdk.getApplicationAddress(pool.poolAppId), true)
-  if (poolBalance === 0) {
-    return { balance: 0n }
+export async function fetchValidatorPools(validatorId: number | bigint): Promise<LocalPoolInfo[]> {
+  const validatorClient = await getSimulateValidatorClient()
+  const poolsData = await validatorClient.getPools({
+    args: { validatorId },
+    note: encodeCallParams('getPools', { validatorId }), // Used by MSW in tests
+  })
+
+  const poolAddresses: string[] = []
+  const poolAlgodVersions: (string | undefined)[] = []
+
+  for (const poolInfo of poolsData) {
+    const stakingPoolClient = await getSimulateStakingPoolClient(poolInfo[0])
+
+    poolAddresses.push(stakingPoolClient.appAddress.toString())
+    poolAlgodVersions.push((await stakingPoolClient.state.global.algodVer()).asString())
   }
 
-  const stakingPoolClient = await getSimulateStakingPoolClient(pool.poolAppId)
-  const stakingPoolGS = await stakingPoolClient.state.global.getAll()
-
-  const lastPayout = stakingPoolGS.lastPayout
-  const ewma = stakingPoolGS.weightedMovingAverage
-  const apy = ewma ? Number(ewma) / 10000 : undefined
-
-  return {
-    balance: BigInt(poolBalance),
-    lastPayout,
-    apy,
-  }
-}
-
-async function setValidatorPoolMetrics(validator: Validator, queryClient?: QueryClient) {
-  if (validator.pools.length === 0) return
-
-  try {
-    const epochRoundLength = BigInt(validator.config.epochRoundLength)
-    const params = await ParamsCache.getSuggestedParams()
-
-    const poolDataPromises = validator.pools.map((pool) => processPool(pool))
-    const poolsData = await Promise.all(poolDataPromises)
-
-    const { rewardsBalance, roundsSinceLastPayout, apy } = calculateValidatorPoolMetrics(
-      poolsData,
-      validator.state.totalAlgoStaked,
-      epochRoundLength,
-      BigInt(params.firstRound),
-    )
-
-    validator.rewardsBalance = rewardsBalance
-    validator.roundsSinceLastPayout = roundsSinceLastPayout
-    validator.apy = apy
-
-    // Seed query cache
-    poolsData.forEach((data, index) => {
-      if (data.apy !== undefined) {
-        queryClient?.setQueryData(['pool-apy', Number(validator.pools[index].poolAppId)], data.apy)
-      }
-    })
-    queryClient?.setQueryData(['available-rewards', validator.id], Number(rewardsBalance))
-    queryClient?.setQueryData(
-      ['rounds-since-last-payout', validator.id],
-      Number(roundsSinceLastPayout),
-    )
-    queryClient?.setQueryData(['validator-apy', validator.id], apy)
-  } catch (error) {
-    console.error(error)
-  }
-}
-
-/**
- * Fetches the validator's configuration, state, pools info, node pool assignments, reward token
- * (if one is configured), NFD for info, and pool metrics. When this is called by the
- * `fetchValidators` function, the `queryClient` parameter is passed in to seed the query cache.
- * @param {string | number} validatorId - The validator's ID.
- * @param {QueryClient} queryClient - The query client to seed the query cache.
- * @return {Promise<Validator>} The validator object.
- */
-export async function fetchValidator(
-  validatorId: string | number,
-  queryClient?: QueryClient,
-): Promise<Validator> {
-  try {
-    const validatorClient = await getSimulateValidatorClient()
-
-    const [config, state, validatorPoolData, nodePoolAssignments] = await Promise.all([
-      callGetValidatorConfig(Number(validatorId), validatorClient),
-      callGetValidatorState(Number(validatorId), validatorClient),
-      callGetPools(Number(validatorId), validatorClient),
-      callGetNodePoolAssignments(Number(validatorId), validatorClient),
-    ])
-
-    const Config = config.return!
-    const State = state.return!
-    const PoolsInfo = validatorPoolData.return!
-    const NodePoolAssignment = nodePoolAssignments.return!
-
-    if (!Config || !State || !PoolsInfo || !NodePoolAssignment) {
-      throw new ValidatorNotFoundError(`Validator with id "${Number(validatorId)}" not found!`)
-    }
-    const convertedPools: LocalPoolInfo[] = PoolsInfo.map(
-      (poolInfo: [bigint, number, bigint], i: number) => ({
+  // Transform raw pool data into LocalPoolInfo[]
+  return poolsData.map(
+    (poolInfo: [bigint, number, bigint], i: number) =>
+      ({
         poolId: BigInt(i + 1),
         poolAppId: poolInfo[0],
         totalStakers: poolInfo[1],
         totalAlgoStaked: poolInfo[2],
+        poolAddress: poolAddresses[i],
+        algodVersion: poolAlgodVersions[i],
+      }) satisfies LocalPoolInfo,
+  )
+}
+
+export async function fetchValidatorNodePoolAssignments(
+  validatorId: number | bigint,
+): Promise<NodePoolAssignmentConfig> {
+  const validatorClient = await getSimulateValidatorClient()
+  const assignments = await validatorClient.getNodePoolAssignments({
+    args: { validatorId },
+  })
+  return assignments
+}
+
+/**
+ * Creates a base validator object from the validator data
+ */
+export function createBaseValidator({
+  id,
+  config,
+  state,
+  pools,
+  nodePoolAssignment,
+}: {
+  id: number
+  config: Omit<ValidatorConfig, 'id'>
+  state: ValidatorCurState
+  pools: LocalPoolInfo[]
+  nodePoolAssignment: NodePoolAssignmentConfig
+}): Validator {
+  return {
+    id,
+    config,
+    state,
+    pools,
+    nodePoolAssignment,
+  }
+}
+
+export async function processPoolData(pool: LocalPoolInfo): Promise<PoolData> {
+  const poolAddress = algosdk.getApplicationAddress(pool.poolAppId)
+
+  // Define the promises for the async operations
+  const balancePromise = fetchAccountBalance(poolAddress.toString(), true)
+
+  const lastPayoutPromise = (async () => {
+    const stakingPoolClient = await getSimulateStakingPoolClient(pool.poolAppId)
+    return stakingPoolClient.state.global.lastPayout()
+  })()
+
+  const nodelyPerfPromise = fetchNodelyVotingPerf(poolAddress.toString())
+
+  // Execute all promises in parallel and wait for them to resolve
+  const [poolBalance, stakingPoolLastPayout, nodelyData] = await Promise.all([
+    balancePromise,
+    lastPayoutPromise,
+    nodelyPerfPromise,
+  ])
+
+  // Construct the PoolData object using the results
+  const poolData: PoolData = {
+    balance: poolBalance, // Using totalAlgoStaked from global state
+    lastPayout: stakingPoolLastPayout,
+    apy: nodelyData.apy,
+    extDeposits: nodelyData.total_external_deposits,
+  }
+
+  return poolData
+}
+/**
+ * Fetches all validator data and enrichment data in parallel. Used after adding a new validator
+ * to seed the query cache with complete data.
+ */
+export async function fetchValidator(validatorId: number): Promise<Validator> {
+  const [config, state, pools, nodePoolAssignment] = await Promise.all([
+    fetchValidatorConfig(validatorId),
+    fetchValidatorState(validatorId),
+    fetchValidatorPools(validatorId),
+    fetchValidatorNodePoolAssignments(validatorId),
+  ])
+
+  if (!config || !state || !pools || !nodePoolAssignment) {
+    throw new ValidatorNotFoundError(`Validator with id "${validatorId}" not found!`)
+  }
+
+  // Create base validator
+  const validator = createBaseValidator({
+    id: validatorId,
+    config,
+    state,
+    pools,
+    nodePoolAssignment,
+  })
+
+  // Fetch all enrichment data in parallel
+  const enrichmentPromises: Promise<void>[] = []
+
+  if (validator.config.rewardTokenId > 0) {
+    enrichmentPromises.push(
+      fetchAsset(validator.config.rewardTokenId).then((token) => {
+        validator.rewardToken = token
       }),
     )
-    // Transform raw data to Validator object
-    const validator: Validator = {
-      id: Number(Config.id),
-      config: Config,
-      state: State,
-      pools: convertedPools,
-      nodePoolAssignment: NodePoolAssignment,
-    }
-    await setValidatorPoolMetrics(validator, queryClient)
+  }
 
-    if (validator.config.rewardTokenId > 0) {
-      const rewardToken = await fetchAsset(validator.config.rewardTokenId)
-      validator.rewardToken = rewardToken
-    }
-
-    if (validator.config.entryGatingType === GatingType.AssetId) {
-      const gatingAssets = await Promise.all(
+  if (validator.config.entryGatingType === GatingType.AssetId) {
+    enrichmentPromises.push(
+      Promise.all(
         validator.config.entryGatingAssets.map(async (assetId) => {
           if (assetId > 0) {
             return fetchAsset(assetId)
           }
           return null
         }),
-      )
-
-      validator.gatingAssets = gatingAssets.filter(Boolean) as Asset[]
-    }
-
-    if (validator.config.nfdForInfo > 0) {
-      const nfd = await fetchNfd(validator.config.nfdForInfo, { view: 'full' })
-      validator.nfd = nfd
-    }
-
-    // Seed the query cache with the validator data
-    queryClient?.setQueryData(['validator', String(validatorId)], validator)
-
-    return validator
-  } catch (error) {
-    console.error(error)
-    throw error
+      ).then((assets) => {
+        validator.gatingAssets = assets.filter(Boolean) as algosdk.modelsv2.Asset[]
+      }),
+    )
   }
-}
 
-export async function fetchValidators(queryClient: QueryClient) {
-  try {
-    const validatorClient = await getSimulateValidatorClient()
-
-    // App call to fetch total number of validators
-    const numValidatorsResponse = await callGetNumValidators(validatorClient)
-
-    const numValidators = numValidatorsResponse.return!
-
-    if (!numValidators) {
-      return []
-    }
-
-    const allValidators: Array<Validator> = []
-    const batchSize = 10
-
-    for (let i = 0; i < numValidators; i += batchSize) {
-      const batchPromises = Array.from(
-        { length: Math.min(batchSize, Number(numValidators) - i) },
-        (_, index) => {
-          const validatorId = i + index + 1
-          return fetchValidator(validatorId, queryClient)
-        },
-      )
-
-      // Run batch calls in parallel, then filter out any undefined results
-      const batchResults = (await Promise.all(batchPromises)).filter(
-        (validator) => validator !== undefined,
-      ) as Array<Validator>
-
-      allValidators.push(...batchResults)
-    }
-
-    return allValidators
-  } catch (error) {
-    console.error(error)
-    throw error
+  if (validator.config.nfdForInfo > 0) {
+    enrichmentPromises.push(
+      fetchNfd(validator.config.nfdForInfo, { view: 'full' }).then((nfd) => {
+        validator.nfd = nfd
+      }),
+    )
   }
+
+  // Wait for all enrichment data
+  if (enrichmentPromises.length > 0) {
+    await Promise.all(enrichmentPromises)
+  }
+
+  return validator
 }
 
 export class ValidatorNotFoundError extends Error {}
@@ -250,14 +229,12 @@ export async function addValidator(
   nfdAppId: bigint,
   signer: algosdk.TransactionSigner,
   activeAddress: string,
-  authAddr?: string,
 ) {
   const validatorClient = await getValidatorClient(signer, activeAddress)
 
   const { addValidatorMbr } = (
     await validatorClient.send.getMbrAmounts({
       args: {},
-      signer: makeEmptyTransactionSigner(authAddr),
     })
   ).return!
 
@@ -268,7 +245,7 @@ export async function addValidator(
   })
 
   // Check balance
-  const requiredBalance = Number(payValidatorMbr.amount) + payValidatorMbr.fee + 1000
+  const requiredBalance = (payValidatorMbr.payment?.amount ?? 0n) + payValidatorMbr.fee + 1000n
   await BalanceChecker.check(activeAddress, requiredBalance, 'Add validator')
 
   const entryGatingType = Number(values.entryGatingType || 0)
@@ -276,7 +253,7 @@ export async function addValidator(
   const entryGatingAssets = new Array(4).fill(0n) as EntryGatingAssets
 
   for (let i = 0; i < values.entryGatingAssets.length && i < 4; i++) {
-    entryGatingAssets[i] = BigInt(values.entryGatingAssets[i] || 0n)
+    entryGatingAssets[i] = BigInt(values.entryGatingAssets[i] ?? 0n)
   }
 
   const validatorConfig: ValidatorConfig = {
@@ -288,13 +265,13 @@ export async function addValidator(
     entryGatingAddress,
     entryGatingAssets,
     gatingAssetMinBalance: BigInt(values.gatingAssetMinBalance || 0),
-    rewardTokenId: BigInt(values.rewardTokenId) || 0n,
-    rewardPerPayout: BigInt(values.rewardPerPayout) || 0n,
+    rewardTokenId: BigInt(values.rewardTokenId) ?? 0n,
+    rewardPerPayout: BigInt(values.rewardPerPayout) ?? 0n,
     epochRoundLength: Number(values.epochRoundLength),
-    percentToValidator: Number(values.percentToValidator) * 10000,
+    percentToValidator: Math.round(Number(values.percentToValidator) * 10000),
     validatorCommissionAddress: values.validatorCommissionAddress,
-    minEntryStake: AlgoAmount.Algos(BigInt(values.minEntryStake)).microAlgos,
-    maxAlgoPerPool: 0n,
+    minEntryStake: AlgoAmount.Algos(Number(values.minEntryStake)).microAlgos,
+    maxAlgoPerPool: AlgoAmount.Algos(Number(values.maxAlgoPerPool || 0) * 1_000_000).microAlgos,
     poolsPerNode: Number(values.poolsPerNode),
     sunsettingOn: 0n,
     sunsettingTo: 0n,
@@ -312,26 +289,6 @@ export async function addValidator(
     .send({ populateAppCallResources: true })
 
   return Number(result.returns![0])
-}
-
-export function callGetNodePoolAssignments(
-  validatorId: number | bigint,
-  validatorClient: ValidatorRegistryClient,
-) {
-  return validatorClient.send.getNodePoolAssignments({ args: { validatorId } })
-}
-
-export async function fetchNodePoolAssignments(
-  validatorId: string | number | bigint,
-): Promise<NodePoolAssignmentConfig> {
-  try {
-    const validatorClient = await getSimulateValidatorClient()
-
-    return (await callGetNodePoolAssignments(BigInt(validatorId), validatorClient)).return!
-  } catch (error) {
-    console.error(error)
-    throw error
-  }
 }
 
 export function callGetMbrAmounts(validatorClient: ValidatorRegistryClient) {
@@ -362,9 +319,15 @@ export async function addStakingPool(
     sender: activeAddress,
     amount: AlgoAmount.MicroAlgo(poolMbr),
   })
+
   // Check balance
   const requiredBalance =
-    Number(payValidatorAddPoolMbr.amount) + payValidatorAddPoolMbr.fee + 1000 + 1000 + 2000
+    (payValidatorAddPoolMbr.payment?.amount ?? 0n) +
+    payValidatorAddPoolMbr.fee +
+    1000n +
+    1000n +
+    2000n
+
   await BalanceChecker.check(activeAddress, requiredBalance, 'Add staking pool')
 
   const addPoolResponse = await validatorClient
@@ -389,19 +352,24 @@ export async function initStakingPoolStorage(
   signer: algosdk.TransactionSigner,
   activeAddress: string,
 ): Promise<void> {
-  const suggestedParams = await ParamsCache.getSuggestedParams()
+  const suggestedParams = await algorandClient.getSuggestedParams()
   const mbrAmount = optInRewardToken ? poolInitMbr + AlgoAmount.Algos(0.1).microAlgos : poolInitMbr
 
   const payPoolInitStorageMbr = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-    from: activeAddress,
-    to: algosdk.getApplicationAddress(poolAppId),
+    sender: activeAddress,
+    receiver: algosdk.getApplicationAddress(poolAppId),
     amount: mbrAmount,
     suggestedParams,
   })
 
   // Check balance
   const requiredBalance =
-    Number(payPoolInitStorageMbr.amount) + payPoolInitStorageMbr.fee + 1000 + 1000 + 3000
+    (payPoolInitStorageMbr.payment?.amount ?? 0n) +
+    payPoolInitStorageMbr.fee +
+    1000n +
+    1000n +
+    3000n
+
   await BalanceChecker.check(activeAddress, requiredBalance, 'Pool storage requirement payment')
 
   const stakingPoolClient = await getStakingPoolClient(poolAppId, signer, activeAddress)
@@ -425,7 +393,7 @@ export async function doesStakerNeedToPayMbr(
   authAddr?: string,
   client?: ValidatorRegistryClient,
 ): Promise<boolean> {
-  const validatorClient = client || (await getSimulateValidatorClient(activeAddress, authAddr))
+  const validatorClient = client || (await getSimulateValidatorClient(activeAddress))
 
   const result = await validatorClient.send.doesStakerNeedToPayMbr({
     args: { staker: activeAddress },
@@ -444,7 +412,7 @@ export async function findPoolForStaker(
   authAddr?: string,
   client?: ValidatorRegistryClient,
 ): Promise<FindPoolForStakerResponse> {
-  const validatorClient = client || (await getSimulateValidatorClient(activeAddress, authAddr))
+  const validatorClient = client || (await getSimulateValidatorClient(activeAddress))
 
   const result = await validatorClient
     .newGroup()
@@ -459,7 +427,7 @@ export async function findPoolForStaker(
       },
       extraFee: AlgoAmount.MicroAlgos(1000),
     })
-    .simulate({ allowEmptySignatures: true, allowUnnamedResources: true })
+    .simulate({ skipSignatures: true, allowUnnamedResources: true })
 
   const errorMessage = result.simulateResponse.txnGroups[0].failureMessage
 
@@ -480,15 +448,14 @@ export async function findPoolForStaker(
 
 export async function addStake(
   validatorId: number,
-  stakeAmount: bigint | number, // microalgos
+  stakeAmount: bigint, // microalgos
   valueToVerify: bigint,
   rewardTokenId: bigint,
   signer: algosdk.TransactionSigner,
   activeAddress: string,
-  authAddr?: string,
 ): Promise<ValidatorPoolKey> {
   const validatorClient = await getValidatorClient(signer, activeAddress)
-  const suggestedParams = await ParamsCache.getSuggestedParams()
+  const suggestedParams = await algorandClient.getSuggestedParams()
 
   const stakeTransferPayment = await validatorClient.appClient.createTransaction.fundAppAccount({
     sender: activeAddress,
@@ -497,38 +464,36 @@ export async function addStake(
 
   const needsOptInTxn = rewardTokenId > 0 && !(await isOptedInToAsset(activeAddress, rewardTokenId))
 
-  const simulateValidatorClient = await getSimulateValidatorClient(activeAddress, authAddr)
+  const simulateValidatorClient = await getSimulateValidatorClient(activeAddress)
 
   const simulateComposer = simulateValidatorClient
     .newGroup()
-    .gas({ args: {} })
-    .addStake(
-      // This the actual send of stake to the ac
-      {
-        args: {
-          stakedAmountPayment: stakeTransferPayment,
-          validatorId,
-          valueToVerify,
-        },
-        staticFee: AlgoAmount.MicroAlgos(240_000),
-        validityWindow: 200,
+    .gas({ args: [], note: '1' })
+    .gas({ args: [], note: '2' })
+    .addStake({
+      args: {
+        stakedAmountPayment: stakeTransferPayment,
+        validatorId,
+        valueToVerify,
       },
-    )
+      staticFee: AlgoAmount.MicroAlgos(240_000),
+      validityWindow: 200,
+    })
 
   if (needsOptInTxn) {
     const rewardTokenOptInTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-      from: activeAddress,
-      to: activeAddress,
+      sender: activeAddress,
+      receiver: activeAddress,
       amount: 0,
       assetIndex: Number(rewardTokenId),
       suggestedParams,
     })
 
-    simulateComposer.addTransaction(rewardTokenOptInTxn, makeEmptyTransactionSigner(authAddr))
+    simulateComposer.addTransaction(rewardTokenOptInTxn)
   }
 
   const simulateResults = await simulateComposer.simulate({
-    allowEmptySignatures: true,
+    skipSignatures: true,
     allowUnnamedResources: true,
   })
 
@@ -543,15 +508,16 @@ export async function addStake(
   )
 
   let requiredBalance =
-    BigInt(stakeTransferPayment.amount) + BigInt(stakeTransferPayment.fee) + feeAmount.microAlgos
+    (stakeTransferPayment.payment?.amount ?? 0n) + stakeTransferPayment.fee + feeAmount.microAlgos
 
   const composer = validatorClient
     .newGroup()
-    .gas({ args: [] })
+    .gas({ args: [], note: '1' })
+    .gas({ args: [], note: '2' })
     .addStake({
       args: {
         // --
-        // This the actual send of stake to the validator contract (which then sends to the staking pool)
+        // This is the actual send of stake to the validator contract (which then sends to the staking pool)
         stakedAmountPayment: { txn: stakeTransferPayment, signer },
         // --
         validatorId,
@@ -562,30 +528,30 @@ export async function addStake(
 
   if (needsOptInTxn) {
     const rewardTokenOptInTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-      from: activeAddress,
-      to: activeAddress,
+      sender: activeAddress,
+      receiver: activeAddress,
       amount: 0,
       assetIndex: Number(rewardTokenId),
       suggestedParams,
     })
 
-    requiredBalance += BigInt(rewardTokenOptInTxn.fee)
+    requiredBalance += rewardTokenOptInTxn.fee
 
     composer.addTransaction(rewardTokenOptInTxn)
   }
 
   // Check balance
-  await BalanceChecker.check(activeAddress, Number(requiredBalance), 'Add stake')
+  await BalanceChecker.check(activeAddress, requiredBalance, 'Add stake')
 
   const result = await composer.send({ populateAppCallResources: true })
 
-  return result.returns![1]!
+  return result.returns![2]!
 }
 
 export async function callFindPoolForStaker(
   validatorId: number | bigint,
   staker: string,
-  amountToStake: number | bigint,
+  amountToStake: bigint,
   validatorClient: ValidatorRegistryClient,
 ) {
   return validatorClient.send.findPoolForStaker({ args: { validatorId, staker, amountToStake } })
@@ -594,7 +560,7 @@ export async function callFindPoolForStaker(
 export async function isNewStakerToValidator(
   validatorId: number | bigint,
   staker: string,
-  minEntryStake: number | bigint,
+  minEntryStake: bigint,
 ) {
   const validatorClient = await getSimulateValidatorClient()
   const result = await callFindPoolForStaker(validatorId, staker, minEntryStake, validatorClient)
@@ -635,10 +601,6 @@ export async function fetchStakedPoolsForAccount(staker: string): Promise<Valida
   }
 }
 
-export async function callGetStakerInfo(staker: string, stakingPoolClient: StakingPoolClient) {
-  return stakingPoolClient.send.getStakerInfo({ args: { staker } })
-}
-
 export async function fetchStakerPoolData(
   poolKey: ValidatorPoolKey,
   staker: string,
@@ -653,9 +615,10 @@ export async function fetchStakerPoolData(
       lastPayoutRound = BigInt(stakingPoolGS.lastPayout.value)
     }
 
-    const result = await callGetStakerInfo(staker, stakingPoolClient)
-
-    const stakedInfo = result.return!
+    const stakedInfo = await stakingPoolClient.getStakerInfo({
+      args: { staker },
+      extraFee: AlgoAmount.MicroAlgos(20000),
+    })
 
     return {
       ...stakedInfo,
@@ -748,19 +711,14 @@ export async function fetchProtocolConstraints(
 
 export async function removeStake(
   poolAppId: bigint,
-  amountToUnstake: number,
+  amountToUnstake: bigint,
   rewardTokenId: bigint,
   signer: algosdk.TransactionSigner,
   activeAddress: string,
-  authAddr?: string,
 ) {
-  const suggestedParams = await ParamsCache.getSuggestedParams()
+  const suggestedParams = await algorandClient.getSuggestedParams()
 
-  const stakingPoolSimulateClient = await getSimulateStakingPoolClient(
-    poolAppId,
-    activeAddress,
-    authAddr,
-  )
+  const stakingPoolSimulateClient = await getSimulateStakingPoolClient(poolAppId, activeAddress)
 
   const needsOptInTxn = rewardTokenId > 0 && !(await isOptedInToAsset(activeAddress, rewardTokenId))
 
@@ -775,18 +733,18 @@ export async function removeStake(
 
   if (needsOptInTxn) {
     const rewardTokenOptInTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-      from: activeAddress,
-      to: activeAddress,
+      sender: activeAddress,
+      receiver: activeAddress,
       amount: 0,
       assetIndex: Number(rewardTokenId),
       suggestedParams,
     })
 
-    simulateComposer.addTransaction(rewardTokenOptInTxn, makeEmptyTransactionSigner(authAddr))
+    simulateComposer.addTransaction(rewardTokenOptInTxn)
   }
 
   const simulateResult = await simulateComposer.simulate({
-    allowEmptySignatures: true,
+    skipSignatures: true,
     allowUnnamedResources: true,
   })
 
@@ -813,20 +771,20 @@ export async function removeStake(
 
   if (needsOptInTxn) {
     const rewardTokenOptInTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-      from: activeAddress,
-      to: activeAddress,
+      sender: activeAddress,
+      receiver: activeAddress,
       amount: 0,
       assetIndex: Number(rewardTokenId),
       suggestedParams,
     })
 
-    requiredBalance += BigInt(rewardTokenOptInTxn.fee)
+    requiredBalance += rewardTokenOptInTxn.fee
 
     composer.addTransaction(rewardTokenOptInTxn)
   }
 
   // Check balance
-  await BalanceChecker.check(activeAddress, Number(requiredBalance), 'Remove stake')
+  await BalanceChecker.check(activeAddress, requiredBalance, 'Remove stake')
 
   await composer.send({ populateAppCallResources: true })
 }
@@ -835,14 +793,9 @@ export async function epochBalanceUpdate(
   poolAppId: bigint,
   signer: algosdk.TransactionSigner,
   activeAddress: string,
-  authAddr?: string,
 ): Promise<void> {
   try {
-    const stakingPoolSimulateClient = await getSimulateStakingPoolClient(
-      poolAppId,
-      activeAddress,
-      authAddr,
-    )
+    const stakingPoolSimulateClient = await getSimulateStakingPoolClient(poolAppId, activeAddress)
 
     const simulateResult = await stakingPoolSimulateClient
       .newGroup()
@@ -850,26 +803,17 @@ export async function epochBalanceUpdate(
         args: [],
         note: '1',
         staticFee: AlgoAmount.MicroAlgos(0),
-        signer: makeEmptyTransactionSigner(
-          'A7NMWS3NT3IUDMLVO26ULGXGIIOUQ3ND2TXSER6EBGRZNOBOUIQXHIBGDE',
-        ),
       })
       .gas({
         args: [],
         note: '2',
         staticFee: AlgoAmount.MicroAlgos(0),
-        signer: makeEmptyTransactionSigner(
-          'A7NMWS3NT3IUDMLVO26ULGXGIIOUQ3ND2TXSER6EBGRZNOBOUIQXHIBGDE',
-        ),
       })
       .epochBalanceUpdate({
         args: {},
         staticFee: AlgoAmount.MicroAlgos(240_000),
-        signer: makeEmptyTransactionSigner(
-          'A7NMWS3NT3IUDMLVO26ULGXGIIOUQ3ND2TXSER6EBGRZNOBOUIQXHIBGDE',
-        ),
       })
-      .simulate({ allowEmptySignatures: true, allowUnnamedResources: true })
+      .simulate({ skipSignatures: true, allowUnnamedResources: true })
 
     const feeAmount = AlgoAmount.MicroAlgos(
       1000 *
@@ -915,7 +859,7 @@ export async function fetchPoolInfo(
     const poolInfo = result.return!
 
     const stakingPoolClient = await getSimulateStakingPoolClient(poolKey.poolAppId)
-    const poolAddress = stakingPoolClient.appAddress
+    const poolAddress = stakingPoolClient.appAddress.toString()
 
     return {
       poolId: poolKey.poolId,
@@ -930,66 +874,19 @@ export async function fetchPoolInfo(
   }
 }
 
-export async function callGetPools(
-  validatorId: number | bigint,
-  validatorClient: ValidatorRegistryClient,
-) {
-  return validatorClient.send.getPools({
-    args: { validatorId },
-    note: encodeCallParams('getPools', { validatorId }),
-  })
-}
-
-export async function fetchValidatorPools(
-  validatorId: string | number,
-  client?: ValidatorRegistryClient,
-): Promise<LocalPoolInfo[]> {
-  try {
-    const validatorClient = client || (await getSimulateValidatorClient())
-
-    const result = await callGetPools(Number(validatorId), validatorClient)
-    const poolsInfo = result.return!
-
-    const poolAddresses: string[] = []
-    const poolAlgodVersions: (string | undefined)[] = []
-
-    for (const poolInfo of poolsInfo) {
-      const stakingPoolClient = await getSimulateStakingPoolClient(poolInfo[0])
-
-      poolAddresses.push(stakingPoolClient.appAddress)
-      poolAlgodVersions.push((await stakingPoolClient.state.global.algodVer()).asString())
-    }
-
-    return poolsInfo.map((poolInfo, i) => ({
-      poolId: BigInt(i + 1),
-      poolAppId: poolInfo[0],
-      totalStakers: poolInfo[1],
-      totalAlgoStaked: poolInfo[2],
-      poolAddress: poolAddresses[i],
-      algodVersion: poolAlgodVersions[i],
-    }))
-  } catch (error) {
-    console.error(error)
-    throw error
-  }
-}
-
 export async function claimTokens(
   pools: PoolInfo[],
   signer: algosdk.TransactionSigner,
   activeAddress: string,
-  authAddr?: string,
 ) {
   const [algorand, stakingFactory] = getStakingPoolFactory()
 
   const feeComposer = algorand.newGroup()
-  const simSigner = makeEmptyTransactionSigner(authAddr)
 
   for (const pool of pools) {
     const client = stakingFactory.getAppClientById({
       appId: pool.poolAppId,
       defaultSender: activeAddress,
-      defaultSigner: simSigner,
     })
     feeComposer
       .addAppCallMethodCall(
@@ -1004,7 +901,7 @@ export async function claimTokens(
   }
 
   const simulateResult = await feeComposer.simulate({
-    allowEmptySignatures: true,
+    skipSignatures: true,
     allowUnnamedResources: true,
   })
 
@@ -1056,7 +953,7 @@ export async function changeValidatorManager(
   const validatorClient = await getValidatorClient(signer, activeAddress)
 
   // Check balance
-  await BalanceChecker.check(activeAddress, 1000, 'Change validator manager')
+  await BalanceChecker.check(activeAddress, 1000n, 'Change validator manager')
 
   validatorClient.send.changeValidatorManager({
     args: { validatorId, manager },
@@ -1074,7 +971,7 @@ export async function changeValidatorSunsetInfo(
   const validatorClient = await getValidatorClient(signer, activeAddress)
 
   // Check balance
-  await BalanceChecker.check(activeAddress, 1000, 'Change validator sunset info')
+  await BalanceChecker.check(activeAddress, 1000n, 'Change validator sunset info')
 
   return validatorClient.send.changeValidatorSunsetInfo({
     args: { validatorId, sunsettingOn, sunsettingTo },
@@ -1092,7 +989,7 @@ export async function changeValidatorNfd(
   const validatorClient = await getValidatorClient(signer, activeAddress)
 
   // Check balance
-  await BalanceChecker.check(activeAddress, 1000, 'Change validator NFD')
+  await BalanceChecker.check(activeAddress, 1000n, 'Change validator NFD')
 
   return validatorClient.send.changeValidatorNfd({
     args: { validatorId, nfdAppId, nfdName },
@@ -1110,7 +1007,7 @@ export async function changeValidatorCommissionAddress(
   const validatorClient = await getValidatorClient(signer, activeAddress)
 
   // Check balance
-  await BalanceChecker.check(activeAddress, 1000, 'Change validator commission address')
+  await BalanceChecker.check(activeAddress, 1000n, 'Change validator commission address')
 
   return validatorClient.send.changeValidatorCommissionAddress({
     args: { validatorId, commissionAddress },
@@ -1123,15 +1020,15 @@ export async function changeValidatorRewardInfo(
   entryGatingType: number,
   entryGatingAddress: string,
   entryGatingAssets: EntryGatingAssets,
-  gatingAssetMinBalance: number | bigint,
-  rewardPerPayout: number | bigint,
+  gatingAssetMinBalance: bigint,
+  rewardPerPayout: bigint,
   signer: algosdk.TransactionSigner,
   activeAddress: string,
 ) {
   const validatorClient = await getValidatorClient(signer, activeAddress)
 
   // Check balance
-  await BalanceChecker.check(activeAddress, 1000, 'Change validator reward info')
+  await BalanceChecker.check(activeAddress, 1000n, 'Change validator reward info')
 
   return validatorClient.send.changeValidatorRewardInfo({
     args: {
@@ -1154,7 +1051,7 @@ export async function fetchPoolApy(poolAppId: bigint): Promise<number> {
     if (!ewma) {
       throw new Error(`Error fetching EWMA for pool ${poolAppId}`)
     }
-    const poolApy = Number(ewma) / 10000
+    const poolApy = (Number(ewma) / 10000) * 100
 
     return poolApy
   } catch (error) {
@@ -1178,28 +1075,28 @@ export async function linkPoolToNfd(
     const feeAmount = AlgoAmount.MicroAlgos(5000)
 
     const payBoxStorageMbrTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-      from: activeAddress,
-      to: nfdAppAddress,
+      sender: activeAddress,
+      receiver: nfdAppAddress,
       amount: boxStorageMbrAmount.microAlgos,
-      suggestedParams: await ParamsCache.getSuggestedParams(),
+      suggestedParams: await algorandClient.getSuggestedParams(),
     })
 
     const updateNfdAppCall = algosdk.makeApplicationNoOpTxnFromObject({
       appIndex: nfdAppId,
-      from: activeAddress,
-      suggestedParams: await ParamsCache.getSuggestedParams(),
+      sender: activeAddress,
+      suggestedParams: await algorandClient.getSuggestedParams(),
       appArgs: [
         new TextEncoder().encode('update_field'),
         new TextEncoder().encode('u.cav.algo.a'),
-        algosdk.decodeAddress(poolAppAddress).publicKey,
+        poolAppAddress.publicKey,
       ],
     })
 
     // Check balance
     const requiredBalance =
-      BigInt(payBoxStorageMbrTxn.amount) +
-      BigInt(payBoxStorageMbrTxn.fee) +
-      BigInt(updateNfdAppCall.fee) +
+      (payBoxStorageMbrTxn.payment?.amount ?? 0n) +
+      payBoxStorageMbrTxn.fee +
+      updateNfdAppCall.fee +
       feeAmount.microAlgos
 
     await BalanceChecker.check(activeAddress, requiredBalance, 'Link pool to NFD')

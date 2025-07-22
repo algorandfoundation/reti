@@ -35,26 +35,26 @@ This section provides instructions for running the protocol and UI in a local Al
 	pnpm install
 	```
 
-- **Start the local network**
+- **Start the local (fnet compatible) test network**
 
 	```bash
-	algokit localnet start
+	cd contracts; pnpm run localnet
 	```
 
 - **Bootstrap the validator**
 	
 	This command bootstraps a new master validator and funds two new test accounts. It also sets environment variables for LocalNet that will be used by the front-end.
 	```bash
-	pnpm run bootstrap
+	cd contracts/boostrap; pnpm run bootstrap
 	```
 
 - **Launch the UI**
 
 	```bash
-	pnpm run dev
+	cd ui; pnpm run dev:localnet
 	```
 
-## TestNet Development
+## FNet Development
 
 - **Navigate to the `ui` directory**
 
@@ -62,15 +62,20 @@ This section provides instructions for running the protocol and UI in a local Al
 	cd ui
 	```
 
-- **Create a `.env.testnet` file**
+- **Create a `.env.fnet` file**
 
-	Copy the TestNet variables from the [`.env.template`](./ui/.env.template) file into a new `.env.testnet` file. Check back often to make sure you're using the latest master validator app ID, set to `VITE_RETI_APP_ID`.
+	Copy the fnet variables from the [`.env.template`](./ui/.env.template) file into a new `.env.fnet` file. Check back often to make sure you're using the latest master validator app ID, set to `VITE_RETI_APP_ID`.
 
 - **Launch the UI**
 
 	```bash
-	pnpm run dev:testnet
+	pnpm run dev:fnet
 	```
+
+## Documentation
+- The documentation is currently available online at https://txnlab.gitbook.io/reti-open-pooling
+- The content is synced with the docs/gitbook branch of this repo inside the ./docs directory.
+  - The changes in that branch should periodically be merged into main but the docs/gitbook branch is the source of truth for the public docs site currently hosted at: https://txnlab.gitbook.io/reti-open-pooling
 
 ## Additional Resources
 

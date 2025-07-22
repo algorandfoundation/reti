@@ -24,6 +24,13 @@ export function Navigation() {
         </Link>
       )}
 
+      <Link
+        to="/institutional-support"
+        className="text-muted-foreground transition-colors hover:text-foreground [&.active]:text-foreground"
+      >
+        Institutional Support
+      </Link>
+
       <a
         href="https://txnlab.gitbook.io/reti-open-pooling"
         target="_blank"

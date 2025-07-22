@@ -1,8 +1,9 @@
 import { useWallet } from '@txnlab/use-wallet-react'
 import { AlgoDisplayAmount } from '@/components/AlgoDisplayAmount'
 import { DisplayAsset } from '@/components/DisplayAsset'
+import { InfoPopover } from '@/components/InfoPopover'
 import { Loading } from '@/components/Loading'
-import { NfdThumbnail } from '@/components/NfdThumbnail'
+import { NfdDisplay } from '@/components/NfdDisplay'
 import { Tooltip } from '@/components/Tooltip'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { EditCommissionAccount } from '@/components/ValidatorDetails/EditCommissionAccount'
@@ -12,10 +13,12 @@ import { EditNfdForInfo } from '@/components/ValidatorDetails/EditNfdForInfo'
 import { EditRewardPerPayout } from '@/components/ValidatorDetails/EditRewardPerPayout'
 import { EditSunsettingInfo } from '@/components/ValidatorDetails/EditSunsettingInfo'
 import { GatingType } from '@/constants/gating'
+import { Constraints } from '@/contracts/ValidatorRegistryClient'
 import { Validator } from '@/interfaces/validator'
 import { useRewardBalance } from '@/hooks/useRewardBalance'
 import { dayjs } from '@/utils/dayjs'
 import { ellipseAddressJsx } from '@/utils/ellipseAddress'
+import { calculateMaxAlgoPerPool } from '@/utils/contracts'
 import { ExplorerLink } from '@/utils/explorer'
 import { convertFromBaseUnits, formatAmount, formatAssetAmount } from '@/utils/format'
 import { getNfdAppFromViteEnvironment } from '@/utils/network/getNfdConfig'
@@ -24,21 +27,37 @@ const nfdAppUrl = getNfdAppFromViteEnvironment()
 
 interface DetailsProps {
   validator: Validator
+  constraints: Constraints
 }
 
-export function Details({ validator }: DetailsProps) {
+export function Details({ validator, constraints }: DetailsProps) {
   const { activeAddress } = useWallet()
   const isOwner = activeAddress === validator.config.owner
 
   const rewardBalanceQuery = useRewardBalance(validator)
+  const calculatedMaxAlgoPerPool = calculateMaxAlgoPerPool(validator, constraints)
 
   const renderRewardBalance = () => {
     if (rewardBalanceQuery.isLoading) {
       return <Loading inline />
     }
 
-    if (rewardBalanceQuery.error || rewardBalanceQuery.data === undefined) {
-      return <span className="text-destructive">Error</span>
+    if (rewardBalanceQuery.error) {
+      if (rewardBalanceQuery.error.message.includes('Pool 1 not found')) {
+        return (
+          <div className="flex items-center gap-x-1">
+            <span className="text-muted-foreground">No pools found</span>
+            <InfoPopover className="mx-1.5 relative sm:mx-1 sm:top-0" label="No pools found">
+              <p>You must create a pool for your validator and send reward tokens to it.</p>
+            </InfoPopover>
+          </div>
+        )
+      }
+      return <span className="text-destructive">Error: {rewardBalanceQuery.error.message}</span>
+    }
+
+    if (rewardBalanceQuery.data === undefined) {
+      return <span className="text-destructive">Error: No data</span>
     }
 
     if (!validator.rewardToken) {
@@ -114,7 +133,7 @@ export function Details({ validator }: DetailsProps) {
           <>
             <strong className="font-medium text-muted-foreground">Asset creator</strong>{' '}
             <div className="truncate">
-              <NfdThumbnail nameOrId={entryGatingAssets[0]} truncate tooltip link />
+              <NfdDisplay nameOrId={entryGatingAssets[0]} truncate tooltip link />
             </div>
           </>
         )
@@ -123,7 +142,7 @@ export function Details({ validator }: DetailsProps) {
           <>
             <strong className="font-medium text-muted-foreground">Segment of</strong>{' '}
             <div className="truncate">
-              <NfdThumbnail nameOrId={entryGatingAssets[0]} truncate tooltip link />
+              <NfdDisplay nameOrId={entryGatingAssets[0]} truncate tooltip link />
             </div>
           </>
         )
@@ -230,6 +249,20 @@ export function Details({ validator }: DetailsProps) {
                   />
                 </dd>
               </div>
+
+              <div className="py-4 grid grid-cols-[2fr_3fr] gap-4 xl:grid-cols-2">
+                <dt className="text-sm font-medium leading-normal text-muted-foreground">
+                  Max Stake Per Pool
+                </dt>
+                <dd className="flex items-center justify-between gap-x-2 text-sm leading-normal">
+                  <AlgoDisplayAmount
+                    amount={calculatedMaxAlgoPerPool}
+                    microalgos
+                    className="font-mono"
+                  />
+                </dd>
+              </div>
+
               <div className="py-4 grid grid-cols-[2fr_3fr] gap-4 xl:grid-cols-2">
                 <dt className="text-sm font-medium leading-normal text-muted-foreground">
                   Epoch Length

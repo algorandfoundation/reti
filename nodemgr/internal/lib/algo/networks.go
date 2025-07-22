@@ -75,19 +75,19 @@ func getDefaults(network string) NetworkConfig {
 	cfg := NetworkConfig{}
 	switch network {
 	case "mainnet":
-		cfg.RetiAppID = 0 // TODO
+		cfg.RetiAppID = 2714516089
 		cfg.NFDAPIUrl = "https://api.nf.domains"
-		cfg.NodeURL = "https://mainnet-api.algonode.cloud"
+		cfg.NodeURL = "https://mainnet-api.4160.nodely.dev"
 	case "testnet":
-		cfg.RetiAppID = 722930961
+		cfg.RetiAppID = 734834614 // 4.0 algod avm11 (deployed 02/28/2025)
 		cfg.NFDAPIUrl = "https://api.testnet.nf.domains"
-		cfg.NodeURL = "https://testnet-api.algonode.cloud"
+		cfg.NodeURL = "https://testnet-api.4160.nodely.dev"
 	case "betanet":
-		cfg.RetiAppID = 2019373722
+		cfg.RetiAppID = 2020356933 // 4.0 algod avm11
 		cfg.NFDAPIUrl = "https://api.betanet.nf.domains"
-		cfg.NodeURL = "https://betanet-api.algonode.cloud"
+		cfg.NodeURL = "https://betanet-api.4160.nodely.dev"
 	case "fnet":
-		cfg.RetiAppID = 639070
+		cfg.RetiAppID = 639070 // 4.0 algod avm11
 		cfg.NFDAPIUrl = "https://api.betanet.nf.domains"
 		cfg.NodeURL = "https://fnet-api.4160.nodely.dev"
 	case "sandbox":
@@ -95,12 +95,6 @@ func getDefaults(network string) NetworkConfig {
 		cfg.NFDAPIUrl = "https://api.testnet.nf.domains"
 		cfg.NodeURL = "http://localhost:4001"
 		cfg.NodeToken = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-	//-----
-	// VOI
-	//-----
-	case "voitestnet":
-		cfg.NFDAPIUrl = "https://api.nf.domains"
-		cfg.NodeURL = "https://testnet-api.voi.nodely.io"
 	}
 	return cfg
 }
