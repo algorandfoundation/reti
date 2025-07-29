@@ -58,6 +58,7 @@ if (import.meta.env.VITE_ALGOD_NETWORK === 'localnet') {
     },
     WalletId.KIBISIS,
     WalletId.EXODUS,
+    WalletId.W3_WALLET,
   ]
 }
 
