@@ -186,6 +186,15 @@ function InstitutionalSupport() {
                       <div className="flex items-start gap-3">
                         <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
                         <div>
+                          <div className="font-medium">Onboarding call</div>
+                          <div className="text-sm text-muted-foreground">
+                            1-hour video call to walk through desired configuration
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                        <div>
                           <div className="font-medium">Dedicated node VM</div>
                           <div className="text-sm text-muted-foreground">
                             99.95% uptime guarantee with enterprise infrastructure
