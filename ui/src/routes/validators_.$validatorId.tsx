@@ -8,6 +8,7 @@ import { Meta } from '@/components/Meta'
 import { PageMain } from '@/components/PageMain'
 import { ValidatorDetails } from '@/components/ValidatorDetails'
 import { DetailsHeader } from '@/components/ValidatorDetails/DetailsHeader'
+import { XGovSignUpBanner } from '@/components/XGovSignUpBanner'
 
 export const Route = createFileRoute('/validators_/$validatorId')({
   beforeLoad: () => {
@@ -36,7 +37,7 @@ function Dashboard() {
   const constraintsQuery = useSuspenseQuery(constraintsQueryOptions)
   const constraints = constraintsQuery.data
 
-  const { activeAddress } = useWallet()
+  const { activeAddress, transactionSigner } = useWallet()
 
   const stakesQuery = useQuery(stakesQueryOptions(activeAddress))
   const stakesByValidator = stakesQuery.data || []
@@ -46,6 +47,11 @@ function Dashboard() {
   return (
     <>
       <Meta title={pageTitle} />
+      <XGovSignUpBanner
+        validator={validator}
+        activeAddress={activeAddress}
+        innerSigner={transactionSigner}
+      />
       <DetailsHeader validator={validator} />
       <PageMain>
         <ValidatorDetails
