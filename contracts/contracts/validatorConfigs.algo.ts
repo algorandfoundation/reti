@@ -1,4 +1,6 @@
+import { FixedArray, uint64 } from '@algorandfoundation/algorand-typescript'
 import { MAX_NODES, MAX_POOLS_PER_NODE } from './constants.algo'
+import { Address, Uint16, Uint32, Uint8 } from '@algorandfoundation/algorand-typescript/arc4'
 
 export type ValidatorIdType = uint64
 
@@ -62,9 +64,9 @@ export type ValidatorConfig = {
     // 2) GATING_TYPE_ASSET_ID: specific asset id (val is asset id)
     // 3) GATING_TYPE_CREATED_BY_NFD_ADDRESSES: asset in nfd linked addresses (value is nfd appid)
     // 4) GATING_TYPE_SEGMENT_OF_NFD: segment of a particular NFD (value is root appid)
-    entryGatingType: uint8
+    entryGatingType: Uint8
     entryGatingAddress: Address // for GATING_TYPE_ASSETS_CREATED_BY
-    entryGatingAssets: StaticArray<uint64, 4> // all checked for GATING_TYPE_ASSET_ID, only first used for GATING_TYPE_CREATED_BY_NFD_ADDRESSES, and GATING_TYPE_SEGMENT_OF_NFD
+    entryGatingAssets: FixedArray<uint64, 4> // all checked for GATING_TYPE_ASSET_ID, only first used for GATING_TYPE_CREATED_BY_NFD_ADDRESSES, and GATING_TYPE_SEGMENT_OF_NFD
 
     // [CHANGEABLE] gatingAssetMinBalance specifies a minimum token base units amount needed of an asset owned by the specified
     // creator (if defined).  If 0, then they need to hold at lest 1 unit, but its assumed this is for tokens, ie: hold
@@ -81,13 +83,13 @@ export type ValidatorConfig = {
     // (by their % stake of the validators total)
     rewardPerPayout: uint64
 
-    epochRoundLength: uint32 // Number of rounds per epoch - ie: 30,857 for approx 24hrs w/ 2.8s round times
-    percentToValidator: uint32 // Payout percentage expressed w/ four decimals - ie: 50000 = 5% -> .0005 -
+    epochRoundLength: Uint32 // Number of rounds per epoch - ie: 30,857 for approx 24hrs w/ 2.8s round times
+    percentToValidator: Uint32 // Payout percentage expressed w/ four decimals - ie: 50000 = 5% -> .0005 -
 
     validatorCommissionAddress: Address // [CHANGEABLE] account that receives the validation commission each epoch payout (can be ZeroAddress)
     minEntryStake: uint64 // minimum stake required to enter pool - but must withdraw all if they want to go below this amount as well(!)
     maxAlgoPerPool: uint64 // maximum stake allowed per pool - if validator wants to restrict it.  0 means to use 'current' limits.
-    poolsPerNode: uint8 // Number of pools to allow per node (max of 3 is recommended)
+    poolsPerNode: Uint8 // Number of pools to allow per node (max of 3 is recommended)
 
     sunsettingOn: uint64 // [CHANGEABLE] timestamp when validator will sunset (if != 0)
     sunsettingTo: ValidatorIdType // [CHANGEABLE] validator id that validator is 'moving' to (if known)
@@ -103,7 +105,7 @@ export type ValidatorConfig = {
  * @property {uint64} rewardTokenHeldBack - Amount of the reward token held back in pool 1 for paying out stakers their rewards. This value is updated as reward tokens are assigned to stakers and must be assumed 'spent,' only reducing as the token is actually sent out by request of the validator itself.
  */
 export type ValidatorCurState = {
-    numPools: uint16 // current number of pools this validator has - capped at MaxPools
+    numPools: Uint16 // current number of pools this validator has - capped at MaxPools
     totalStakers: uint64 // total number of stakers across all pools of THIS validator
     totalAlgoStaked: uint64 // total amount staked to this validator across ALL of its pools
     // amount of the reward token held back in pool 1 for paying out stakers their rewards.
@@ -123,7 +125,7 @@ export type ValidatorCurState = {
  */
 export type PoolInfo = {
     poolAppId: uint64 // The App id of this staking pool contract instance
-    totalStakers: uint16
+    totalStakers: Uint16
     totalAlgoStaked: uint64
 }
 
@@ -134,7 +136,7 @@ export type PoolInfo = {
  * @property {StaticArray<uint64, typeof MAX_POOLS_PER_NODE>} poolAppIds - An array containing the application IDs of the pools associated with the node.
  */
 type NodeConfig = {
-    poolAppIds: StaticArray<uint64, typeof MAX_POOLS_PER_NODE>
+    poolAppIds: FixedArray<uint64, typeof MAX_POOLS_PER_NODE>
 }
 
 /**
@@ -144,7 +146,7 @@ type NodeConfig = {
  * @property {StaticArray<NodeConfig, typeof MAX_NODES>} nodes - A static array of node configurations with a maximum defined size.
  */
 export type NodePoolAssignmentConfig = {
-    nodes: StaticArray<NodeConfig, typeof MAX_NODES>
+    nodes: FixedArray<NodeConfig, typeof MAX_NODES>
 }
 
 /**
@@ -156,7 +158,7 @@ export type NodePoolAssignmentConfig = {
  */
 export type PoolTokenPayoutRatio = {
     // MUST TRACK THE MAX_POOLS CONSTANT (MAX_POOLS_PER_NODE * MAX_NODES) !
-    poolPctOfWhole: StaticArray<uint64, 24>
+    poolPctOfWhole: FixedArray<uint64, 24>
     // current round when last set - only pool 1 caller can trigger/calculate this and only once per epoch
     // set and compared against pool 1's lastPayout property.
     updatedForPayout: uint64
@@ -182,7 +184,7 @@ export type ValidatorInfo = {
     config: ValidatorConfig
     state: ValidatorCurState
     // MUST TRACK THE MAX_POOLS CONSTANT (MAX_POOLS_PER_NODE * MAX_NODES) !
-    pools: StaticArray<PoolInfo, 24>
+    pools: FixedArray<PoolInfo, 24>
     tokenPayoutRatio: PoolTokenPayoutRatio
     nodePoolAssignments: NodePoolAssignmentConfig
 }

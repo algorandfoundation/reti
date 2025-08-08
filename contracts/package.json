@@ -4,7 +4,7 @@
     "license": "MIT",
     "scripts": {
         "generate-client": "algokit generate client contracts/artifacts/ --language typescript  --output contracts/clients/{contract_name}Client.ts && ./update_contract_artifacts.sh",
-        "compile-contract": "tealscript contracts/*.algo.ts contracts/artifacts",
+        "compile-contract": "algokit compile ts contracts --out-dir artifacts",
         "generate-components": "algokit-generate-component contracts/artifacts/validatorRegistry.arc32.json contracts/artifacts/components",
         "noalgobuild": "pnpm run compile-contract -- --skip-algod && pnpm run generate-client",
         "build": "pnpm run compile-contract && pnpm run generate-client",
@@ -23,7 +23,8 @@
     },
     "devDependencies": {
         "@algorandfoundation/algokit-client-generator": "4.0.6",
-        "@algorandfoundation/tealscript": "0.106.1",
+        "@algorandfoundation/algorand-typescript": "1.0.0-alpha.74",
+        "@algorandfoundation/puya-ts": "1.0.0-alpha.74",
         "@joe-p/algokit-generate-component": "0.2.1",
         "@typescript-eslint/eslint-plugin": "8.8.1",
         "@typescript-eslint/parser": "8.8.1",
