@@ -76,13 +76,13 @@ describe('reti', () => {
         stakingPoolFactory = validatorMasterAlgorandClient.client.getTypedAppFactory(StakingPoolFactory)
         const { approvalProgram: stakingApprovalProgram } = await stakingPoolFactory.appFactory.compile({
             deployTimeParams: {
-                nfdRegistryAppId: 0,
+                NFD_REGISTRY_APP_ID: 0,
             },
         })
         validatorFactory = validatorMasterAlgorandClient.client.getTypedAppFactory(ValidatorRegistryFactory, {
             defaultSender: testAccount.addr,
             deployTimeParams: {
-                nfdRegistryAppId: 0,
+                NFD_REGISTRY_APP_ID: 0,
             },
         })
 
