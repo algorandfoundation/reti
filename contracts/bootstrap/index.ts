@@ -136,7 +136,7 @@ async function main() {
     const stakingPoolFactory = algorand.client.getTypedAppFactory(StakingPoolFactory)
     const { compiledApproval } = await stakingPoolFactory.appFactory.compile({
         deployTimeParams: {
-            nfdRegistryAppId: Number(registryAppID),
+            NFD_REGISTRY_APP_ID: Number(registryAppID),
         },
     })
     // first we have to deploy a staking pool contract instance for future use by the staking master contract which uses it as its
@@ -144,7 +144,7 @@ async function main() {
     const validatorFactory = algorand.client.getTypedAppFactory(ValidatorRegistryFactory, {
         defaultSender: creatorAcct.addr,
         deployTimeParams: {
-            nfdRegistryAppId: Number(registryAppID),
+            NFD_REGISTRY_APP_ID: Number(registryAppID),
         },
     })
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
