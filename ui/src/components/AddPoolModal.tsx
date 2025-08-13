@@ -78,6 +78,7 @@ export function AddPoolModal({
   const [poolAddress, setPoolAddress] = React.useState<string | null>(null)
   const [isInitMbrError, setIsInitMbrError] = React.useState<string | undefined>(undefined)
   const [enrolledPool, setEnrolledPool] = React.useState<boolean>(false)
+  const [isEnrollPoolError, setIsEnrollPoolError] = React.useState<string | undefined>(undefined)
   const [nfdToLink, setNfdToLink] = React.useState<Nfd | null>(null)
   const [isFetchingNfdToLink, setIsFetchingNfdToLink] = React.useState(false)
 
@@ -403,7 +404,7 @@ export function AddPoolModal({
         toast.error('Pool xGov enrollment request payment failed', { id: toastId })
       }
       console.error(error)
-      setIsInitMbrError(error?.message)
+      setIsEnrollPoolError(error?.message)
     } finally {
       setIsSigning(false)
     }
@@ -571,8 +572,8 @@ export function AddPoolModal({
                         />{' '}
                         payment is required.
                       </p>
-                      <FormMessage className={cn({ hidden: !isInitMbrError })}>
-                        {isInitMbrError}
+                      <FormMessage className={cn({ hidden: !isEnrollPoolError })}>
+                        {isEnrollPoolError}
                       </FormMessage>
                     </div>
                   </CollapsibleContent>
