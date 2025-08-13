@@ -1,11 +1,14 @@
 import { DisplayAsset } from '@/components/DisplayAsset'
 import { Constraints } from '@/contracts/ValidatorRegistryClient'
 import { useBlockTime } from '@/hooks/useBlockTime'
+import { useRegistry } from '@/hooks/useRegistry'
+import { useXGovs } from '@/hooks/useXGovs'
 import { Validator } from '@/interfaces/validator'
 import { calculateMaxStakers } from '@/utils/contracts'
 import { formatDuration } from '@/utils/dayjs'
 import { formatAmount, formatAssetAmount } from '@/utils/format'
 import { cn } from '@/utils/ui'
+import { getApplicationAddress } from 'algosdk'
 
 interface ValidatorInfoRowProps {
   validator: Validator
@@ -14,6 +17,9 @@ interface ValidatorInfoRowProps {
 
 export function ValidatorInfoRow({ validator, constraints }: ValidatorInfoRowProps) {
   const blockTime = useBlockTime()
+  const pools = validator.pools.map(p => getApplicationAddress(p.poolAppId).toString())
+  const xgovs = useXGovs(pools);
+  const numEnrolled = xgovs.data ? Object.keys(xgovs.data).length : 0
 
   const epochLength = validator.config.epochRoundLength
   const numRounds = formatAmount(epochLength)
@@ -46,7 +52,7 @@ export function ValidatorInfoRow({ validator, constraints }: ValidatorInfoRowPro
         validator.config.rewardTokenId === 0n ? 'grid-cols-2' : 'grid-cols-3',
       )}
     >
-      <div className="grid gap-5 grid-cols-2">
+      <div className="grid gap-5 grid-cols-3">
         <div>
           <h4 className="text-sm font-medium text-muted-foreground">Pools / Max</h4>
           <p className="text-sm">
@@ -68,6 +74,15 @@ export function ValidatorInfoRow({ validator, constraints }: ValidatorInfoRowPro
               ) : (
                 <>--</>
               )}
+            </span>
+          </p>
+        </div>
+        <div>
+          <h4 className="text-sm font-medium text-muted-foreground"><span className="text-algo-blue dark:text-algo-teal">xGov</span> / Max</h4>
+          <p className="text-sm">
+            <span className="whitespace-nowrap">
+              {numEnrolled} /{' '}
+              {validator.state.numPools}
             </span>
           </p>
         </div>

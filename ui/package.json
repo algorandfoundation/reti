@@ -37,7 +37,8 @@
     "vitest": "2.1.2"
   },
   "dependencies": {
-    "@algorandfoundation/algokit-utils": "8.0.3",
+    "@algorandfoundation/algokit-utils": "9.1.2",
+    "@algorandfoundation/xgov": "github:algorandfoundation/xgov-beta-ts#chore/upgrade-to-algosdk-3",
     "@blockshake/defly-connect": "1.2.1",
     "@hookform/resolvers": "3.9.0",
     "@perawallet/connect": "1.4.1",
@@ -65,7 +66,7 @@
     "@tremor/react": "3.18.3",
     "@txnlab/use-wallet-react": "4.0.0-beta.4",
     "@walletconnect/modal-sign-html": "2.7.0",
-    "algosdk": "3.1.0",
+    "algosdk": "3.4.0",
     "axios": "1.7.7",
     "axios-cache-interceptor": "1.6.0",
     "big.js": "6.2.2",

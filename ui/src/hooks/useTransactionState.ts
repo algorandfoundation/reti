@@ -1,4 +1,4 @@
-import type { TransactionState } from "@/api/transaction_state";
+import type { TransactionState } from "@/api/transactionState";
 import type { TransactionSigner } from "algosdk";
 import { useMemo, useState } from "react";
 

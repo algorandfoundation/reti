@@ -37,7 +37,7 @@ function Dashboard() {
   const constraintsQuery = useSuspenseQuery(constraintsQueryOptions)
   const constraints = constraintsQuery.data
 
-  const { activeAddress, transactionSigner } = useWallet()
+  const { activeAddress } = useWallet()
 
   const stakesQuery = useQuery(stakesQueryOptions(activeAddress))
   const stakesByValidator = stakesQuery.data || []
@@ -47,11 +47,7 @@ function Dashboard() {
   return (
     <>
       <Meta title={pageTitle} />
-      <XGovSignUpBanner
-        validator={validator}
-        activeAddress={activeAddress}
-        innerSigner={transactionSigner}
-      />
+      <XGovSignUpBanner validator={validator} />
       <DetailsHeader validator={validator} />
       <PageMain>
         <ValidatorDetails
