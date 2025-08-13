@@ -1,69 +1,71 @@
-import { encodeUint64 } from "algosdk";
-import { getSimulateXGovRegistryClient } from "./clients";
-import { GlobalKeysState, XGovBoxValue, XGovSubscribeRequestBoxValue } from "@algorandfoundation/xgov/registry";
+import { encodeUint64 } from 'algosdk'
+import { getSimulateXGovRegistryClient } from './clients'
+import {
+  GlobalKeysState,
+  XGovBoxValue,
+  XGovSubscribeRequestBoxValue,
+} from '@algorandfoundation/xgov/registry'
 
 export function requestBoxName(id: number): Uint8Array {
-  return new Uint8Array(
-    Buffer.concat([
-      Buffer.from("r"),
-      encodeUint64(id),
-    ]),
-  );
+  return new Uint8Array(Buffer.concat([Buffer.from('r'), encodeUint64(id)]))
 }
 
 export async function getXGovGlobalState(): Promise<GlobalKeysState | undefined> {
   try {
     const client = await getSimulateXGovRegistryClient()
-    return await client.state.global.getAll() as unknown as GlobalKeysState;
+    return (await client.state.global.getAll()) as unknown as GlobalKeysState
   } catch (e) {
-    console.error("failed to fetch global registry contract state", e);
-    return {} as GlobalKeysState;
+    console.error('failed to fetch global registry contract state', e)
+    return {} as GlobalKeysState
   }
 }
 
-export async function getXGovBoxes(xgovAddresses: string[]): Promise<{ [address: string]: XGovBoxValue }> {
+export async function getXGovBoxes(
+  xgovAddresses: string[],
+): Promise<{ [address: string]: XGovBoxValue }> {
   const client = await getSimulateXGovRegistryClient()
   const results = await Promise.allSettled(
     xgovAddresses.map(async (address) => {
-      const box = await client.state.box.xgovBox.value(address);
-      return { address, box };
-    })
-  );
-  
-  const boxes: { [address: string]: XGovBoxValue } = {};
+      const box = await client.state.box.xgovBox.value(address)
+      return { address, box }
+    }),
+  )
+
+  const boxes: { [address: string]: XGovBoxValue } = {}
   results.forEach((result) => {
-    if (result.status === "fulfilled") {
-      const { address, box } = result.value;
+    if (result.status === 'fulfilled') {
+      const { address, box } = result.value
       if (box) {
-        boxes[address] = box;
+        boxes[address] = box
       }
     }
-  });
-  
-  return boxes;
+  })
+
+  return boxes
 }
 
-export async function getXGovRequestBoxes(ownerAddress: string | null, xgovAddresses: string[]): Promise<{ [id: number]: XGovSubscribeRequestBoxValue } | null> {
+export async function getXGovRequestBoxes(
+  ownerAddress: string | null,
+  xgovAddresses: string[],
+): Promise<{ [id: number]: XGovSubscribeRequestBoxValue } | null> {
   try {
     const client = await getSimulateXGovRegistryClient()
     const requests = await client.state.box.requestBox.getMap()
-    console.log("Fetched request boxes:", requests);
 
-    let requestBoxes: { [id: number]: XGovSubscribeRequestBoxValue } = {}
+    const requestBoxes: { [id: number]: XGovSubscribeRequestBoxValue } = {}
     for (const [key, value] of requests) {
-      console.log("Processing request box:", key, value);
       if (
-          value.ownerAddr === ownerAddress && 
-          xgovAddresses.includes(value.xgovAddr) && 
-          value.relationType === 1n // Reti enum value for relation type
-        ) {
+        value.ownerAddr === ownerAddress &&
+        xgovAddresses.includes(value.xgovAddr) &&
+        value.relationType === 1n // Reti enum value for relation type
+      ) {
         requestBoxes[Number(key)] = value
       }
     }
 
-    return requestBoxes;
+    return requestBoxes
   } catch (e) {
-    console.error("failed to fetch request box by address", e);
-    return null;
+    console.error('failed to fetch request box by address', e)
+    return null
   }
 }

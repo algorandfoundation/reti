@@ -2,7 +2,10 @@ import algosdk from 'algosdk'
 import { FEE_SINK } from '@/constants/accounts'
 import { StakingPoolClient, StakingPoolFactory } from '@/contracts/StakingPoolClient'
 import { ValidatorRegistryClient } from '@/contracts/ValidatorRegistryClient'
-import { getRetiAppIdFromViteEnvironment, getXGovRegistryAppIdFromViteEnvironment } from '@/utils/env'
+import {
+  getRetiAppIdFromViteEnvironment,
+  getXGovRegistryAppIdFromViteEnvironment,
+} from '@/utils/env'
 import { getAlgodConfigFromViteEnvironment } from '@/utils/network/getAlgoClientConfigs'
 import { AlgorandClient } from '@algorandfoundation/algokit-utils'
 import { XGovRegistryClient } from '@algorandfoundation/xgov/registry'

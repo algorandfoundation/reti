@@ -1130,20 +1130,20 @@ export async function requestSubscribeXGov({
   setStatus,
   refetch,
   xgovFee,
-  pools
+  pools,
 }: RequestSubscribeXGovProps) {
-  if (!innerSigner) return;
+  if (!innerSigner) return
 
-  const signer = wrapTransactionSigner(innerSigner, setStatus);
+  const signer = wrapTransactionSigner(innerSigner, setStatus)
 
   if (!activeAddress || !signer) {
-    setStatus(new Error("No active address or transaction signer"));
-    return;
+    setStatus(new Error('No active address or transaction signer'))
+    return
   }
 
   if (!xgovFee) {
-    setStatus(new Error("xgovFee is not set"));
-    return;
+    setStatus(new Error('xgovFee is not set'))
+    return
   }
 
   const client = await getXGovRegistryClient(signer, activeAddress)
@@ -1155,7 +1155,7 @@ export async function requestSubscribeXGov({
       sender: activeAddress,
       receiver: client.appAddress,
       amount: xgovFee.microAlgo(),
-      note: `payment for enrolling ${pool} in xGov`
+      note: `payment for enrolling ${pool} in xGov`,
     })
 
     builder.requestSubscribeXgov({
@@ -1163,30 +1163,32 @@ export async function requestSubscribeXGov({
         xgovAddress: pool,
         ownerAddress: activeAddress,
         relationType: 1,
-        payment
-      }
+        payment,
+      },
     })
   }
 
   try {
-    const { confirmations: [confirmation] } = await builder.send({ populateAppCallResources: true });
+    const {
+      confirmations: [confirmation],
+    } = await builder.send({ populateAppCallResources: true })
 
     if (
       confirmation.confirmedRound !== undefined &&
       confirmation.confirmedRound > 0 &&
-      confirmation.poolError === ""
+      confirmation.poolError === ''
     ) {
-      setStatus("confirmed");
-      await sleep(800);
-      setStatus("idle");
-      await Promise.all(refetch.map(r => r()));
-      return;
+      setStatus('confirmed')
+      await sleep(800)
+      setStatus('idle')
+      await Promise.all(refetch.map((r) => r()))
+      return
     }
 
-    setStatus(new Error("Failed to confirm transaction submission"));
-  } catch (e: any) {
-    console.error("Error during requestSubscribeXGov:", e.message);
-    setStatus(new Error(`Failed to request subscription to xGov`));
-    return;
+    setStatus(new Error('Failed to confirm transaction submission'))
+  } catch (e) {
+    console.error('Error during requestSubscribeXGov:', (e as Error).message)
+    setStatus(new Error(`Failed to request subscription to xGov`))
+    return
   }
 }

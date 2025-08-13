@@ -9,7 +9,7 @@ export function getRetiAppIdFromViteEnvironment(): number {
 }
 
 export function getXGovRegistryAppIdFromViteEnvironment(): number {
-    if (!import.meta.env.VITE_XGOV_REGISTRY_APP_ID) {
+  if (!import.meta.env.VITE_XGOV_REGISTRY_APP_ID) {
     throw new Error(
       'Attempt to get xGov Registry app id without specifying VITE_XGOV_REGISTRY_APP_ID in the environment variables',
     )

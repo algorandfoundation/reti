@@ -85,7 +85,7 @@ export function AddPoolModal({
   const showRewardTokenInfo = totalSteps === 5
 
   const queryClient = useQueryClient()
-  const registry = useRegistry();
+  const registry = useRegistry()
   const { theme } = useTheme()
   const { transactionSigner, activeAddress } = useWallet()
 
@@ -366,7 +366,9 @@ export function AddPoolModal({
       }
 
       if (availableBalance < registry.data.xgovFee) {
-        throw new Error(`Insufficient balance: ${formatAlgoAmount(registry.data.xgovFee)} ALGO required`)
+        throw new Error(
+          `Insufficient balance: ${formatAlgoAmount(registry.data.xgovFee)} ALGO required`,
+        )
       }
 
       toast.loading(`Sign transaction to enroll pool...`, { id: toastId })
@@ -376,7 +378,7 @@ export function AddPoolModal({
       await requestSubscribeXGov({
         activeAddress,
         innerSigner: transactionSigner,
-        setStatus: () => { },
+        setStatus: () => {},
         refetch: [],
         xgovFee: registry.data.xgovFee,
         pools: [poolAddress],
@@ -469,7 +471,7 @@ export function AddPoolModal({
     event.preventDefault()
 
     if (showRewardTokenInfo) {
-      setCurrentStep(prev => prev + 1)
+      setCurrentStep((prev) => prev + 1)
     } else {
       handleOpenChange(false)
     }
@@ -563,7 +565,7 @@ export function AddPoolModal({
                       <p className="text-sm text-muted-foreground mb-2">
                         To request xGov enrollment for this pool, a{' '}
                         <AlgoDisplayAmount
-                          amount={registry.data?.xgovFee!}
+                          amount={registry.data?.xgovFee ?? 0n}
                           microalgos
                           className="text-foreground font-mono"
                         />{' '}
@@ -678,13 +680,7 @@ export function AddPoolModal({
               <div className={cn('my-6')}>
                 <ProgressBar
                   value={currentStep * (100 / totalSteps)}
-                  color={
-                    currentStep === 3
-                      ? theme === 'light'
-                        ? "blue"
-                        : "teal"
-                      : "rose"
-                  }
+                  color={currentStep === 3 ? (theme === 'light' ? 'blue' : 'teal') : 'rose'}
                   className="mt-3"
                   showAnimation
                 />
@@ -711,7 +707,7 @@ export function AddPoolModal({
                       Skip for now
                     </Button>
                     <Button
-                      className='bg-algo-blue text-white hover:bg-algo-blue/90 dark:bg-algo-teal dark:text-algo-black hover:dark:bg-algo-teal/90'
+                      className="bg-algo-blue text-white hover:bg-algo-blue/90 dark:bg-algo-teal dark:text-algo-black hover:dark:bg-algo-teal/90"
                       onClick={handleEnrollXGov}
                       disabled={isSigning}
                     >

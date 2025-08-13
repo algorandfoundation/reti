@@ -1,7 +1,6 @@
 import { DisplayAsset } from '@/components/DisplayAsset'
 import { Constraints } from '@/contracts/ValidatorRegistryClient'
 import { useBlockTime } from '@/hooks/useBlockTime'
-import { useRegistry } from '@/hooks/useRegistry'
 import { useXGovs } from '@/hooks/useXGovs'
 import { Validator } from '@/interfaces/validator'
 import { calculateMaxStakers } from '@/utils/contracts'
@@ -17,8 +16,8 @@ interface ValidatorInfoRowProps {
 
 export function ValidatorInfoRow({ validator, constraints }: ValidatorInfoRowProps) {
   const blockTime = useBlockTime()
-  const pools = validator.pools.map(p => getApplicationAddress(p.poolAppId).toString())
-  const xgovs = useXGovs(pools);
+  const pools = validator.pools.map((p) => getApplicationAddress(p.poolAppId).toString())
+  const xgovs = useXGovs(pools)
   const numEnrolled = xgovs.data ? Object.keys(xgovs.data).length : 0
 
   const epochLength = validator.config.epochRoundLength
@@ -78,11 +77,12 @@ export function ValidatorInfoRow({ validator, constraints }: ValidatorInfoRowPro
           </p>
         </div>
         <div>
-          <h4 className="text-sm font-medium text-muted-foreground"><span className="text-algo-blue dark:text-algo-teal">xGov</span> / Max</h4>
+          <h4 className="text-sm font-medium text-muted-foreground">
+            <span className="text-algo-blue dark:text-algo-teal">xGov</span> / Max
+          </h4>
           <p className="text-sm">
             <span className="whitespace-nowrap">
-              {numEnrolled} /{' '}
-              {validator.state.numPools}
+              {numEnrolled} / {validator.state.numPools}
             </span>
           </p>
         </div>
