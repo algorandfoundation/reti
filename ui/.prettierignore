@@ -8,3 +8,5 @@ public
 .idea
 
 src/contracts
+
+src/routeTree.gen.ts

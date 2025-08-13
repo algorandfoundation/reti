@@ -72,6 +72,14 @@ func (r *Reti) GetAvgApr(poolAppID uint64) (*big.Int, error) {
 	return algo.GetUint128FromGlobalState(appInfo.Params.GlobalState, StakePoolEWMA)
 }
 
+func (r *Reti) GetBinRoundStart(poolAppID uint64) (uint64, error) {
+	appInfo, err := r.algoClient.GetApplicationByID(poolAppID).Do(context.Background())
+	if err != nil {
+		return 0, err
+	}
+	return algo.GetUint64FromGlobalState(appInfo.Params.GlobalState, StakePoolBinRoundStart)
+}
+
 func (r *Reti) GetRoundsPerDay(poolAppID uint64) (uint64, error) {
 	appInfo, err := r.algoClient.GetApplicationByID(poolAppID).Do(context.Background())
 	if err != nil {

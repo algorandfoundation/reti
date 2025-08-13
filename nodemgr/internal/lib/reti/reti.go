@@ -27,8 +27,6 @@ type Reti struct {
 	ValidatorId uint64
 	NodeNum     uint64
 
-	poolTmplAppId uint64
-
 	validatorContract *abi.Contract
 	poolContract      *abi.Contract
 
@@ -97,11 +95,6 @@ func (r *Reti) LoadState(ctx context.Context) error {
 	if r.RetiAppId == 0 {
 		return errors.New("reti App id not defined")
 	}
-	appInfo, err := r.algoClient.GetApplicationByID(r.RetiAppId).Do(ctx)
-	if err != nil {
-		return err
-	}
-	r.poolTmplAppId, _ = algo.GetUint64FromGlobalState(appInfo.Params.GlobalState, VldtrPoolTmplId)
 
 	// Now load all the data from the chain for our validator, etc.
 	if r.ValidatorId != 0 {

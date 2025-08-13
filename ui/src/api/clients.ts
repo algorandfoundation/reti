@@ -8,7 +8,10 @@ import { AlgorandClient } from '@algorandfoundation/algokit-utils'
 import { XGovRegistryClient } from '@algorandfoundation/xgov/registry'
 
 const algodConfig = getAlgodConfigFromViteEnvironment()
-const algorandClient = AlgorandClient.fromConfig({ algodConfig }).setDefaultValidityWindow(200)
+
+export const algorandClient = AlgorandClient.fromConfig({ algodConfig })
+  .setDefaultValidityWindow(200)
+  .setSuggestedParamsCacheTimeout(1000 * 60 * 5) // 5 minutes
 
 const RETI_APP_ID = BigInt(getRetiAppIdFromViteEnvironment())
 const XGOV_REGISTRY_APP_ID = BigInt(getXGovRegistryAppIdFromViteEnvironment())

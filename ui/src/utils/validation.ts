@@ -186,7 +186,7 @@ export const validatorSchemas = {
       })
       .refine(
         (val) => {
-          const match = val.match(/^\d+(\.\d{1,6})?$/)
+          const match = val.match(/^(\d*\.?\d{1,6}|\d+)$/)
           return match !== null
         },
         {
@@ -196,6 +196,34 @@ export const validatorSchemas = {
       .refine((val) => AlgoAmount.Algos(Number(val)).microAlgos >= constraints.minEntryStake, {
         message: `Must be at least ${AlgoAmount.MicroAlgos(Number(constraints.minEntryStake)).algos} ALGO`,
       })
+  },
+  maxAlgoPerPool: (constraints: Constraints) => {
+    return z
+      .string()
+      .refine((val) => val === '' || (!isNaN(Number(val)) && Number(val) > 0), {
+        message: 'Must be a positive number or empty',
+      })
+      .refine(
+        (val) => {
+          if (val === '') return true
+          const match = val.match(/^(\d+)$/)
+          return match !== null
+        },
+        {
+          message: 'Must be a whole number (no decimals)',
+        },
+      )
+      .refine(
+        (val) => {
+          if (val === '') return true
+          // Convert the input (in millions) to microAlgos for comparison
+          const inputMicroAlgos = AlgoAmount.Algos(Number(val) * 1_000_000).microAlgos
+          return inputMicroAlgos <= constraints.maxAlgoPerPool
+        },
+        {
+          message: `Cannot exceed ${Number(AlgoAmount.MicroAlgos(constraints.maxAlgoPerPool).algos) / 1_000_000}M ALGO (protocol maximum)`,
+        },
+      )
   },
   poolsPerNode: (constraints: Constraints) => {
     return z
@@ -251,7 +279,7 @@ export const rewardTokenRefinement = (
         message: 'Required field',
       })
     } else if (decimals) {
-      const regex = new RegExp(`^\\d+(\\.\\d{1,${Number(decimals)}})?$`)
+      const regex = new RegExp(`^(\\d*\\.?\\d{1,${Number(decimals)}}|\\d+)$`)
 
       if (!regex.test(rewardPerPayout)) {
         ctx.addIssue({

@@ -12,14 +12,16 @@ import {
   VisibilityState,
 } from '@tanstack/react-table'
 import { useWallet } from '@txnlab/use-wallet-react'
-import { Ban, FlaskConical, MoreHorizontal, Sunset } from 'lucide-react'
+import { Ban, FlaskConical, MessageCircleWarning, MoreHorizontal, Sunset } from 'lucide-react'
 import * as React from 'react'
 import { AddStakeModal } from '@/components/AddStakeModal'
 import { AlgoDisplayAmount } from '@/components/AlgoDisplayAmount'
 import { ClaimTokens } from '@/components/ClaimTokens'
 import { DataTableColumnHeader } from '@/components/DataTableColumnHeader'
-import { NfdThumbnail } from '@/components/NfdThumbnail'
+import { Loading } from '@/components/Loading'
+import { NfdDisplay } from '@/components/NfdDisplay'
 import { Tooltip } from '@/components/Tooltip'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -38,6 +40,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { UnstakeModal } from '@/components/UnstakeModal'
+import { Constraints } from '@/contracts/ValidatorRegistryClient'
 import { StakerValidatorData } from '@/interfaces/staking'
 import { Validator } from '@/interfaces/validator'
 import {
@@ -54,7 +57,6 @@ import { ellipseAddressJsx } from '@/utils/ellipseAddress'
 import { formatAssetAmount } from '@/utils/format'
 import { globalFilterFn } from '@/utils/table'
 import { cn } from '@/utils/ui'
-import { Constraints } from '@/contracts/ValidatorRegistryClient'
 
 interface StakingTableProps {
   validators: Validator[]
@@ -118,7 +120,7 @@ export function StakingTable({
               className="link underline-offset-4"
             >
               {nfdAppId > 0 ? (
-                <NfdThumbnail nameOrId={nfdAppId} />
+                <NfdDisplay nameOrId={nfdAppId} />
               ) : (
                 <span className="font-mono whitespace-nowrap">
                   {ellipseAddressJsx(validator.config.owner)}
@@ -317,55 +319,58 @@ export function StakingTable({
     <>
       <div>
         <div className="lg:flex items-center gap-x-2 py-3">
-          <h2 className="mb-2 text-lg font-semibold lg:flex-1 lg:my-1">My Stakes</h2>
+          <h2 className="flex items-center mb-2 text-lg font-semibold lg:flex-1 lg:my-1">
+            My Stakes {activeAddress && isLoading && <Loading size="sm" inline className="ml-3" />}
+          </h2>
         </div>
-        <div className="rounded-md border">
-          <Table className="border-collapse border-spacing-0">
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
-                    return (
-                      <TableHead key={header.id} className={cn('first:px-4')}>
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(header.column.columnDef.header, header.getContext())}
-                      </TableHead>
-                    )
-                  })}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id} className={cn('first:px-4')}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
-                    ))}
+        {!activeAddress ? (
+          <Alert className="max-w-md">
+            <MessageCircleWarning className="h-5 w-5 -mt-1" />
+            <AlertTitle>Wallet not connected</AlertTitle>
+            <AlertDescription className="text-muted-foreground">
+              Connect a wallet to manage your staking positions.
+            </AlertDescription>
+          </Alert>
+        ) : (
+          <div className="rounded-md border">
+            <Table className="border-collapse border-spacing-0">
+              <TableHeader>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => {
+                      return (
+                        <TableHead key={header.id} className={cn('first:px-4')}>
+                          {header.isPlaceholder
+                            ? null
+                            : flexRender(header.column.columnDef.header, header.getContext())}
+                        </TableHead>
+                      )
+                    })}
                   </TableRow>
-                ))
-              ) : (
-                <TableRow className="hover:bg-transparent">
-                  <TableCell colSpan={columns.length} className="h-24 text-center">
-                    {isLoading ? 'Loading...' : 'No results'}
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
-
-        {/* {table.getFilteredRowModel().rows.length > 0 && (
-          <div className="flex items-center justify-end space-x-2 py-4">
-            <div className="flex-1 text-sm text-muted-foreground">
-              {table.getFilteredSelectedRowModel().rows.length} of{' '}
-              {table.getFilteredRowModel().rows.length} row(s) selected.
-            </div>
+                ))}
+              </TableHeader>
+              <TableBody>
+                {table.getRowModel().rows?.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id} className={cn('first:px-4')}>
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow className="hover:bg-transparent">
+                    <TableCell colSpan={columns.length} className="h-24 text-center">
+                      {isLoading ? 'Loading...' : 'No results'}
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
           </div>
-        )} */}
+        )}
       </div>
 
       <AddStakeModal

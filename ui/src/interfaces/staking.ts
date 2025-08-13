@@ -14,3 +14,9 @@ export interface StakerValidatorData {
   lastPayout: bigint
   pools: Array<StakerPoolData>
 }
+
+export interface StakerChartData {
+  name: string
+  value: number
+  href: string
+}

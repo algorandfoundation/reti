@@ -283,6 +283,7 @@ func PoolLedger(ctx context.Context, command *cli.Command) error {
 	if adjustedEpoch < uint64(params.FirstRoundValid) {
 		adjustedEpoch = uint64(params.FirstRoundValid) - (uint64(params.FirstRoundValid) % uint64(config.EpochRoundLength))
 	}
+	binRoundStart, _ := App.retiClient.GetBinRoundStart(pools[poolId-1].PoolAppId)
 	roundsPerDay, _ := App.retiClient.GetRoundsPerDay(pools[poolId-1].PoolAppId)
 
 	pctTimeInEpoch := func(stakerEntry uint64) int {
@@ -350,6 +351,9 @@ func PoolLedger(ctx context.Context, command *cli.Command) error {
 	if nextEpoch < uint64(params.FirstRoundValid) {
 		fmt.Fprintf(tw, "Missed payout by: %d\t\n", uint64(params.FirstRoundValid)-nextEpoch)
 	}
+	fmt.Fprintf(tw, "Rounds Per Day: %d\t\n", roundsPerDay)
+	fmt.Fprintf(tw, "End Of Day block: %d\t\n", binRoundStart+roundsPerDay)
+	fmt.Fprintf(tw, "in approx: %s\t\n", (time.Duration(binRoundStart+roundsPerDay-uint64(params.FirstRoundValid)) * blockTime).Round(time.Second))
 	tw.Flush()
 	slog.Info(out.String())
 	return nil

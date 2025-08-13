@@ -1,22 +1,23 @@
-import { useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { useWallet } from '@txnlab/use-wallet-react'
-import { constraintsQueryOptions, stakesQueryOptions, validatorsQueryOptions } from '@/api/queries'
+import {
+  constraintsQueryOptions,
+  numValidatorsQueryOptions,
+  stakesQueryOptions,
+} from '@/api/queries'
 import { Loading } from '@/components/Loading'
 import { Meta } from '@/components/Meta'
 import { PageHeader } from '@/components/PageHeader'
 import { PageMain } from '@/components/PageMain'
 import { StakingTable } from '@/components/StakingTable'
 import { ValidatorTable } from '@/components/ValidatorTable'
+import { useValidators } from '@/hooks/useValidators'
 
 export const Route = createFileRoute('/')({
-  beforeLoad: () => {
-    return {
-      validatorsQueryOptions,
-    }
-  },
-  loader: ({ context: { queryClient, validatorsQueryOptions } }) => {
-    queryClient.ensureQueryData(validatorsQueryOptions(queryClient))
+  beforeLoad: ({ context: { queryClient } }) => {
+    // Prefetch number of validators
+    return queryClient.prefetchQuery(numValidatorsQueryOptions)
   },
   component: Dashboard,
   pendingComponent: () => <Loading size="lg" className="opacity-50" flex />,
@@ -29,17 +30,19 @@ export const Route = createFileRoute('/')({
 })
 
 function Dashboard() {
-  const queryClient = useQueryClient()
-  const validatorsQuery = useSuspenseQuery(validatorsQueryOptions(queryClient))
-  const validators = validatorsQuery.data
+  const { activeAddress } = useWallet()
 
   const constraintsQuery = useSuspenseQuery(constraintsQueryOptions)
   const constraints = constraintsQuery.data
 
-  const { activeAddress } = useWallet()
+  const { validators, isLoading: validatorsLoading, error: validatorsError } = useValidators()
 
   const stakesQuery = useQuery(stakesQueryOptions(activeAddress))
   const stakesByValidator = stakesQuery.data || []
+
+  if (validatorsError) {
+    return <div>Error loading validators: {validatorsError.message}</div>
+  }
 
   return (
     <>
@@ -52,15 +55,16 @@ function Dashboard() {
       <PageMain>
         <div className="space-y-8">
           <StakingTable
-            validators={validators || []}
+            validators={validators}
             stakesByValidator={stakesByValidator}
-            isLoading={stakesQuery.isLoading}
             constraints={constraints}
+            isLoading={validatorsLoading || stakesQuery.isLoading}
           />
           <ValidatorTable
-            validators={validators || []}
+            validators={validators}
             stakesByValidator={stakesByValidator}
             constraints={constraints}
+            isLoading={validatorsLoading}
           />
         </div>
       </PageMain>

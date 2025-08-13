@@ -28,6 +28,14 @@ type ValidatorInfo struct {
 	LocalPools map[uint64]uint64
 }
 
+func (vi ValidatorInfo) IsSunset() bool {
+	sunsetVal := vi.Config.SunsettingOn
+	if sunsetVal == 0 {
+		return false
+	}
+	return time.Now().After(time.Unix(int64(sunsetVal), 0))
+}
+
 type NodeConfig struct {
 	PoolAppIds []uint64
 }
@@ -793,7 +801,6 @@ func (r *Reti) ChangeValidatorManagerAddress(id uint64, sender types.Address, ma
 			id,
 			managerAddress,
 		},
-		ForeignApps: []uint64{r.poolTemplateAppId()},
 		BoxReferences: []types.AppBoxReference{
 			{AppID: 0, Name: GetValidatorListBoxName(id)},
 			{AppID: 0, Name: nil}, // extra i/o
@@ -831,7 +838,6 @@ func (r *Reti) ChangeValidatorCommissionAddress(id uint64, sender types.Address,
 			id,
 			commissionAddress,
 		},
-		ForeignApps: []uint64{r.poolTemplateAppId()},
 		BoxReferences: []types.AppBoxReference{
 			{AppID: 0, Name: GetValidatorListBoxName(id)},
 			{AppID: 0, Name: nil}, // extra i/o
@@ -895,7 +901,6 @@ func (r *Reti) AddStakingPool(nodeNum uint64) (*ValidatorPoolKey, error) {
 			info.Config.ID,
 			nodeNum,
 		},
-		ForeignApps: []uint64{r.poolTemplateAppId()},
 		BoxReferences: []types.AppBoxReference{
 			{AppID: 0, Name: GetValidatorListBoxName(info.Config.ID)},
 			{AppID: 0, Name: nil}, // extra i/o
@@ -967,7 +972,6 @@ func (r *Reti) MovePoolToNode(poolAppId uint64, nodeNum uint64) error {
 			nodeNum,
 		},
 		ForeignApps: []uint64{
-			r.poolTemplateAppId(),
 			poolAppId,
 		},
 		BoxReferences: []types.AppBoxReference{
@@ -1499,8 +1503,4 @@ func (r *Reti) GetNumValidators() (uint64, error) {
 		return 0, err
 	}
 	return algo.GetUint64FromGlobalState(appInfo.Params.GlobalState, VldtrNumValidators)
-}
-
-func (r *Reti) poolTemplateAppId() uint64 {
-	return r.poolTmplAppId
 }

@@ -12,6 +12,12 @@ export function useRewardBalance(validator: Validator) {
   return useQuery({
     queryKey: ['reward-balance', validator.id],
     queryFn: () => fetchRemainingRewardsBalance(validator),
+    retry: (retryCount, error) => {
+      if (error?.message.includes('Pool 1 not found')) {
+        return false
+      }
+      return retryCount < 3
+    },
     enabled: !!rewardTokenId,
     staleTime,
   })

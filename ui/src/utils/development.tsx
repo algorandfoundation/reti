@@ -8,6 +8,7 @@ import { useRouter } from '@tanstack/react-router'
 import algosdk from 'algosdk'
 import { toast } from 'sonner'
 import { fetchAccountInformation, fetchAsset } from '@/api/algod'
+import { algorandClient } from '@/api/clients'
 import { epochBalanceUpdate } from '@/api/contracts'
 import { StakerPoolData } from '@/interfaces/staking'
 import { ToStringTypes } from '@/interfaces/utils'
@@ -16,7 +17,6 @@ import { InsufficientBalanceError } from '@/utils/balanceChecker'
 import { convertToStringTypes } from '@/utils/convert'
 import { convertToBaseUnits, formatAssetAmount } from '@/utils/format'
 import { getAlgodConfigFromViteEnvironment } from '@/utils/network/getAlgoClientConfigs'
-import { ParamsCache } from '@/utils/paramsCache'
 import { ValidatorConfig } from '@/contracts/ValidatorRegistryClient'
 
 const algodConfig = getAlgodConfigFromViteEnvironment()
@@ -266,7 +266,7 @@ export async function sendRewardTokensToPool(
     const poolAddress = algosdk.getApplicationAddress(poolAppId)
 
     const atc = new algosdk.AtomicTransactionComposer()
-    const suggestedParams = await ParamsCache.getSuggestedParams()
+    const suggestedParams = await algorandClient.getSuggestedParams()
 
     const assetTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
       sender: activeAddress,

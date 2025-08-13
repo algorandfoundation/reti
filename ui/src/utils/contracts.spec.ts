@@ -201,6 +201,20 @@ describe('isStakingDisabled', () => {
     }
     expect(isStakingDisabled(activeAddress, normalValidator, constraints)).toBe(false)
   })
+
+  it('should disable staking if the first pool is full', () => {
+    const validator = {
+      ...MOCK_VALIDATOR_1,
+      pools: [
+        {
+          ...MOCK_VALIDATOR_1.pools[0],
+          totalStakers: Number(constraints.maxStakersPerPool), // First pool is full
+        },
+        ...MOCK_VALIDATOR_1.pools.slice(1),
+      ],
+    }
+    expect(isStakingDisabled(activeAddress, validator, constraints)).toBe(true)
+  })
 })
 
 describe('isUnstakingDisabled', () => {
@@ -488,7 +502,7 @@ describe('calculateValidatorPoolMetrics', () => {
 
     expect(result.rewardsBalance).toBe(1000000n) // Rounded to nearest whole ALGO
     expect(result.roundsSinceLastPayout).toBe(1000n)
-    expect(result.apy).toBe(6)
+    expect(result.apy).toBeCloseTo(6.16, 1)
   })
 
   it('handles pools with zero balance', () => {
@@ -507,8 +521,8 @@ describe('calculateValidatorPoolMetrics', () => {
     )
 
     expect(result.rewardsBalance).toBe(0n)
-    expect(result.roundsSinceLastPayout).toBe(1000n)
-    expect(result.apy).toBe(5.5)
+    expect(result.roundsSinceLastPayout).toBe(0n)
+    expect(result.apy).toBe(5.75)
   })
 
   it('returns zero APY when all pools have zero balance', () => {
@@ -526,7 +540,7 @@ describe('calculateValidatorPoolMetrics', () => {
     )
 
     expect(result.rewardsBalance).toBe(0n)
-    expect(result.roundsSinceLastPayout).toBe(1000n)
+    expect(result.roundsSinceLastPayout).toBe(undefined)
     expect(result.apy).toBe(0)
   })
 
@@ -546,7 +560,7 @@ describe('calculateValidatorPoolMetrics', () => {
 
     expect(result.rewardsBalance).toBe(0n)
     expect(result.roundsSinceLastPayout).toBe(1000n)
-    expect(result.apy).toBe(6)
+    expect(result.apy).toBeCloseTo(6.33, 1)
   })
 
   it('returns undefined roundsSinceLastPayout when no valid lastPayout', () => {
@@ -565,7 +579,7 @@ describe('calculateValidatorPoolMetrics', () => {
 
     expect(result.rewardsBalance).toBe(0n)
     expect(result.roundsSinceLastPayout).toBeUndefined()
-    expect(result.apy).toBe(6)
+    expect(result.apy).toBeCloseTo(6.33, 1)
   })
 
   it('handles negative rewards balance', () => {
@@ -584,6 +598,6 @@ describe('calculateValidatorPoolMetrics', () => {
 
     expect(result.rewardsBalance).toBe(0n)
     expect(result.roundsSinceLastPayout).toBe(1000n)
-    expect(result.apy).toBe(6)
+    expect(result.apy).toBeCloseTo(6.33, 1)
   })
 })

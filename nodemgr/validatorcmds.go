@@ -395,6 +395,22 @@ func refundAllStakers(ctx context.Context, command *cli.Command) error {
 	signerAddr, _ := types.DecodeAddress(signer)
 	misc.Infof(App.logger, "signing unstake with:%s", signer)
 
+	info, errs := refundAllPools(signerAddr)
+	if len(errs) == 0 {
+		managerAddr, _ := types.DecodeAddress(App.retiClient.Info().Config.Manager)
+		// go offline in each of the pools as they should all be 0 balances now
+		for _, pool := range info.Pools {
+			misc.Infof(App.logger, "offlining pool app id:%d", pool)
+			if err := App.retiClient.GoOffline(pool.PoolAppId, managerAddr); err != nil {
+				misc.Errorf(App.logger, "error offlining pool app id:%d, err:%v", pool, err)
+			}
+		}
+	}
+
+	return nil
+}
+
+func refundAllPools(signerAddr types.Address) (reti.ValidatorInfo, []error) {
 	var (
 		info   = App.retiClient.Info()
 		fanOut = syncutil.NewFanOut(20)
@@ -424,7 +440,7 @@ func refundAllStakers(ctx context.Context, command *cli.Command) error {
 	for send := range unstakeRequests {
 		fanOut.Run(func(val any) error {
 			sendReq := val.(removeStakeRequest)
-			err = App.retiClient.RemoveStake(sendReq.poolKey, signerAddr, sendReq.staker, 0)
+			err := App.retiClient.RemoveStake(sendReq.poolKey, signerAddr, sendReq.staker, 0)
 			if err != nil {
 				return fmt.Errorf("error removing stake for pool %d, staker:%s, err:%v", sendReq.poolKey.PoolAppId, sendReq.staker.String(), err)
 			} else {
@@ -435,20 +451,9 @@ func refundAllStakers(ctx context.Context, command *cli.Command) error {
 	}
 	errs := fanOut.Wait()
 	for _, err := range errs {
-		misc.Errorf(App.logger, "error unstaking: %v", err)
+		misc.Errorf(App.logger, "error refunding: %v", err)
 	}
-	if len(errs) == 0 {
-		managerAddr, _ := types.DecodeAddress(App.retiClient.Info().Config.Manager)
-		// go offline in each of the pools as they should all be 0 balances now
-		for _, pool := range info.Pools {
-			misc.Infof(App.logger, "offlining pool app id:%d", pool)
-			if err := App.retiClient.GoOffline(pool.PoolAppId, managerAddr); err != nil {
-				misc.Errorf(App.logger, "error offlining pool app id:%d, err:%v", pool, err)
-			}
-		}
-	}
-
-	return nil
+	return info, errs
 }
 
 func emptyTokenRewards(ctx context.Context, command *cli.Command) error {

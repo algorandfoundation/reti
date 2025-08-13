@@ -1,3 +1,4 @@
+import { AlgoAmount } from '@algorandfoundation/algokit-utils/types/amount'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
@@ -16,6 +17,15 @@ import { AlgoSymbol } from '@/components/AlgoSymbol'
 import { AssetLookup } from '@/components/AssetLookup'
 import { InfoPopover } from '@/components/InfoPopover'
 import { Tooltip } from '@/components/Tooltip'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -37,6 +47,7 @@ import {
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { GatingType } from '@/constants/gating'
+import { Constraints } from '@/contracts/ValidatorRegistryClient'
 import { useBlockTime } from '@/hooks/useBlockTime'
 import { InsufficientBalanceError } from '@/utils/balanceChecker'
 import {
@@ -50,7 +61,6 @@ import { getNfdAppFromViteEnvironment } from '@/utils/network/getNfdConfig'
 import { isValidName, trimExtension } from '@/utils/nfd'
 import { cn } from '@/utils/ui'
 import { entryGatingRefinement, rewardTokenRefinement, validatorSchemas } from '@/utils/validation'
-import { Constraints } from '@/contracts/ValidatorRegistryClient'
 
 const nfdAppUrl = getNfdAppFromViteEnvironment()
 
@@ -71,6 +81,8 @@ export function AddValidatorForm({ constraints }: AddValidatorFormProps) {
   const [isFetchingGatingAssetIndex, setIsFetchingGatingAssetIndex] = React.useState<number>(-1)
   const [epochTimeframe, setEpochTimeframe] = React.useState('blocks')
   const [isSigning, setIsSigning] = React.useState(false)
+  const [showRewardTokenAlert, setShowRewardTokenAlert] = React.useState(false)
+  const [validatorId, setValidatorId] = React.useState<string>('')
 
   const { transactionSigner, activeAddress } = useWallet()
 
@@ -94,6 +106,7 @@ export function AddValidatorForm({ constraints }: AddValidatorFormProps) {
       percentToValidator: validatorSchemas.percentToValidator(constraints),
       validatorCommissionAddress: validatorSchemas.validatorCommissionAddress(),
       minEntryStake: validatorSchemas.minEntryStake(constraints),
+      maxAlgoPerPool: validatorSchemas.maxAlgoPerPool(constraints),
       poolsPerNode: validatorSchemas.poolsPerNode(constraints),
     })
     .superRefine((data, ctx) => rewardTokenRefinement(data, ctx, rewardToken?.params.decimals))
@@ -119,6 +132,7 @@ export function AddValidatorForm({ constraints }: AddValidatorFormProps) {
       percentToValidator: '',
       validatorCommissionAddress: '',
       minEntryStake: '',
+      maxAlgoPerPool: '',
       poolsPerNode: '1',
     },
   })
@@ -314,7 +328,7 @@ export function AddValidatorForm({ constraints }: AddValidatorFormProps) {
         gatingAssetMinBalance,
       }
 
-      const validatorId = await addValidator(
+      const newValidatorId = await addValidator(
         newValues,
         nfdForInfoAppId,
         transactionSigner,
@@ -324,7 +338,7 @@ export function AddValidatorForm({ constraints }: AddValidatorFormProps) {
       toast.success(
         <div className="flex items-center gap-x-2">
           <MonitorCheck className="h-5 w-5 text-foreground" />
-          <span>Validator {Number(validatorId)} created!</span>
+          <span>Validator {Number(newValidatorId)} created!</span>
         </div>,
         {
           id: toastId,
@@ -333,12 +347,21 @@ export function AddValidatorForm({ constraints }: AddValidatorFormProps) {
       )
 
       // Fetch validator data
-      const newData = await fetchValidator(validatorId)
+      const newData = await fetchValidator(newValidatorId)
 
       // Seed/update query cache with new data
       setValidatorQueriesData(queryClient, newData)
 
-      await navigate({ to: '/' })
+      setValidatorId(String(newValidatorId))
+
+      if (rewardToken) {
+        setShowRewardTokenAlert(true)
+      } else {
+        await navigate({
+          to: '/validators/$validatorId',
+          params: { validatorId: String(newValidatorId) },
+        })
+      }
     } catch (error) {
       if (error instanceof InsufficientBalanceError) {
         toast.error('Insufficient balance', {
@@ -534,6 +557,44 @@ export function AddValidatorForm({ constraints }: AddValidatorFormProps) {
                       </div>
                     </FormControl>
                     <FormMessage>{errors.minEntryStake?.message}</FormMessage>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="maxAlgoPerPool"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel htmlFor="max-algo-per-pool-input">
+                      Max stake per pool
+                      <InfoPopover className={infoPopoverClassName} label="Max stake per pool">
+                        Maximum total stake allowed in a pool in millions of ALGO (e.g., 50 for 50M
+                        ALGO). Protocol maximum will be used if left blank.
+                      </InfoPopover>
+                    </FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                          <AlgoSymbol
+                            verticalOffset={1}
+                            className="text-muted-foreground"
+                            aria-hidden="true"
+                          />
+                        </div>
+                        <Input
+                          id="max-algo-per-pool-input"
+                          className="pl-7"
+                          placeholder="Enter millions (e.g., 50)"
+                          {...field}
+                        />
+                      </div>
+                    </FormControl>
+                    <FormDescription>
+                      Leave blank to use protocol maximum (
+                      {AlgoAmount.MicroAlgos(constraints.maxAlgoPerPool).algos / 1_000_000}M).
+                    </FormDescription>
+                    <FormMessage>{errors.maxAlgoPerPool?.message}</FormMessage>
                   </FormItem>
                 )}
               />
@@ -1150,6 +1211,37 @@ export function AddValidatorForm({ constraints }: AddValidatorFormProps) {
           </div>
         </form>
       </Form>
+
+      <AlertDialog open={showRewardTokenAlert} onOpenChange={setShowRewardTokenAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader className="text-left">
+            <AlertDialogTitle>Important: Reward Token Setup</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-4 text-left">
+              <span>To complete the reward token setup, you will need to:</span>
+              <ol className="list-decimal list-inside space-y-3 border rounded-md p-4 my-2 bg-muted/50">
+                <li>Create Pool 1 for your validator</li>
+                <li>
+                  Send reward tokens to the pool (you'll see detailed instructions during pool
+                  creation)
+                </li>
+              </ol>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction
+              onClick={() => {
+                setShowRewardTokenAlert(false)
+                navigate({
+                  to: '/validators/$validatorId',
+                  params: { validatorId: String(validatorId) },
+                })
+              }}
+            >
+              Go to Validator
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

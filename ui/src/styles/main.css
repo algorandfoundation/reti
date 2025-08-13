@@ -171,8 +171,9 @@
   background-color: hsl(var(--muted));
   text-align: center;
   text-indent: -1px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
-    'Courier New', monospace;
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
+    monospace;
   font-size: 1rem;
   line-height: 1.5rem;
   font-weight: 400;

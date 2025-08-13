@@ -265,7 +265,7 @@ func (d *Daemon) setAverageBlockTime(ctx context.Context) error {
 	// Get the latest block via the algoClient.Status() call, then
 	// fetch the most recent X blocks - fetching the timestamps from each and
 	// determining the approximate current average block time.
-	const numRounds = 10
+	const numRounds = 20
 
 	blockTime, err := algo.CalcBlockTimes(ctx, d.algoClient, numRounds)
 	if err != nil {
@@ -345,26 +345,36 @@ func (d *Daemon) removeExpiredKeys(ctx context.Context, partKeys algo.PartKeysBy
 
 func (d *Daemon) ensureParticipation(ctx context.Context, poolAccounts map[string]onlineInfo, partKeys algo.PartKeysByAddress) error {
 	/** conditions to cover for participation keys / accounts
-	1) account has NO local participation key (online or offline) (ie: they could've moved to new node)
+	1) Pool account is marked as sunsetted - ensure OFFLINE (!) - skip - do NOT online it again
+	2) account has NO local participation key (online or offline) (ie: they could've moved to new node)
 		Create brand new 'GeneratedKeyLengthInDays' length key - will go online as part of subsequent checks once part.
 		key reaches first valid.
-	2) account is NOT online but has one or more part keys
+	3) account is NOT online but has one or more part keys
 		Go online against newest part key - done
-	3) account has ONE local part key AND IS ONLINE
+	4) account has ONE local part key AND IS ONLINE
 		Assumed 'steady state' - check lifetime of CURRENT key and if expiring within 1 day
 		If expiring soon, create new key w/ firstValid set to existing key's lastValid - 1 day of rounds.
-	4) account is online and has multiple local part keys
+	5) account is online and has multiple local part keys
 		If Online (assumed steady state when a future pending part key has been created)
 			Sort keys descending by first valid
 			If part key first valid is >= current round AND not current part. key id for account
 				Go online against this new key - done.  prior key will be removed a week later when it's out of valid range
 	*/
+	// check online accounts against pools that are sunset - offline them
+	if err := d.ensureSunsetPoolsOffline(ctx, poolAccounts, partKeys); err != nil {
+		return err
+	}
+	// if sunset, nothing else to do..
+	if App.retiClient.Info().IsSunset() {
+		return nil
+	}
+
 	// get accounts without (local) part. keys at all.
 	if err := d.ensureParticipationNoKeysYet(ctx, poolAccounts, partKeys); err != nil {
 		return err
 	}
-	// Not online...
-	if err := d.ensureParticipationNotOnline(ctx, poolAccounts, partKeys); err != nil {
+	// Not online - needs to go online...
+	if err := d.ensureParticipationGoesOnline(ctx, poolAccounts, partKeys); err != nil {
 		return err
 	}
 	// account has 1 part key, IS ONLINE and might expire soon (needing to generate new key)
@@ -374,6 +384,30 @@ func (d *Daemon) ensureParticipation(ctx context.Context, poolAccounts map[strin
 	// account is online - see if there's a newer key to 'switch' to
 	if err := d.ensureParticipationCheckNeedsSwitched(ctx, poolAccounts, partKeys); err != nil {
 		return err
+	}
+	return nil
+}
+
+func (d *Daemon) ensureSunsetPoolsOffline(_ context.Context, poolAccounts map[string]onlineInfo, partKeys algo.PartKeysByAddress) error {
+	var (
+		err            error
+		managerAddr, _ = types.DecodeAddress(App.retiClient.Info().Config.Manager)
+	)
+
+	if !App.retiClient.Info().IsSunset() {
+		return nil
+	}
+	for account, info := range poolAccounts {
+		if info.isOnline {
+			// doesn't matter if the keys are on this node.. offline it anyway
+			misc.Infof(d.logger, "validator past sunset time, account:%s being marked offline", account)
+			err = App.retiClient.GoOffline(info.poolAppId, managerAddr)
+			if err != nil {
+				return fmt.Errorf("unable to go offline for account:%s, pool app id:%d, err:%w", account, info.poolAppId, err)
+			}
+			misc.Infof(d.logger, "account:%s marked offline.  Make SURE TO LEAVE DAEMON RUNNING FOR 320 ronds AND INTO NEXT EPOCH so stakes can be refunded!", account)
+			continue
+		}
 	}
 	return nil
 }
@@ -395,7 +429,7 @@ func (d *Daemon) ensureParticipationNoKeysYet(ctx context.Context, poolAccounts 
 }
 
 // Handle: account is NOT online but has one or more part keys - go online against newest
-func (d *Daemon) ensureParticipationNotOnline(_ context.Context, poolAccounts map[string]onlineInfo, partKeys algo.PartKeysByAddress) error {
+func (d *Daemon) ensureParticipationGoesOnline(_ context.Context, poolAccounts map[string]onlineInfo, partKeys algo.PartKeysByAddress) error {
 	var (
 		err            error
 		managerAddr, _ = types.DecodeAddress(App.retiClient.Info().Config.Manager)
@@ -575,6 +609,7 @@ func (d *Daemon) EpochUpdater(ctx context.Context) {
 				info = App.retiClient.Info()
 			)
 			for i, pool := range info.Pools {
+				// only process pools specific to this node (for epoch updates)
 				if _, found := info.LocalPools[uint64(i+1)]; !found {
 					continue
 				}
@@ -614,6 +649,14 @@ func (d *Daemon) EpochUpdater(ctx context.Context) {
 							}).Set(),
 						),
 					)
+					if err == nil {
+						// already sunset and just did an epoch update.. refund if we can
+						if App.retiClient.Info().IsSunset() {
+							managerAddr, _ := types.DecodeAddress(info.Config.Manager)
+							refundAllPools(managerAddr)
+						}
+
+					}
 					return err
 				}, nil)
 			}
