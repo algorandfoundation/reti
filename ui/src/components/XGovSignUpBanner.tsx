@@ -111,8 +111,8 @@ export function XGovSignUpBanner({ validator }: XGovSignUpBannerProps) {
   }
 
   return (
-    <div className="mt-6 md:rounded-xl mx-auto max-w-3xl w-full bg-algo-blue dark:bg-algo-teal">
-      <div className="flex flex-col md:flex-row gap-4 justify-between items-start p-4">
+    <div className="md:mt-6 md:rounded-xl mx-auto max-w-3xl w-full bg-algo-blue dark:bg-algo-teal">
+      <div className="flex flex-col md:flex-row gap-4 justify-between md:items-start p-4">
         <div>
           <h2 className="text-lg mb-1 text-center md:text-left font-semibold text-white dark:text-algo-black">
             xGov Pool Manager Sign Up
@@ -120,7 +120,7 @@ export function XGovSignUpBanner({ validator }: XGovSignUpBannerProps) {
           <p className="text-sm mb-1 text-center md:text-left text-gray-200 dark:text-gray-600">
             Participate in xGov on behalf of your pool{numPools > 1 ? 's' : ''}!
           </p>
-          <p className="text-sm text-white dark:text-algo-black">
+          <p className="text-center text-sm text-white dark:text-algo-black">
             Cost is
             <AlgoDisplayAmount
               amount={registry.data?.xgovFee ?? 0n}
