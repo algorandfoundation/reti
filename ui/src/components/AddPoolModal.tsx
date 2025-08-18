@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ProgressBar } from '@tremor/react'
 import { useWallet } from '@txnlab/use-wallet-react'
-import algosdk from 'algosdk'
+import algosdk, { getApplicationAddress } from 'algosdk'
 import { CheckIcon, Copy } from 'lucide-react'
 import * as React from 'react'
 import { useForm } from 'react-hook-form'
@@ -57,6 +57,7 @@ import { isValidName } from '@/utils/nfd'
 import { cn } from '@/utils/ui'
 import { useRegistry } from '@/hooks/useRegistry'
 import { useTheme } from 'next-themes'
+import { useRequestBoxes } from '@/hooks/useRequestBoxes'
 
 interface AddPoolModalProps {
   validator: Validator | null
@@ -89,6 +90,9 @@ export function AddPoolModal({
   const registry = useRegistry()
   const { theme } = useTheme()
   const { transactionSigner, activeAddress } = useWallet()
+
+  const pools = validator?.pools.map((p) => getApplicationAddress(p.poolAppId).toString())
+  const xGovRequests = useRequestBoxes(activeAddress, pools ?? [])
 
   const accountInfoQuery = useQuery({
     queryKey: ['account-info', activeAddress],
@@ -328,6 +332,7 @@ export function AddPoolModal({
       // Refetch validator data
       const newData = await fetchValidator(validator!.id)
       setValidatorQueriesData(queryClient, newData)
+      setValidator(newData)
 
       setCurrentStep(3)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -380,7 +385,7 @@ export function AddPoolModal({
         activeAddress,
         innerSigner: transactionSigner,
         setStatus: () => {},
-        refetch: [],
+        refetch: [xGovRequests.refetch],
         xgovFee: registry.data.xgovFee,
         pools: [poolAddress],
       })

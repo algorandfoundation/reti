@@ -106,7 +106,7 @@ export function XGovSignUpBanner({ validator }: XGovSignUpBannerProps) {
     )
   } else if (errorMessage) {
     enrollMessage = <span className="text-red-500">{errorMessage}</span>
-  } else if (numEnrollable <= 0) {
+  } else if (numEnrollable < 1) {
     enrollMessage = <>All pools enrolled</>
   }
 
@@ -146,7 +146,7 @@ export function XGovSignUpBanner({ validator }: XGovSignUpBannerProps) {
                 pools: unenrolledPools,
               })
             }
-            disabled={requests.data ? !(Object.keys(requests.data).length > 0) : true || isPending}
+            disabled={isPending || numEnrollable < 1}
           >
             {enrollMessage}
           </Button>
