@@ -8,7 +8,7 @@ import {
 } from '@/utils/env'
 import { getAlgodConfigFromViteEnvironment } from '@/utils/network/getAlgoClientConfigs'
 import { AlgorandClient } from '@algorandfoundation/algokit-utils'
-// @ts-expect-error
+// @ts-expect-error module resolution issue
 import { XGovRegistryClient } from '@algorandfoundation/xgov/registry'
 
 const algodConfig = getAlgodConfigFromViteEnvironment()
