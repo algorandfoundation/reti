@@ -91,7 +91,7 @@ export function XGovSignUpBanner({ validator }: XGovSignUpBannerProps) {
       <>
         <Loading size="sm" className="opacity-50" />
         {status === 'signing'
-          ? `Sign in ${activeWallet?.name}`
+          ? `Sign in ${activeWallet?.id}`
           : status === 'sending'
             ? 'Sending'
             : null}
