@@ -1,7 +1,11 @@
 import { encodeUint64 } from 'algosdk'
 import { getSimulateXGovRegistryClient } from './clients'
-// @ts-expect-error module resolution issue
-import { GlobalKeysState, XGovBoxValue, XGovSubscribeRequestBoxValue } from '@algorandfoundation/xgov/registry'
+import {
+  GlobalKeysState,
+  XGovBoxValue,
+  XGovSubscribeRequestBoxValue,
+  // @ts-expect-error module resolution issue
+} from '@algorandfoundation/xgov/registry'
 
 export function requestBoxName(id: number): Uint8Array {
   return new Uint8Array(Buffer.concat([Buffer.from('r'), encodeUint64(id)]))
