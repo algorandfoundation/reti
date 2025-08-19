@@ -11,15 +11,15 @@ importers:
   contracts:
     dependencies:
       '@algorandfoundation/algokit-utils':
-        specifier: 8.0.3
-        version: 8.0.3(algosdk@3.1.0)
+        specifier: 9.1.2
+        version: 9.1.2(algosdk@3.4.0)
       algosdk:
-        specifier: 3.1.0
-        version: 3.1.0
+        specifier: 3.4.0
+        version: 3.4.0
     devDependencies:
       '@algorandfoundation/algokit-client-generator':
-        specifier: 4.0.6
-        version: 4.0.6(@algorandfoundation/algokit-utils@8.0.3(algosdk@3.1.0))(algosdk@3.1.0)
+        specifier: 6.0.0
+        version: 6.0.0(@algorandfoundation/algokit-utils@9.1.2(algosdk@3.4.0))(algosdk@3.4.0)
       '@algorandfoundation/tealscript':
         specifier: 0.106.1
         version: 0.106.1
@@ -63,11 +63,11 @@ importers:
   contracts/bootstrap:
     dependencies:
       '@algorandfoundation/algokit-utils':
-        specifier: 8.0.3
-        version: 8.0.3(algosdk@3.1.0)
+        specifier: 9.1.2
+        version: 9.1.2(algosdk@3.4.0)
       algosdk:
-        specifier: 3.1.0
-        version: 3.1.0
+        specifier: 3.4.0
+        version: 3.4.0
       prompts:
         specifier: ^2.4.2
         version: 2.4.2
@@ -364,19 +364,13 @@ packages:
   '@adraffy/ens-normalize@1.11.0':
     resolution: {integrity: sha512-/3DDPKHqqIqxUULp8yP4zODUY1i+2xvVWsv8A79xGWdCAG+8sb0hRh0Rk2QyOJUnnbyPUAZYcpBuRe3nS2OIUg==}
 
-  '@algorandfoundation/algokit-client-generator@4.0.6':
-    resolution: {integrity: sha512-N19esgyZ4sjZbqpEZbxLsr1/0MvYK52gdjt2jrIdGSASj90HxTslbGKwRK/sTHt/NR/1fcFMbzGOxe2ZbkdTgg==}
+  '@algorandfoundation/algokit-client-generator@6.0.0':
+    resolution: {integrity: sha512-K6P3uqb3XCQNGYBo3PiBxTy6XUGG0BDeSph2zlaAWJTW2yu1Cidrrwt73t0JZxGJvm1b789rs57/KuoC5YK/lQ==}
     engines: {node: '>=20.0'}
     hasBin: true
     peerDependencies:
-      '@algorandfoundation/algokit-utils': ^7.0.1 || ^8.0.1
-      algosdk: ^2.9.0 || ^3.0.0
-
-  '@algorandfoundation/algokit-utils@8.0.3':
-    resolution: {integrity: sha512-2YYlCDJmT4pvNLUOLqdX6M1nwC2hh4l1gDZFi2ID+JFQ7ZDyASZqg+c2euFrzvxhZJi2Ue94iP+ARqrv74b0+w==}
-    engines: {node: '>=20.0'}
-    peerDependencies:
-      algosdk: ^3.0.0
+      '@algorandfoundation/algokit-utils': ^9.0.0
+      algosdk: ^3.2.0
 
   '@algorandfoundation/algokit-utils@9.1.2':
     resolution: {integrity: sha512-gZTg9H5FAce+QcT79y8Eun8by+MtlgocYjIUvP2ahh2O0U0HCcTSjVux5lQZj5+EsSaL3sR0p+BmjXnPAMplbA==}
@@ -2399,10 +2393,6 @@ packages:
     resolution: {integrity: sha512-08k7pBQnkaUB5p+jL7f1TRaUIlTSDE0cesFu1mD7llLao+1cAhtvvZmGE3OnisTd0xOn118QMw74SRqddqaYvw==}
     engines: {node: '>= 14'}
 
-  algosdk@3.1.0:
-    resolution: {integrity: sha512-0mT+GKG5jmMyCVl0cj4uwvnPBnMwW1FCwCpsMk1n0tXPyb7deCGuCq1HlHtk6nf3sjE6te83BtfkOvIrdSTMXg==}
-    engines: {node: '>=18.0.0'}
-
   algosdk@3.4.0:
     resolution: {integrity: sha512-95NYlVxMsHKs9gV8/hUvNTRAqmRC55wtesGR53j37fjP/sHUWd1gxNGTNBy0d1+o4jDKxVaasVgUHh78IqgtCw==}
     engines: {node: '>=18.0.0'}
@@ -2663,6 +2653,10 @@ packages:
     resolution: {integrity: sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA==}
     engines: {node: '>=10'}
 
+  chalk@5.6.0:
+    resolution: {integrity: sha512-46QrSQFyVSEyYAgQ22hQ+zDa60YHA4fBstHmtSApj1Y5vKtG27fWowW03jCk5KcbXEWPZUIR894aARCA/G1kfQ==}
+    engines: {node: ^12.17.0 || ^14.13 || >=16.0.0}
+
   change-case@5.4.4:
     resolution: {integrity: sha512-HRQyTk2/YPEkt9TnUPbOpr64Uw3KOicFWPVBb+xiHvd6eBx/qPr9xqfBFDT8P2vWsvvz4jbEkfDe71W3VyNu2w==}
 
@@ -2733,9 +2727,9 @@ packages:
     resolution: {integrity: sha512-FQN4MRfuJeHf7cBbBMJFXhKSDq+2kAArBlmRBvcvFE5BB1HZKXtSFASDhdlz9zOYwxh8lDdnvmMOe/+5cdoEdg==}
     engines: {node: '>= 0.8'}
 
-  commander@11.1.0:
-    resolution: {integrity: sha512-yPVavfyCcRhmorC7rWlkHn15b4wDVgVmBA7kV4QVBsF7kv/9TKJAbAXVTxvTnwP8HHKjRCJDClKbciiYS7p0DQ==}
-    engines: {node: '>=16'}
+  commander@14.0.0:
+    resolution: {integrity: sha512-2uM9rYjPvyq39NwLRqaiLtWHyDC1FvryJDa2ATTVims5YAS4PupsEQsDvP14FqhFr0P49CYDugi59xaxJlTXRA==}
+    engines: {node: '>=20'}
 
   commander@4.1.1:
     resolution: {integrity: sha512-NOKm8xhkzAjzFx8B2v5OAHT+u5pRQc2UCa2Vq9jYL/31o2wi9mxBA7LIFs3sV5VSC49z6pEhfbMULvShKj26WA==}
@@ -3759,8 +3753,8 @@ packages:
     engines: {node: '>=6'}
     hasBin: true
 
-  jsonschema@1.4.1:
-    resolution: {integrity: sha512-S6cATIPVv1z0IlxdN+zUk5EPjkGCdnhN4wVSBlvoUO1tOLJootbo9CquNJmbIh4yikWHiUedhRYrNPn1arpEmQ==}
+  jsonschema@1.5.0:
+    resolution: {integrity: sha512-K+A9hhqbn0f3pJX17Q/7H6yQfD/5OXgdrR5UE12gMXCiN9D5Xq2o5mddV2QEcX/bjla99ASsAAQUyMCCRWAEhw==}
 
   keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
@@ -5424,19 +5418,14 @@ snapshots:
 
   '@adraffy/ens-normalize@1.11.0': {}
 
-  '@algorandfoundation/algokit-client-generator@4.0.6(@algorandfoundation/algokit-utils@8.0.3(algosdk@3.1.0))(algosdk@3.1.0)':
+  '@algorandfoundation/algokit-client-generator@6.0.0(@algorandfoundation/algokit-utils@9.1.2(algosdk@3.4.0))(algosdk@3.4.0)':
     dependencies:
-      '@algorandfoundation/algokit-utils': 8.0.3(algosdk@3.1.0)
-      algosdk: 3.1.0
-      chalk: 4.1.2
+      '@algorandfoundation/algokit-utils': 9.1.2(algosdk@3.4.0)
+      algosdk: 3.4.0
+      chalk: 5.6.0
       change-case: 5.4.4
-      commander: 11.1.0
-      jsonschema: 1.4.1
-
-  '@algorandfoundation/algokit-utils@8.0.3(algosdk@3.1.0)':
-    dependencies:
-      algosdk: 3.1.0
-      buffer: 6.0.3
+      commander: 14.0.0
+      jsonschema: 1.5.0
 
   '@algorandfoundation/algokit-utils@9.1.2(algosdk@3.4.0)':
     dependencies:
@@ -7661,17 +7650,6 @@ snapshots:
 
   algorand-msgpack@1.1.0: {}
 
-  algosdk@3.1.0:
-    dependencies:
-      algorand-msgpack: 1.1.0
-      hi-base32: 0.5.1
-      js-sha256: 0.9.0
-      js-sha3: 0.8.0
-      js-sha512: 0.8.0
-      json-bigint: 1.0.0
-      tweetnacl: 1.0.3
-      vlq: 2.0.4
-
   algosdk@3.4.0:
     dependencies:
       algorand-msgpack: 1.1.0
@@ -7992,6 +7970,8 @@ snapshots:
       ansi-styles: 4.3.0
       supports-color: 7.2.0
 
+  chalk@5.6.0: {}
+
   change-case@5.4.4: {}
 
   check-error@2.1.1: {}
@@ -8067,7 +8047,7 @@ snapshots:
     dependencies:
       delayed-stream: 1.0.0
 
-  commander@11.1.0: {}
+  commander@14.0.0: {}
 
   commander@4.1.1: {}
 
@@ -9181,7 +9161,7 @@ snapshots:
 
   json5@2.2.3: {}
 
-  jsonschema@1.4.1: {}
+  jsonschema@1.5.0: {}
 
   keyv@4.5.4:
     dependencies:
