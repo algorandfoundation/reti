@@ -89,7 +89,6 @@ export function AddPoolModal({
   const queryClient = useQueryClient()
   const registry = useRegistry()
   const { theme } = useTheme()
-  console.log('theme', theme)
   const { transactionSigner, activeAddress } = useWallet()
 
   const pools = validator?.pools.map((p) => getApplicationAddress(p.poolAppId).toString())
