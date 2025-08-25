@@ -120,7 +120,7 @@ export function XGovSignUpBanner({ validator }: XGovSignUpBannerProps) {
           <p className="text-sm mb-1 text-center md:text-left text-gray-200 dark:text-gray-600">
             Participate in xGov on behalf of your pool{numPools > 1 ? 's' : ''}!
           </p>
-          <p className="text-center text-sm text-white dark:text-algo-black">
+          <p className="text-center md:text-left text-sm text-white dark:text-algo-black">
             Cost is
             <AlgoDisplayAmount
               amount={registry.data?.xgovFee ?? 0n}

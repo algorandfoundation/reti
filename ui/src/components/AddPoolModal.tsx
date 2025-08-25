@@ -56,7 +56,7 @@ import { formatAlgoAmount } from '@/utils/format'
 import { isValidName } from '@/utils/nfd'
 import { cn } from '@/utils/ui'
 import { useRegistry } from '@/hooks/useRegistry'
-import { useTheme } from 'next-themes'
+import { useTheme } from '@/providers/ThemeProvider'
 import { useRequestBoxes } from '@/hooks/useRequestBoxes'
 
 interface AddPoolModalProps {
@@ -89,6 +89,7 @@ export function AddPoolModal({
   const queryClient = useQueryClient()
   const registry = useRegistry()
   const { theme } = useTheme()
+  console.log('theme', theme)
   const { transactionSigner, activeAddress } = useWallet()
 
   const pools = validator?.pools.map((p) => getApplicationAddress(p.poolAppId).toString())
@@ -476,7 +477,7 @@ export function AddPoolModal({
   const handleSkipForNow = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault()
 
-    if (showRewardTokenInfo) {
+    if (currentStep === 3 || showRewardTokenInfo) {
       setCurrentStep((prev) => prev + 1)
     } else {
       handleOpenChange(false)
