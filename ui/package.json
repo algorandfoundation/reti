@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "@algorandfoundation/algokit-utils": "9.1.2",
-    "@algorandfoundation/xgov": "github:algorandfoundation/xgov-beta-ts#chore/upgrade-to-algosdk-3",
+    "@algorandfoundation/xgov-clients": "^3.0.1",
     "@blockshake/defly-connect": "1.2.1",
     "@hookform/resolvers": "3.9.0",
     "@perawallet/connect": "1.4.1",

@@ -5,7 +5,7 @@ import {
   XGovBoxValue,
   XGovSubscribeRequestBoxValue,
   // @ts-expect-error module resolution issue
-} from '@algorandfoundation/xgov/registry'
+} from '@algorandfoundation/xgov-clients/registry'
 
 export function requestBoxName(id: number): Uint8Array {
   return new Uint8Array(Buffer.concat([Buffer.from('r'), encodeUint64(id)]))

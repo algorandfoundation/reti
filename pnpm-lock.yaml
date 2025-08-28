@@ -96,9 +96,9 @@ importers:
       '@algorandfoundation/algokit-utils':
         specifier: 9.1.2
         version: 9.1.2(algosdk@3.4.0)
-      '@algorandfoundation/xgov':
-        specifier: github:algorandfoundation/xgov-beta-ts#chore/upgrade-to-algosdk-3
-        version: https://codeload.github.com/algorandfoundation/xgov-beta-ts/tar.gz/9c8ae09c4a811a4c7a9ef20c75fba567ff88ddc5(@algorandfoundation/algokit-utils@9.1.2(algosdk@3.4.0))(algosdk@3.4.0)
+      '@algorandfoundation/xgov-clients':
+        specifier: ^3.0.1
+        version: 3.0.1(@algorandfoundation/algokit-utils@9.1.2(algosdk@3.4.0))(algosdk@3.4.0)
       '@blockshake/defly-connect':
         specifier: 1.2.1
         version: 1.2.1(algosdk@3.4.0)
@@ -382,9 +382,8 @@ packages:
     resolution: {integrity: sha512-aQpLHfz6+f5WoTWs9U6AbFysS8dw65iCjk2jxkqE+l137i4ZQF01GC8OndTyVX97RTSwjoBay/gJ2jk1JBdyeA==}
     hasBin: true
 
-  '@algorandfoundation/xgov@https://codeload.github.com/algorandfoundation/xgov-beta-ts/tar.gz/9c8ae09c4a811a4c7a9ef20c75fba567ff88ddc5':
-    resolution: {tarball: https://codeload.github.com/algorandfoundation/xgov-beta-ts/tar.gz/9c8ae09c4a811a4c7a9ef20c75fba567ff88ddc5}
-    version: 0.0.0
+  '@algorandfoundation/xgov-clients@3.0.1':
+    resolution: {integrity: sha512-s/L40sVpzeVtZqbsqR3NY3qLchg4UCR8mqdxFfXy4sL6iAkvoibpdz2NrIBAglHLyD4m8H4JI3Hj1oHf7FySAQ==}
     peerDependencies:
       '@algorandfoundation/algokit-utils': ^9.1.2
       algosdk: ^3.4.0
@@ -5450,7 +5449,7 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  '@algorandfoundation/xgov@https://codeload.github.com/algorandfoundation/xgov-beta-ts/tar.gz/9c8ae09c4a811a4c7a9ef20c75fba567ff88ddc5(@algorandfoundation/algokit-utils@9.1.2(algosdk@3.4.0))(algosdk@3.4.0)':
+  '@algorandfoundation/xgov-clients@3.0.1(@algorandfoundation/algokit-utils@9.1.2(algosdk@3.4.0))(algosdk@3.4.0)':
     dependencies:
       '@algorandfoundation/algokit-utils': 9.1.2(algosdk@3.4.0)
       algosdk: 3.4.0
