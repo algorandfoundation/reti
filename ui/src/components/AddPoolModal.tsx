@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ProgressBar } from '@tremor/react'
 import { useWallet } from '@txnlab/use-wallet-react'
-import algosdk from 'algosdk'
+import algosdk, { getApplicationAddress } from 'algosdk'
 import { CheckIcon, Copy } from 'lucide-react'
 import * as React from 'react'
 import { useForm } from 'react-hook-form'
@@ -14,6 +14,7 @@ import {
   fetchValidator,
   initStakingPoolStorage,
   linkPoolToNfd,
+  requestSubscribeXGov,
 } from '@/api/contracts'
 import { mbrQueryOptions, validatorNodePoolAssignmentsQueryOptions } from '@/api/queries'
 import { AlgoDisplayAmount } from '@/components/AlgoDisplayAmount'
@@ -54,6 +55,9 @@ import { ExplorerLink } from '@/utils/explorer'
 import { formatAlgoAmount } from '@/utils/format'
 import { isValidName } from '@/utils/nfd'
 import { cn } from '@/utils/ui'
+import { useRegistry } from '@/hooks/useRegistry'
+import { useTheme } from '@/providers/ThemeProvider'
+import { useRequestBoxes } from '@/hooks/useRequestBoxes'
 
 interface AddPoolModalProps {
   validator: Validator | null
@@ -70,18 +74,25 @@ export function AddPoolModal({
 }: AddPoolModalProps) {
   const [isSigning, setIsSigning] = React.useState<boolean>(false)
   const [currentStep, setCurrentStep] = React.useState<number>(0)
-  const [totalSteps, setTotalSteps] = React.useState<number>(3)
+  const [totalSteps, setTotalSteps] = React.useState<number>(4)
   const [poolKey, setPoolKey] = React.useState<ValidatorPoolKey | null>(null)
   const [poolAddress, setPoolAddress] = React.useState<string | null>(null)
   const [isInitMbrError, setIsInitMbrError] = React.useState<string | undefined>(undefined)
+  const [enrolledPool, setEnrolledPool] = React.useState<boolean>(false)
+  const [isEnrollPoolError, setIsEnrollPoolError] = React.useState<string | undefined>(undefined)
   const [nfdToLink, setNfdToLink] = React.useState<Nfd | null>(null)
   const [isFetchingNfdToLink, setIsFetchingNfdToLink] = React.useState(false)
 
   const isLocalnet = import.meta.env.VITE_ALGOD_NETWORK === 'localnet'
-  const showRewardTokenInfo = totalSteps === 4
+  const showRewardTokenInfo = totalSteps === 5
 
   const queryClient = useQueryClient()
+  const registry = useRegistry()
+  const { theme } = useTheme()
   const { transactionSigner, activeAddress } = useWallet()
+
+  const pools = validator?.pools.map((p) => getApplicationAddress(p.poolAppId).toString())
+  const xGovRequests = useRequestBoxes(activeAddress, pools ?? [])
 
   const accountInfoQuery = useQuery({
     queryKey: ['account-info', activeAddress],
@@ -157,7 +168,7 @@ export function AddPoolModal({
   React.useEffect(() => {
     if (validator !== null && currentStep == 0 && nodeNum !== '' && !errors.nodeNum) {
       const isRewardsPool = validator.config.rewardTokenId !== 0n && validator.state.numPools === 0
-      const numSteps = isRewardsPool ? 4 : 3
+      const numSteps = isRewardsPool ? 5 : 4
       setTotalSteps(numSteps)
       setCurrentStep(1)
     }
@@ -171,7 +182,7 @@ export function AddPoolModal({
     form.reset(defaultValues)
     form.clearErrors()
     setCurrentStep(0)
-    setTotalSteps(3)
+    setTotalSteps(4)
     setPoolKey(null)
     setPoolAddress(null)
     setNfdToLink(null)
@@ -321,6 +332,7 @@ export function AddPoolModal({
       // Refetch validator data
       const newData = await fetchValidator(validator!.id)
       setValidatorQueriesData(queryClient, newData)
+      setValidator(newData)
 
       setCurrentStep(3)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -336,6 +348,68 @@ export function AddPoolModal({
       }
       console.error(error)
       setIsInitMbrError(error?.message)
+    } finally {
+      setIsSigning(false)
+    }
+  }
+
+  const handleEnrollXGov = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault()
+
+    const toastId = `${TOAST_ID}-pay-mbr`
+
+    try {
+      if (!activeAddress) {
+        throw new Error('No active address')
+      }
+
+      if (!poolAddress) {
+        throw new Error('No pool address found')
+      }
+
+      if (!registry.data?.xgovFee) {
+        throw new Error('No xGov fee data found')
+      }
+
+      if (availableBalance < registry.data.xgovFee) {
+        throw new Error(
+          `Insufficient balance: ${formatAlgoAmount(registry.data.xgovFee)} ALGO required`,
+        )
+      }
+
+      toast.loading(`Sign transaction to enroll pool...`, { id: toastId })
+
+      setIsSigning(true)
+
+      await requestSubscribeXGov({
+        activeAddress,
+        innerSigner: transactionSigner,
+        setStatus: () => {},
+        refetch: [xGovRequests.refetch],
+        xgovFee: registry.data.xgovFee,
+        pools: [poolAddress],
+      })
+
+      toast.success(`Pool xGov enrollment requested successfully!`, {
+        id: toastId,
+        duration: 5000,
+      })
+
+      setEnrolledPool(true)
+      setCurrentStep(4)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      if (error instanceof InsufficientBalanceError) {
+        toast.error('Insufficient balance', {
+          id: toastId,
+          description: error.toastMessage,
+          duration: 5000,
+        })
+      } else {
+        toast.error('Pool xGov enrollment request payment failed', { id: toastId })
+      }
+      console.error(error)
+      setIsEnrollPoolError(error?.message)
     } finally {
       setIsSigning(false)
     }
@@ -381,7 +455,7 @@ export function AddPoolModal({
         duration: 5000,
       })
 
-      setCurrentStep(4)
+      setCurrentStep(5)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       if (error instanceof InsufficientBalanceError) {
@@ -402,8 +476,8 @@ export function AddPoolModal({
   const handleSkipForNow = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault()
 
-    if (showRewardTokenInfo) {
-      setCurrentStep(4)
+    if (currentStep === 3 || showRewardTokenInfo) {
+      setCurrentStep((prev) => prev + 1)
     } else {
       handleOpenChange(false)
     }
@@ -485,6 +559,35 @@ export function AddPoolModal({
                   open={currentStep == 3}
                   className={cn('relative pb-6 space-y-2', {
                     completed: currentStep > 3,
+                    skipped: !enrolledPool,
+                  })}
+                >
+                  <span className="absolute -left-8 -translate-x-[1px] h-full w-px bg-muted" />
+                  <FormLabel className={cn({ 'text-muted-foreground/50': currentStep < 3 })}>
+                    Request xGov Enrollment
+                  </FormLabel>
+                  <CollapsibleContent className="space-y-2">
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-2">
+                        To request xGov enrollment for this pool, a{' '}
+                        <AlgoDisplayAmount
+                          amount={registry.data?.xgovFee ?? 0n}
+                          microalgos
+                          className="text-foreground font-mono"
+                        />{' '}
+                        payment is required.
+                      </p>
+                      <FormMessage className={cn({ hidden: !isEnrollPoolError })}>
+                        {isEnrollPoolError}
+                      </FormMessage>
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+
+                <Collapsible
+                  open={currentStep == 4}
+                  className={cn('relative pb-6 space-y-2', {
+                    completed: currentStep > 4,
                     skipped: !nfdToLink,
                   })}
                 >
@@ -495,7 +598,7 @@ export function AddPoolModal({
                   />
                   <FormLabel
                     htmlFor="link-pool-to-nfd-input"
-                    className={cn({ 'text-muted-foreground/50': currentStep < 3 })}
+                    className={cn({ 'text-muted-foreground/50': currentStep < 4 })}
                   >
                     Link Pool to NFD
                   </FormLabel>
@@ -518,8 +621,8 @@ export function AddPoolModal({
                 </Collapsible>
 
                 {showRewardTokenInfo && (
-                  <Collapsible open={currentStep == 4} className="space-y-2">
-                    <FormLabel className={cn({ 'text-muted-foreground/50': currentStep < 4 })}>
+                  <Collapsible open={currentStep == 5} className="space-y-2">
+                    <FormLabel className={cn({ 'text-muted-foreground/50': currentStep < 5 })}>
                       Send Reward Tokens
                     </FormLabel>
                     <CollapsibleContent className="space-y-2">
@@ -583,7 +686,7 @@ export function AddPoolModal({
               <div className={cn('my-6')}>
                 <ProgressBar
                   value={currentStep * (100 / totalSteps)}
-                  color="rose"
+                  color={currentStep === 3 ? (theme === 'light' ? 'blue' : 'teal') : 'rose'}
                   className="mt-3"
                   showAnimation
                 />
@@ -609,12 +712,31 @@ export function AddPoolModal({
                     >
                       Skip for now
                     </Button>
+                    <Button
+                      className="bg-algo-blue text-white hover:bg-algo-blue/90 dark:bg-algo-teal dark:text-algo-black hover:dark:bg-algo-teal/90"
+                      onClick={handleEnrollXGov}
+                      disabled={isSigning}
+                    >
+                      Request xGov Enrollment
+                    </Button>
+                  </>
+                )}
+                {currentStep == 4 && (
+                  <>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={handleSkipForNow}
+                      disabled={isSigning}
+                    >
+                      Skip for now
+                    </Button>
                     <Button onClick={handleLinkPoolToNfd} disabled={isLocalnet || isSigning}>
                       Link to NFD
                     </Button>
                   </>
                 )}
-                {currentStep == 4 && (
+                {currentStep == 5 && (
                   <Button onClick={() => handleOpenChange(false)}>
                     <CheckIcon className="mr-2 h-4 w-4" /> Finished
                   </Button>
