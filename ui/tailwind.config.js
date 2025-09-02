@@ -68,6 +68,9 @@ const tremor = {
             inverted: colors.stone[950],
           },
         },
+        'algo-black': '#001324',
+        'algo-blue': '#2D2DF1',
+        'algo-teal': '#17CAC6',
       },
       boxShadow: {
         // light
