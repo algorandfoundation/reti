@@ -8,11 +8,11 @@ import { useBlockTime } from '@/hooks/useBlockTime'
 import { Validator } from '@/interfaces/validator'
 import { formatDuration } from '@/utils/dayjs'
 
-interface ValidatorRewardsProps {
+interface ValidatorStatusProps {
   validator: Validator
 }
 
-export function ValidatorStatus({ validator }: ValidatorRewardsProps) {
+export function ValidatorStatus({ validator }: ValidatorStatusProps) {
   const queryClient = useQueryClient()
   const metricsQuery = useQuery(validatorMetricsQueryOptions(validator.id, queryClient))
 
