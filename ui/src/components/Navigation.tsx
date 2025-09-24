@@ -15,6 +15,13 @@ export function Navigation() {
         Dashboard
       </Link>
 
+      <Link
+        to="/validators"
+        className="text-muted-foreground transition-colors hover:text-foreground [&.active]:text-foreground"
+      >
+        Validators
+      </Link>
+
       {activeAddress && (
         <Link
           to="/add"

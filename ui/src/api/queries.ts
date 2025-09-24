@@ -135,8 +135,10 @@ export const stakedInfoQueryOptions = (poolAppId: bigint) =>
 export const stakesQueryOptions = (staker: string | null) =>
   queryOptions({
     queryKey: ['stakes', { staker }],
-    queryFn: () => fetchStakerValidatorData(staker!),
-    enabled: !!staker,
+    queryFn: async () => {
+      if (!staker) return []
+      return await fetchStakerValidatorData(staker)
+    },
     retry: false,
     refetchInterval: 1000 * 60, // 1 minute
   })

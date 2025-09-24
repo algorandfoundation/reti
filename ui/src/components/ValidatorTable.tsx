@@ -1,6 +1,6 @@
 import { AlgoAmount } from '@algorandfoundation/algokit-utils/types/amount'
 import { useQueryClient } from '@tanstack/react-query'
-import { Link, useRouter } from '@tanstack/react-router'
+import { Link, useLocation, useRouter } from '@tanstack/react-router'
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -79,6 +79,7 @@ interface ValidatorTableProps {
   stakesByValidator: StakerValidatorData[]
   constraints: Constraints
   isLoading: boolean
+  title?: string
 }
 
 export function ValidatorTable({
@@ -86,6 +87,7 @@ export function ValidatorTable({
   stakesByValidator,
   constraints,
   isLoading,
+  title = 'Validators',
 }: ValidatorTableProps) {
   const [addStakeValidator, setAddStakeValidator] = React.useState<Validator | null>(null)
   const [unstakeValidator, setUnstakeValidator] = React.useState<Validator | null>(null)
@@ -96,16 +98,30 @@ export function ValidatorTable({
   const router = useRouter()
   const queryClient = useQueryClient()
 
-  // Persistent column sorting state
-  const [sorting, setSorting] = useLocalStorage<SortingState>('validator-sorting', [
+  const location = useLocation()
+  const isDashboard = location.pathname === '/'
+
+  // Persistent column sorting state - for non-Dashboard
+  const [storedSorting, setStoredSorting] = useLocalStorage<SortingState>('validator-sorting', [
     { id: 'stake', desc: true },
   ])
+  const storedSortingRef = React.useRef(storedSorting)
+  React.useEffect(() => {
+    storedSortingRef.current = storedSorting
+  }, [storedSorting])
+
+  const [sorting, setSorting] = React.useState<SortingState>(isDashboard ? [] : storedSorting)
+  React.useEffect(() => {
+    setSorting(isDashboard ? [] : storedSortingRef.current)
+  }, [isDashboard])
 
   const handleSortingChange = (updaterOrValue: Updater<SortingState>) => {
     if (typeof updaterOrValue === 'function') {
       const newState = updaterOrValue(sorting)
+      setStoredSorting(newState)
       setSorting(newState)
     } else {
+      setStoredSorting(updaterOrValue)
       setSorting(updaterOrValue)
     }
   }
@@ -553,7 +569,7 @@ export function ValidatorTable({
       <div>
         <div className="sm:flex items-center sm:gap-x-3 py-3">
           <h2 className="flex items-center mb-2 text-lg font-semibold sm:flex-1 sm:my-1">
-            Validators {isLoading && <Loading size="sm" inline className="ml-3" />}
+            {title} {isLoading && <Loading size="sm" inline className="ml-3" />}
           </h2>
           <div className="flex items-center gap-x-4 mb-3 sm:mb-0">
             <div

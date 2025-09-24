@@ -1,7 +1,7 @@
 import { GitHubLogoIcon } from '@radix-ui/react-icons'
 import { Link } from '@tanstack/react-router'
 import { useWallet } from '@txnlab/use-wallet-react'
-import { Menu, Headset, Home, Monitor, Book, HandCoins } from 'lucide-react'
+import { Menu, Headset, Home, Monitor, Book, HandCoins, Globe } from 'lucide-react'
 import { Logo } from '@/components/Logo'
 import { ModeToggleMobile } from '@/components/ModeToggleMobile'
 import { Button } from '@/components/ui/button'
@@ -34,6 +34,16 @@ export function MobileMenu() {
             >
               <Home className="h-5 w-5" />
               Dashboard
+            </Link>
+          </SheetClose>
+
+          <SheetClose asChild>
+            <Link
+              to="/validators"
+              className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground [&.active]:text-foreground"
+            >
+              <Globe className="h-5 w-5" />
+              Validators
             </Link>
           </SheetClose>
 

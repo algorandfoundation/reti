@@ -1,4 +1,4 @@
-import { useQueries, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
+import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query'
 import algosdk from 'algosdk'
 import * as React from 'react'
 import { createBaseValidator } from '@/api/contracts'
@@ -6,7 +6,6 @@ import {
   assetQueryOptions,
   nfdQueryOptions,
   nodelyPerfMetricsQueryOptions,
-  numValidatorsQueryOptions,
   validatorConfigQueryOptions,
   validatorMetricsQueryOptions,
   validatorNodePoolAssignmentsQueryOptions,
@@ -18,22 +17,14 @@ import { useQueuedQueries } from '@/hooks/useQueuedQueries'
 import { Validator } from '@/interfaces/validator'
 
 /**
- * Fetches all validator data and enrichment data in parallel.
+ * Fetches all validator data and enrichment data in parallel for given validator IDs.
  */
-export function useValidators(): {
+export function useValidators(validatorIds: number[]): {
   validators: Validator[]
   isLoading: boolean
   error: Error | undefined | null
 } {
   const queryClient = useQueryClient()
-
-  // Get total number of validators
-  const numValidatorsQuery = useSuspenseQuery(numValidatorsQueryOptions)
-  const numValidators = numValidatorsQuery.data
-
-  const validatorIds = React.useMemo(() => {
-    return Array.from({ length: numValidators }, (_, i) => i + 1)
-  }, [numValidators])
 
   // Memoize query options
   const validatorConfigQueries = React.useMemo(
@@ -186,6 +177,13 @@ export function useValidators(): {
     nfdQueries,
     queuedMetricsQueries.data,
   ])
+
+  if (validatorIds.length === 0)
+    return {
+      validators: [],
+      isLoading: false,
+      error: null,
+    }
 
   const isLoading =
     configQueries.isLoading ||
