@@ -1,4 +1,4 @@
-import { getXGovGlobalState } from '@/api/xgovRegistry'
+import { getXGovGlobalState } from '@/features/xgov/api/registry'
 import { useQuery } from '@tanstack/react-query'
 
 export function useRegistry() {

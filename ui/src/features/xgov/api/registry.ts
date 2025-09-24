@@ -1,11 +1,14 @@
+import { wrapTransactionSigner } from '@/hooks/useTransactionState'
+import { sleep } from '@/utils/time'
 import { encodeUint64 } from 'algosdk'
-import { getSimulateXGovRegistryClient } from './clients'
 import {
   GlobalKeysState,
   XGovBoxValue,
   XGovSubscribeRequestBoxValue,
   // @ts-expect-error module resolution issue
 } from '@algorandfoundation/xgov-clients/registry'
+import { TransactionHandlerProps } from '@/api/transactionState'
+import { getSimulateXGovRegistryClient, getXGovRegistryClient } from './clients'
 
 export function requestBoxName(id: number): Uint8Array {
   return new Uint8Array(Buffer.concat([Buffer.from('r'), encodeUint64(id)]))
@@ -68,5 +71,79 @@ export async function getXGovRequestBoxes(
   } catch (e) {
     console.error('failed to fetch request box by address', e)
     return null
+  }
+}
+
+export interface RequestSubscribeXGovProps extends TransactionHandlerProps {
+  xgovFee?: bigint
+  pools: string[]
+}
+
+export async function requestSubscribeXGov({
+  activeAddress,
+  innerSigner,
+  setStatus,
+  refetch,
+  xgovFee,
+  pools,
+}: RequestSubscribeXGovProps) {
+  if (!innerSigner) return
+
+  const signer = wrapTransactionSigner(innerSigner, setStatus)
+
+  if (!activeAddress || !signer) {
+    setStatus(new Error('No active address or transaction signer'))
+    return
+  }
+
+  if (!xgovFee) {
+    setStatus(new Error('xgovFee is not set'))
+    return
+  }
+
+  const client = await getXGovRegistryClient(signer, activeAddress)
+
+  const builder = client.newGroup()
+
+  for (const pool of pools) {
+    const payment = await client.algorand.createTransaction.payment({
+      sender: activeAddress,
+      receiver: client.appAddress,
+      amount: xgovFee.microAlgo(),
+      note: `payment for enrolling ${pool} in xGov`,
+    })
+
+    builder.requestSubscribeXgov({
+      args: {
+        xgovAddress: pool,
+        ownerAddress: activeAddress,
+        relationType: 1,
+        payment,
+      },
+    })
+  }
+
+  try {
+    const {
+      confirmations: [confirmation],
+    } = await builder.send({ populateAppCallResources: true })
+
+    if (
+      confirmation.confirmedRound !== undefined &&
+      confirmation.confirmedRound > 0 &&
+      confirmation.poolError === ''
+    ) {
+      setStatus('confirmed')
+      await sleep(800)
+      setStatus('idle')
+      await Promise.all(refetch.map((r) => r()))
+      return
+    }
+
+    setStatus(new Error('Failed to confirm transaction submission'))
+  } catch (e) {
+    console.error('Error during requestSubscribeXGov:', (e as Error).message)
+    setStatus(new Error(`Failed to request subscription to xGov`))
+    return
   }
 }

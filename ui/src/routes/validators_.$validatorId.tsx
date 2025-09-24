@@ -15,8 +15,8 @@ import { Meta } from '@/components/Meta'
 import { PageMain } from '@/components/PageMain'
 import { ValidatorDetails } from '@/components/ValidatorDetails'
 import { DetailsHeader } from '@/components/ValidatorDetails/DetailsHeader'
-import { XGovSignUpBanner } from '@/components/XGovSignUpBanner'
 import { useValidator } from '@/hooks/useValidator'
+import { XGovSignUpBanner } from '@/features/xgov/components/XGovSignUpBanner'
 
 export const Route = createFileRoute('/validators_/$validatorId')({
   beforeLoad: () => {

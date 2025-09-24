@@ -1,7 +1,7 @@
 import { DisplayAsset } from '@/components/DisplayAsset'
 import { Constraints } from '@/contracts/ValidatorRegistryClient'
 import { useBlockTime } from '@/hooks/useBlockTime'
-import { useXGovs } from '@/hooks/useXGovs'
+import { useXGovs } from '@/features/xgov/hooks/useXGovs'
 import { Validator } from '@/interfaces/validator'
 import { calculateMaxStakers } from '@/utils/contracts'
 import { formatDuration } from '@/utils/dayjs'

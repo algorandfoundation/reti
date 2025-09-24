@@ -14,7 +14,6 @@ import {
   fetchValidator,
   initStakingPoolStorage,
   linkPoolToNfd,
-  requestSubscribeXGov,
 } from '@/api/contracts'
 import { mbrQueryOptions, validatorNodePoolAssignmentsQueryOptions } from '@/api/queries'
 import { AlgoDisplayAmount } from '@/components/AlgoDisplayAmount'
@@ -55,9 +54,10 @@ import { ExplorerLink } from '@/utils/explorer'
 import { formatAlgoAmount } from '@/utils/format'
 import { isValidName } from '@/utils/nfd'
 import { cn } from '@/utils/ui'
-import { useRegistry } from '@/hooks/useRegistry'
+import { useRegistry } from '@/features/xgov/hooks/useRegistry'
 import { useTheme } from '@/providers/ThemeProvider'
-import { useRequestBoxes } from '@/hooks/useRequestBoxes'
+import { useRequestBoxes } from '@/features/xgov/hooks/useRequestBoxes'
+import { requestSubscribeXGov } from '@/features/xgov/api/registry'
 
 interface AddPoolModalProps {
   validator: Validator | null

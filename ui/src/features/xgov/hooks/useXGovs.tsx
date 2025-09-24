@@ -1,4 +1,4 @@
-import { getXGovBoxes } from '@/api/xgovRegistry'
+import { getXGovBoxes } from '@/features/xgov/api/registry'
 import { useQuery } from '@tanstack/react-query'
 
 export function useXGovs(xgovAddresses: string[]) {

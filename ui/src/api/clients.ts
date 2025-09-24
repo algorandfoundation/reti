@@ -2,14 +2,9 @@ import algosdk from 'algosdk'
 import { FEE_SINK } from '@/constants/accounts'
 import { StakingPoolClient, StakingPoolFactory } from '@/contracts/StakingPoolClient'
 import { ValidatorRegistryClient } from '@/contracts/ValidatorRegistryClient'
-import {
-  getRetiAppIdFromViteEnvironment,
-  getXGovRegistryAppIdFromViteEnvironment,
-} from '@/utils/env'
+import { getRetiAppIdFromViteEnvironment } from '@/utils/env'
 import { getAlgodConfigFromViteEnvironment } from '@/utils/network/getAlgoClientConfigs'
 import { AlgorandClient } from '@algorandfoundation/algokit-utils'
-// @ts-expect-error module resolution issue
-import { XGovRegistryClient } from '@algorandfoundation/xgov-clients/registry'
 
 const algodConfig = getAlgodConfigFromViteEnvironment()
 
@@ -18,7 +13,6 @@ export const algorandClient = AlgorandClient.fromConfig({ algodConfig })
   .setSuggestedParamsCacheTimeout(1000 * 60 * 5) // 5 minutes
 
 const RETI_APP_ID = BigInt(getRetiAppIdFromViteEnvironment())
-const XGOV_REGISTRY_APP_ID = BigInt(getXGovRegistryAppIdFromViteEnvironment())
 
 export function getStakingPoolFactory(): [AlgorandClient, StakingPoolFactory] {
   return [algorandClient, new StakingPoolFactory({ algorand: algorandClient })]
@@ -63,25 +57,5 @@ export async function getSimulateStakingPoolClient(
   return algorandClient.client.getTypedAppClientById(StakingPoolClient, {
     defaultSender: senderAddr,
     appId: poolAppId,
-  })
-}
-
-export async function getXGovRegistryClient(
-  signer: algosdk.TransactionSigner,
-  activeAddress: string,
-): Promise<XGovRegistryClient> {
-  algorandClient.setSigner(activeAddress, signer)
-  return algorandClient.client.getTypedAppClientById(XGovRegistryClient, {
-    defaultSender: activeAddress,
-    appId: XGOV_REGISTRY_APP_ID,
-  })
-}
-
-export async function getSimulateXGovRegistryClient(
-  senderAddr: string = FEE_SINK,
-): Promise<XGovRegistryClient> {
-  return algorandClient.client.getTypedAppClientById(XGovRegistryClient, {
-    defaultSender: senderAddr,
-    appId: XGOV_REGISTRY_APP_ID,
   })
 }
