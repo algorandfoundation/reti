@@ -159,7 +159,7 @@ export async function fetchBlockTimes(numRounds: number = 10): Promise<number[]>
     const lastRound = Number(status.lastRound)
 
     const blockTimes: number[] = []
-    for (let round = lastRound - numRounds; round < lastRound; round++) {
+    for (let round = Math.max(lastRound - numRounds, 1); round < lastRound; round++) {
       try {
         const blockResponse = await algodClient.block(round).do()
         const block = blockResponse.block
