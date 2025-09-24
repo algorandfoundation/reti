@@ -1,29 +1,42 @@
-import { Validator } from '@/interfaces/validator'
 import { Button } from '@/components/ui/button'
 import { useTransactionState } from '@/hooks/useTransactionState'
-import { getApplicationAddress } from 'algosdk'
-import { requestSubscribeXGov } from '@/features/xgov/api/registry'
-import { useRegistry } from '@/features/xgov/hooks/useRegistry'
-import { useRequestBoxes } from '@/features/xgov/hooks/useRequestBoxes'
-import { useXGovs } from '@/features/xgov/hooks/useXGovs'
 import { Loading } from '@/components/Loading'
 import { ArrowUpRight, CheckIcon } from 'lucide-react'
 import { useWallet } from '@txnlab/use-wallet-react'
 import { AlgoDisplayAmount } from '@/components/AlgoDisplayAmount'
 import { useEffect, useRef } from 'react'
 import { toast } from 'sonner'
+import { cn } from '@/utils/ui'
+import { TransactionState } from '@/api/transactionState'
+import {
+  GlobalKeysState as RegistryGlobalKeyState,
+  XGovBoxValue,
+  XGovSubscribeRequestBoxValue,
+  // @ts-expect-error module resolution issue
+} from '@algorandfoundation/xgov-clients/registry'
 
 export type XGovSignUpBannerProps = {
-  validator: Validator
+  pools: string[]
+  registry: RegistryGlobalKeyState
+  xgovs: Map<string, XGovBoxValue>
+  requests: {
+    [id: number]: XGovSubscribeRequestBoxValue
+  }
+  subscribeXGov: (
+    setStatus: React.Dispatch<React.SetStateAction<TransactionState>>,
+  ) => Promise<void>
+  className?: string
 }
 
-export function XGovSignUpBanner({ validator }: XGovSignUpBannerProps) {
-  const { activeAddress, transactionSigner: innerSigner, activeWallet } = useWallet()
-  const registry = useRegistry()
-  const pools = validator.pools.map((p) => getApplicationAddress(p.poolAppId).toString())
-  const requests = useRequestBoxes(activeAddress, pools)
-  const xgovs = useXGovs(pools)
-
+export function XGovSignUpBanner({
+  pools,
+  registry,
+  xgovs,
+  requests,
+  subscribeXGov,
+  className,
+}: XGovSignUpBannerProps) {
+  const { activeWallet } = useWallet()
   const { status, setStatus, errorMessage, isPending } = useTransactionState()
 
   const toastIdRef = useRef(`toast-${Date.now()}-${Math.random()}`)
@@ -36,7 +49,7 @@ export function XGovSignUpBanner({ validator }: XGovSignUpBannerProps) {
         break
       case 'loading':
       case 'signing': {
-        toast.loading('Sign transactions to add stake...', { id: toastId })
+        toast.loading('Sign transactions to enroll in xGov...', { id: toastId })
         break
       }
       case 'sending': {
@@ -62,24 +75,10 @@ export function XGovSignUpBanner({ validator }: XGovSignUpBannerProps) {
     }
   }, [status])
 
-  if (
-    validator.config.owner !== activeAddress ||
-    activeAddress === null ||
-    registry.isLoading ||
-    requests.isLoading ||
-    xgovs.isLoading
-  ) {
-    return <></>
-  }
-
   const numPools = pools.length
-  const numRequested = requests.data ? Object.keys(requests.data).length : 0
-  const numEnrolled = xgovs.data ? Object.keys(xgovs.data).length : 0
+  const numRequested = Object.keys(requests).length
+  const numEnrolled = xgovs.size
   const numEnrollable = numPools - (numRequested + numEnrolled)
-  const requestedPools = Object.keys(requests.data ?? {}).map(
-    (key) => requests.data![Number(key)].xgovAddr,
-  )
-  const unenrolledPools = pools.filter((p) => !xgovs.data?.[p] && !requestedPools.includes(p))
 
   let enrollMessage = (
     <>
@@ -106,51 +105,41 @@ export function XGovSignUpBanner({ validator }: XGovSignUpBannerProps) {
     )
   } else if (errorMessage) {
     enrollMessage = <span className="text-red-500">{errorMessage}</span>
-  } else if (numEnrollable < 1) {
+  } else if (numPools <= 0) {
+    enrollMessage = <>There are no pools</>
+  } else if (numPools - numEnrolled < 1) {
     enrollMessage = <>All pools enrolled</>
+  } else if (numEnrollable < 1) {
+    enrollMessage = <>All pools enrolled or pending</>
   }
 
   return (
-    <div className="md:mt-6 md:rounded-xl mx-auto max-w-3xl w-full bg-algo-blue dark:bg-algo-teal">
-      <div className="flex flex-col md:flex-row gap-4 justify-between md:items-start p-4">
-        <div>
-          <h2 className="text-lg mb-1 text-center md:text-left font-semibold text-white dark:text-algo-black">
-            xGov Pool Manager Sign Up
-          </h2>
-          <p className="text-sm mb-1 text-center md:text-left text-gray-200 dark:text-gray-600">
-            Participate in xGov on behalf of your pool{numPools > 1 ? 's' : ''}!
-          </p>
-          <p className="text-center md:text-left text-sm text-white dark:text-algo-black">
-            Cost is
-            <AlgoDisplayAmount
-              amount={registry.data?.xgovFee ?? 0n}
-              microalgos
-              className="ml-2 text-white dark:text-algo-black font-mono"
-            />{' '}
-            per pool
-          </p>
-        </div>
-        <div className="flex flex-col items-center">
-          <h2 className="text-sm mb-4 font-semibold text-white dark:text-algo-black">
-            {`${numRequested} requested | ${numEnrolled} enrolled | ${numPools} pools`}
-          </h2>
-          <Button
-            className="bg-white dark:bg-algo-black hover:bg-algo-blue dark:hover:bg-algo-teal hover:text-white dark:hover:text-algo-black text-algo-black dark:text-white border border-algo-blue dark:border-algo-teal hover:border-white dark:hover:border-algo-black"
-            onClick={() =>
-              requestSubscribeXGov({
-                activeAddress,
-                innerSigner,
-                setStatus,
-                refetch: [registry.refetch, requests.refetch],
-                xgovFee: registry.data?.xgovFee,
-                pools: unenrolledPools,
-              })
-            }
-            disabled={isPending || numEnrollable < 1}
-          >
-            {enrollMessage}
-          </Button>
-        </div>
+    <div className={cn('flex flex-col gap-2 md:items-center justify-center', className)}>
+      <div>
+        <h3 className="text-md mb-1 text-center font-semibold text-white dark:text-algo-black">
+          Enroll each pool in xGov to be eligible to vote!
+        </h3>
+        <p className="text-center text-xs sm:text-sm text-gray-200 dark:text-gray-600">
+          Cost is
+          <AlgoDisplayAmount
+            amount={registry.xgovFee ?? 0n}
+            microalgos
+            className="ml-2 text-white dark:text-algo-black font-mono"
+          />{' '}
+          per pool
+        </p>
+      </div>
+      <div className="flex flex-col items-center gap-2">
+        <Button
+          className="bg-white dark:bg-algo-black hover:bg-algo-blue dark:hover:bg-algo-teal hover:text-white dark:hover:text-algo-black text-algo-black dark:text-white border border-algo-blue dark:border-algo-teal hover:border-white dark:hover:border-algo-black"
+          onClick={() => subscribeXGov(setStatus)}
+          disabled={isPending || numEnrollable < 1}
+        >
+          {enrollMessage}
+        </Button>
+        <h3 className="text-xs sm:text-sm font-semibold text-white dark:text-algo-black">
+          {`${numEnrolled} enrolled | ${numRequested} pending | ${numPools} pools`}
+        </h3>
       </div>
     </div>
   )

@@ -3,6 +3,8 @@ import { FEE_SINK } from '@/constants/accounts'
 import { getXGovRegistryAppIdFromViteEnvironment } from '@/utils/env'
 // @ts-expect-error module resolution issue
 import { XGovRegistryClient } from '@algorandfoundation/xgov-clients/registry'
+// @ts-expect-error module resolution issue
+import { ProposalClient } from '@algorandfoundation/xgov-clients/proposal'
 import { algorandClient } from '@/api/clients'
 
 const XGOV_REGISTRY_APP_ID = BigInt(getXGovRegistryAppIdFromViteEnvironment())
@@ -24,5 +26,15 @@ export async function getSimulateXGovRegistryClient(
   return algorandClient.client.getTypedAppClientById(XGovRegistryClient, {
     defaultSender: senderAddr,
     appId: XGOV_REGISTRY_APP_ID,
+  })
+}
+
+export async function getSimulateProposalClient(
+  proposalAppId: bigint,
+  senderAddr: string = FEE_SINK,
+): Promise<ProposalClient> {
+  return algorandClient.client.getTypedAppClientById(ProposalClient, {
+    defaultSender: senderAddr,
+    appId: proposalAppId,
   })
 }

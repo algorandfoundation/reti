@@ -73,6 +73,7 @@ import { formatAmount, formatAssetAmount } from '@/utils/format'
 import { globalFilterFn, ineligibleFilter, MIN_ELIGIBLE_STAKE, sunsetFilter } from '@/utils/table'
 import { cn } from '@/utils/ui'
 import { ValidatorRewards } from '@/components/ValidatorRewards'
+import { XGovIndicator } from '@/features/xgov/components/XGovIndicator'
 
 interface ValidatorTableProps {
   validators: Validator[]
@@ -324,6 +325,11 @@ export function ValidatorTable({
 
         return <ValidatorStatus validator={validator} />
       },
+    },
+    {
+      id: 'xgov',
+      header: ({ column }) => <DataTableColumnHeader column={column} title="xGov" />,
+      cell: ({ row }) => <XGovIndicator validator={row.original} />,
     },
     {
       id: 'apy',

@@ -12,6 +12,8 @@ import { PageHeader } from '@/components/PageHeader'
 import { PageMain } from '@/components/PageMain'
 import { StakingTable } from '@/components/StakingTable'
 import { ValidatorTable } from '@/components/ValidatorTable'
+import { StakerXGovCard } from '@/features/xgov/components/StakerXGovCard'
+import { getXGovUrlFromViteEnvironment } from '@/features/xgov/utils/getXGovConfig'
 import { useValidators } from '@/hooks/useValidators'
 import { useMemo } from 'react'
 import {
@@ -19,6 +21,8 @@ import {
   getRndValidatorNum,
 } from '@/utils/network/getFeaturedValidatorIds'
 import { getRandomUniqueIntegers } from '@/utils/random'
+
+const xGovPlatformUrl = getXGovUrlFromViteEnvironment()
 
 export const Route = createFileRoute('/')({
   component: Dashboard,
@@ -92,7 +96,19 @@ function Dashboard() {
       <Meta title="Dashboard" />
       <PageHeader
         title="Staking Dashboard"
-        description="Browse validators in the protocol and manage your staking activity."
+        description={
+          <>
+            Browse{' '}
+            <Link to="/validators" className="link">
+              validators
+            </Link>
+            , manage your staking activity, and participate in{' '}
+            <a href={xGovPlatformUrl} target="_blank" rel="noreferrer" className="link">
+              xGov
+            </a>
+            .
+          </>
+        }
         separator
       />
       <PageMain>
@@ -103,6 +119,7 @@ function Dashboard() {
             constraints={constraints}
             isLoading={isValidatorsLoading || stakesQuery.isLoading}
           />
+          <StakerXGovCard stakesByValidator={stakesByValidator} />
           <ValidatorTable
             validators={featuredValidators}
             stakesByValidator={stakesByValidator}

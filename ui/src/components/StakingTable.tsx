@@ -57,6 +57,7 @@ import { ellipseAddressJsx } from '@/utils/ellipseAddress'
 import { formatAssetAmount } from '@/utils/format'
 import { globalFilterFn } from '@/utils/table'
 import { cn } from '@/utils/ui'
+import { XGovIndicator } from '@/features/xgov/components/XGovIndicator'
 
 interface StakingTableProps {
   validators: Validator[]
@@ -142,6 +143,15 @@ export function StakingTable({
           className="font-mono"
         />
       ),
+    },
+    {
+      id: 'xgov',
+      header: ({ column }) => <DataTableColumnHeader column={column} title="xGov" />,
+      cell: ({ row }) => {
+        const validator = validators.find((v) => BigInt(v.id) === BigInt(row.original.validatorId))
+        if (!validator) return 'Unknown Validator'
+        return <XGovIndicator validator={validator} />
+      },
     },
     {
       accessorKey: 'totalRewarded',

@@ -16,7 +16,6 @@ import { PageMain } from '@/components/PageMain'
 import { ValidatorDetails } from '@/components/ValidatorDetails'
 import { DetailsHeader } from '@/components/ValidatorDetails/DetailsHeader'
 import { useValidator } from '@/hooks/useValidator'
-import { XGovSignUpBanner } from '@/features/xgov/components/XGovSignUpBanner'
 
 export const Route = createFileRoute('/validators_/$validatorId')({
   beforeLoad: () => {
@@ -68,7 +67,6 @@ function Dashboard() {
   return (
     <>
       <Meta title={pageTitle} />
-      <XGovSignUpBanner validator={validator!} />
       <DetailsHeader validator={validator!} />
       <PageMain>
         <ValidatorDetails

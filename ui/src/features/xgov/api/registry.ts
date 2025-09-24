@@ -1,14 +1,23 @@
 import { wrapTransactionSigner } from '@/hooks/useTransactionState'
 import { sleep } from '@/utils/time'
 import { encodeUint64 } from 'algosdk'
+import { algorandClient } from '@/api/clients'
 import {
   GlobalKeysState,
   XGovBoxValue,
   XGovSubscribeRequestBoxValue,
   // @ts-expect-error module resolution issue
 } from '@algorandfoundation/xgov-clients/registry'
+import {
+  decodeApplicationToBaseProposal,
+  getProposalCategoryParams,
+  getProposalVoterBox,
+} from './proposal'
+import { Proposal, Vote } from '@/features/xgov/types/proposal'
 import { TransactionHandlerProps } from '@/api/transactionState'
 import { getSimulateXGovRegistryClient, getXGovRegistryClient } from './clients'
+import { PPM_MAX } from '@/constants/units'
+import { AlgoAmount } from '@algorandfoundation/algokit-utils/types/amount'
 
 export function requestBoxName(id: number): Uint8Array {
   return new Uint8Array(Buffer.concat([Buffer.from('r'), encodeUint64(id)]))
@@ -24,28 +33,20 @@ export async function getXGovGlobalState(): Promise<GlobalKeysState | undefined>
   }
 }
 
-export async function getXGovBoxes(
-  xgovAddresses: string[],
-): Promise<{ [address: string]: XGovBoxValue }> {
-  const client = await getSimulateXGovRegistryClient()
-  const results = await Promise.allSettled(
-    xgovAddresses.map(async (address) => {
-      const box = await client.state.box.xgovBox.value(address)
-      return { address, box }
-    }),
-  )
+export async function getXGovBox(address: string): Promise<XGovBoxValue | null> {
+  try {
+    const client = await getSimulateXGovRegistryClient()
+    const xGovBox = await client.state.box.xgovBox.value(address)
 
-  const boxes: { [address: string]: XGovBoxValue } = {}
-  results.forEach((result) => {
-    if (result.status === 'fulfilled') {
-      const { address, box } = result.value
-      if (box) {
-        boxes[address] = box
-      }
+    return xGovBox
+  } catch (error) {
+    if (error instanceof Error && /status 404.*box not found/i.test(error.message ?? '')) {
+      return null
     }
-  })
 
-  return boxes
+    console.error(error)
+    return null
+  }
 }
 
 export async function getXGovRequestBoxes(
@@ -143,7 +144,132 @@ export async function requestSubscribeXGov({
     setStatus(new Error('Failed to confirm transaction submission'))
   } catch (e) {
     console.error('Error during requestSubscribeXGov:', (e as Error).message)
-    setStatus(new Error(`Failed to request subscription to xGov`))
+    const err = new Error(`Failed to request subscription to xGov`)
+    setStatus(err)
+    throw err
+  }
+}
+
+export async function fetchProposals(): Promise<Proposal[]> {
+  try {
+    const client = await getSimulateXGovRegistryClient()
+    const registryState = await getXGovGlobalState()
+    const result = await algorandClient.client.algod.accountInformation(client.appAddress).do()
+    const proposalsRaw = result.createdApps
+    const proposals: Proposal[] = []
+
+    if (proposalsRaw) {
+      proposalsRaw.forEach((proposalRaw) => {
+        const proposal = decodeApplicationToBaseProposal(proposalRaw)
+        if (!proposal) return
+        const proposalCategoryParams = getProposalCategoryParams(
+          proposal.fundingCategory,
+          registryState,
+        )
+        proposal.voteClose = new Date(
+          proposal.voteStart.getTime() + proposalCategoryParams.durationTS * 1000,
+        )
+
+        proposals.push(proposal)
+      })
+    }
+
+    return proposals
+  } catch (error) {
+    console.error(error)
+    throw error
+  }
+}
+
+export interface VoteOwnerXGovProps extends TransactionHandlerProps {
+  proposalId: bigint
+  poolAddresses: string[]
+  vote: Vote
+}
+
+export async function voteXGov({
+  activeAddress,
+  innerSigner,
+  setStatus,
+  refetch,
+  proposalId,
+  poolAddresses,
+  vote,
+}: VoteOwnerXGovProps) {
+  if (!innerSigner) return
+
+  const signer = wrapTransactionSigner(innerSigner, setStatus)
+
+  if (!activeAddress || !signer) {
+    setStatus(new Error('No active address or transaction signer'))
     return
+  }
+
+  const client = await getXGovRegistryClient(signer, activeAddress)
+
+  const builder = client.newGroup()
+  let txnCnt = 0
+
+  for (const poolAddress of poolAddresses) {
+    const voterBox = await getProposalVoterBox(proposalId, poolAddress)
+    if (voterBox === null) {
+      console.error(
+        'Pool voter box not found. It might not be eligible to vote if it produced 0 blocks.',
+      )
+      continue
+    }
+    if (voterBox.voted) {
+      console.error('Pool already voted')
+      continue
+    }
+    const approvalVotes = (vote.approvals * voterBox.votes) / PPM_MAX
+    const rejectionVotes = (vote.rejections * voterBox.votes) / PPM_MAX
+    // Note: Any remainder accounts for null votes.
+    // E.g. if 50% of pool votes to approve and 50% to reject and there are 3 votes for the pool,
+    // the votes will be 1:1:1.
+    // Pool owner does not break the tie. It only votes with the portion of stake that did not
+    // cast any vote (which is already included here in `vote`).
+
+    builder.voteProposal({
+      args: {
+        proposalId,
+        xgovAddress: poolAddress,
+        approvalVotes,
+        rejectionVotes,
+      },
+      staticFee: AlgoAmount.MicroAlgos(2000),
+    })
+    txnCnt += 1
+  }
+
+  if (txnCnt === 0) {
+    const err = new Error('No votes to cast. Your validator might have not produced any blocks.')
+    setStatus(err)
+    throw err
+  }
+
+  try {
+    const {
+      confirmations: [confirmation],
+    } = await builder.send({ populateAppCallResources: true })
+
+    if (
+      confirmation.confirmedRound !== undefined &&
+      confirmation.confirmedRound > 0 &&
+      confirmation.poolError === ''
+    ) {
+      setStatus('confirmed')
+      await sleep(800)
+      setStatus('idle')
+      await Promise.all(refetch.map((r) => r()))
+      return
+    }
+
+    setStatus(new Error('Failed to confirm transaction submission'))
+  } catch (e) {
+    console.error('Error during voteOwnerXGov:', (e as Error).message)
+    const err = new Error(`Failed to cast vote in xGov`)
+    setStatus(err)
+    throw err
   }
 }

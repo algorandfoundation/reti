@@ -16,11 +16,11 @@ export function getAlgodConfigFromViteEnvironment(): AlgoViteClientConfig {
   }
 }
 
-export function getIndexerConfigFromViteEnvironment(): AlgoViteClientConfig {
+export function getIndexerConfigFromViteEnvironment(): AlgoViteClientConfig | undefined {
   if (!import.meta.env.VITE_INDEXER_SERVER) {
-    throw new Error(
-      'Attempt to get default algod configuration without specifying VITE_INDEXER_SERVER in the environment variables',
-    )
+    // eslint-disable-next-line no-console
+    console.log('Did not find default indexer configuration. Some features will be unavailable.')
+    return
   }
 
   return {

@@ -15,6 +15,7 @@ import { ExplorerLink } from '@/utils/explorer'
 import { roundToFirstNonZeroDecimal } from '@/utils/format'
 import { nodeNumForPoolId } from '@/utils/pools'
 import { LinkPoolToNfdModal } from './LinkPoolToNfdModal'
+import { XGovIndicator } from '@/features/xgov/components/XGovIndicator'
 
 interface StakingPoolInfoProps {
   validator: Validator
@@ -108,6 +109,14 @@ export function StakingPoolInfo({
               <dt className="text-sm font-medium leading-6 text-muted-foreground">Total Pools</dt>
               <dd className="flex items-center gap-x-2 text-sm leading-6">
                 {validator.state.numPools}
+              </dd>
+            </div>
+            <div className="py-4 grid grid-cols-2 gap-4">
+              <dt className="text-sm font-medium leading-6 text-muted-foreground">
+                xGov Participation
+              </dt>
+              <dd className="flex items-center gap-x-2 text-sm leading-6">
+                <XGovIndicator validator={validator} className="-ml-1" />
               </dd>
             </div>
             <div className="py-4 grid grid-cols-2 gap-4">
@@ -207,6 +216,15 @@ export function StakingPoolInfo({
               <span className="font-mono">
                 {nodeNumForPoolId(poolInfo.poolAppId, validator.nodePoolAssignment)}
               </span>
+            </dd>
+          </div>
+
+          <div className="py-4 grid grid-cols-2 gap-4">
+            <dt className="text-sm font-medium leading-6 text-muted-foreground">
+              xGov Participation
+            </dt>
+            <dd className="flex items-center gap-x-2 text-sm">
+              <XGovIndicator validator={validator} poolId={poolInfo.poolId} className="-ml-1" />
             </dd>
           </div>
 

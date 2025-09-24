@@ -8,6 +8,7 @@ import { formatDuration } from '@/utils/dayjs'
 import { formatAmount, formatAssetAmount } from '@/utils/format'
 import { cn } from '@/utils/ui'
 import { getApplicationAddress } from 'algosdk'
+import { useMemo } from 'react'
 
 interface ValidatorInfoRowProps {
   validator: Validator
@@ -16,9 +17,13 @@ interface ValidatorInfoRowProps {
 
 export function ValidatorInfoRow({ validator, constraints }: ValidatorInfoRowProps) {
   const blockTime = useBlockTime()
-  const pools = validator.pools.map((p) => getApplicationAddress(p.poolAppId).toString())
+
+  const pools = useMemo(
+    () => validator.pools.map((p) => getApplicationAddress(p.poolAppId).toString()),
+    [validator.pools],
+  )
   const xgovs = useXGovs(pools)
-  const numEnrolled = xgovs.data ? Object.keys(xgovs.data).length : 0
+  const numEnrolled = xgovs.data.size
 
   const epochLength = validator.config.epochRoundLength
   const numRounds = formatAmount(epochLength)

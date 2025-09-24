@@ -1,8 +1,9 @@
 import { Separator } from '@/components/ui/separator'
+import { ReactNode } from 'react'
 
 interface PageHeaderProps {
   title?: string | null
-  description?: string
+  description?: string | ReactNode
   separator?: boolean
 }
 

@@ -217,5 +217,9 @@ module.exports = {
       },
     },
   },
-  plugins: [require('tailwindcss-animate'), ...tremor.plugins],
+  plugins: [
+    require('tailwindcss-animate'),
+    require('@tailwindcss/container-queries'),
+    ...tremor.plugins,
+  ],
 }

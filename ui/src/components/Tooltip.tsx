@@ -4,6 +4,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
+  TooltipPortal,
 } from '@/components/ui/tooltip'
 import { cn } from '@/utils/ui'
 
@@ -11,22 +12,26 @@ interface TooltipProps {
   content: React.ReactNode
   children: React.ReactNode
   variant?: 'default' | 'primary'
+  className?: string
 }
 
-export function Tooltip({ content, children, variant = 'default' }: TooltipProps) {
+export function Tooltip({ content, children, variant = 'default', className }: TooltipProps) {
   return (
     <TooltipProvider>
       <TooltipPrimative>
         <TooltipTrigger asChild>{children}</TooltipTrigger>
-        <TooltipContent
-          className={cn(
-            variant === 'default'
-              ? 'bg-stone-900 text-white font-semibold tracking-tight dark:bg-white dark:text-stone-900'
-              : '',
-          )}
-        >
-          {content}
-        </TooltipContent>
+        <TooltipPortal>
+          <TooltipContent
+            className={cn(
+              variant === 'default'
+                ? 'bg-stone-900 text-white font-semibold tracking-tight dark:bg-white dark:text-stone-900'
+                : '',
+              className,
+            )}
+          >
+            {content}
+          </TooltipContent>
+        </TooltipPortal>
       </TooltipPrimative>
     </TooltipProvider>
   )

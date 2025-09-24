@@ -32,6 +32,7 @@ import { SelectPool } from './SelectPool'
 import { StakingPoolInfo } from './StakingPoolInfo'
 import { StakersList } from './StakersList'
 import { SunsetNotice } from './SunsetNotice'
+import { OwnerXGovCard } from '@/features/xgov/components/OwnerXGovCard'
 
 interface ValidatorDetailsProps {
   validator: Validator
@@ -193,12 +194,27 @@ export function ValidatorDetails({
 
   return (
     <div className="py-10 space-y-4">
-      <Highlights
-        validator={validator}
-        constraints={constraints}
-        setAddPoolValidator={setAddPoolValidator}
-        canAddPool={canAddPool}
-      />
+      {isOwner ? (
+        <div className="grid gap-4 lg:grid-cols-3">
+          <Highlights
+            validator={validator}
+            constraints={constraints}
+            setAddPoolValidator={setAddPoolValidator}
+            canAddPool={canAddPool}
+          />
+          <div className="order-first lg:order-last lg:col-span-2 min-w-0">
+            <OwnerXGovCard validator={validator} />
+          </div>
+        </div>
+      ) : (
+        <Highlights
+          validator={validator}
+          constraints={constraints}
+          setAddPoolValidator={setAddPoolValidator}
+          canAddPool={canAddPool}
+        />
+      )}
+
       <div className="grid gap-4 lg:grid-cols-3">
         <div>
           <Details validator={validator} constraints={constraints} />

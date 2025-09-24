@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Constraints } from '@/contracts/ValidatorRegistryClient'
 import { Validator } from '@/interfaces/validator'
 import { calculateMaxStakers } from '@/utils/contracts'
+import { useWallet } from '@txnlab/use-wallet-react'
 
 interface HighlightsProps {
   validator: Validator
@@ -20,18 +21,20 @@ export function Highlights({
   setAddPoolValidator,
   canAddPool,
 }: HighlightsProps) {
+  const { activeAddress } = useWallet()
   const totalStakers = validator.state.totalStakers
   const maxStakers = calculateMaxStakers(validator, constraints)
   const { poolsPerNode } = validator.config
   const maxNodes = Number(constraints.maxNodes)
+  const isOwner = validator.config.owner === activeAddress
 
   return (
     <>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className={`grid gap-4 md:grid-cols-2 ${!isOwner ? 'lg:grid-cols-4' : ''}`}>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle as="h2" className="text-sm font-medium">
-              Total Staked
+              Total Stake
             </CardTitle>
             <Coins className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
@@ -40,7 +43,7 @@ export function Highlights({
               <AlgoDisplayAmount
                 amount={validator.state.totalAlgoStaked}
                 microalgos
-                maxLength={13}
+                maxLength={8}
                 compactPrecision={2}
                 mutedRemainder
               />
@@ -78,7 +81,7 @@ export function Highlights({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="group -my-2"
+                  className="group -my-2 -mx-2"
                   onClick={() => setAddPoolValidator(validator)}
                 >
                   <CirclePlus className="h-5 w-5 text-muted-foreground transition-colors group-hover:text-foreground" />
