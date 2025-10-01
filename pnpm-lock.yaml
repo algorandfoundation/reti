@@ -21,11 +21,11 @@ importers:
         specifier: 4.0.6
         version: 4.0.6(@algorandfoundation/algokit-utils@8.0.3(algosdk@3.1.0))(algosdk@3.1.0)
       '@algorandfoundation/algorand-typescript':
-        specifier: 1.0.0-alpha.74
-        version: 1.0.0-alpha.74(tslib@2.8.1)
+        specifier: 1.0.0-alpha.87
+        version: 1.0.0-alpha.87(tslib@2.8.1)
       '@algorandfoundation/puya-ts':
-        specifier: 1.0.0-alpha.74
-        version: 1.0.0-alpha.74
+        specifier: 1.0.0-alpha.87
+        version: 1.0.0-alpha.87
       '@joe-p/algokit-generate-component':
         specifier: 0.2.1
         version: 0.2.1(chokidar@3.6.0)
@@ -378,13 +378,13 @@ packages:
     peerDependencies:
       algosdk: ^3.0.0
 
-  '@algorandfoundation/algorand-typescript@1.0.0-alpha.74':
-    resolution: {integrity: sha512-rUJtmbJt8cfju2U/4ZoaCUlgN4AW9Nor3rOLozVg6IFoML0N9QzgRlqebdFUgJvJGXQ7zrJdcy19movZMc9fnw==}
+  '@algorandfoundation/algorand-typescript@1.0.0-alpha.87':
+    resolution: {integrity: sha512-f9NaQ9j3tPS0quM8ylfBdRD9v0HxEfbcX2KzO6EFOI4RygubX9jc+i5hXTyB8jYXnr7gQJfiKZaLzIRP9eRnyA==}
     peerDependencies:
       tslib: ^2.6.2
 
-  '@algorandfoundation/puya-ts@1.0.0-alpha.74':
-    resolution: {integrity: sha512-pDpHBNpR+iWIZVDwdGxxnTZOTSAaA1JURsegO0bbCHpVwgfrgks9MLAtJiHiN7/7eE7QKF/zo3DSLxNb6PY35A==}
+  '@algorandfoundation/puya-ts@1.0.0-alpha.87':
+    resolution: {integrity: sha512-la92IL3XUBO/WyL7sxx4MrieEg0Hyci+EANx1BntitVQCUmVXROIobw5N9YZbeoQdBZuwkqW/HRpHB2+ZO4qwA==}
     hasBin: true
 
   '@alloc/quick-lru@5.2.0':
@@ -5500,13 +5500,13 @@ snapshots:
       algosdk: 3.2.0
       buffer: 6.0.3
 
-  '@algorandfoundation/algorand-typescript@1.0.0-alpha.74(tslib@2.8.1)':
+  '@algorandfoundation/algorand-typescript@1.0.0-alpha.87(tslib@2.8.1)':
     dependencies:
       tslib: 2.8.1
 
-  '@algorandfoundation/puya-ts@1.0.0-alpha.74':
+  '@algorandfoundation/puya-ts@1.0.0-alpha.87':
     dependencies:
-      '@algorandfoundation/algorand-typescript': 1.0.0-alpha.74(tslib@2.8.1)
+      '@algorandfoundation/algorand-typescript': 1.0.0-alpha.87(tslib@2.8.1)
       arcsecond: 5.0.0
       argparse: 2.0.1
       chalk: 5.5.0

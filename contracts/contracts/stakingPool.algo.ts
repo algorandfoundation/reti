@@ -31,17 +31,9 @@ import {
     MIN_ALGO_STAKE_PER_POOL,
 } from './constants.algo'
 import { PoolTokenPayoutRatio, ValidatorPoolKey } from './validatorConfigs.algo'
-import {
-    abiCall,
-    abimethod,
-    Address,
-    arc4EncodedLength,
-    encodeArc4,
-    Uint128,
-} from '@algorandfoundation/algorand-typescript/arc4'
+import { abiCall, abimethod, Address, sizeOf, encodeArc4, Uint128 } from '@algorandfoundation/algorand-typescript/arc4'
 import { wideRatio } from './utils.algo'
-import { ValidatorRegistryInterface } from './interfaces'
-
+import type { ValidatorRegistry } from './validatorRegistry.algo'
 // The data stored 'per-staker' in box storage of each pool
 export type StakedInfo = {
     account: Address
@@ -180,7 +172,7 @@ export class StakingPool extends Contract {
         assert(!this.stakers.exists, 'staking pool already initialized')
 
         // Get the config of our validator to determine if we issue reward tokens
-        const validatorConfig = abiCall(ValidatorRegistryInterface.prototype.getValidatorConfig, {
+        const validatorConfig = abiCall<typeof ValidatorRegistry.prototype.getValidatorConfig>({
             appId: this.creatingValidatorContractAppId.value,
             args: [this.validatorId.value],
         }).returnValue
@@ -190,7 +182,7 @@ export class StakingPool extends Contract {
         const PoolInitMbr: uint64 =
             ALGORAND_ACCOUNT_MIN_BALANCE +
             extraMBR +
-            this.costForBoxStorage(7 /* 'stakers' name */ + arc4EncodedLength<StakedInfo>() * MAX_STAKERS_PER_POOL)
+            this.costForBoxStorage(7 /* 'stakers' name */ + sizeOf<StakedInfo>() * MAX_STAKERS_PER_POOL)
 
         // the pay transaction must exactly match our MBR requirement.
         assertMatch(mbrPayment, { receiver: Global.currentApplicationAddress, amount: PoolInitMbr })
@@ -247,7 +239,7 @@ export class StakingPool extends Contract {
 
         const roundsLeftInBin: uint64 = this.binRoundStart.value + this.roundsPerDay.value - Global.round
         this.stakeAccumulator.value = new Uint128(
-            this.stakeAccumulator.value.native + BigUint(stakedAmountPayment.amount) * BigUint(roundsLeftInBin),
+            this.stakeAccumulator.value.asBigUint() + BigUint(stakedAmountPayment.amount) * BigUint(roundsLeftInBin),
         )
 
         // firstEmpty should represent 1-based index to first empty slot we find - 0 means none were found
@@ -331,7 +323,7 @@ export class StakingPool extends Contract {
                 if (cmpStaker.rewardTokenBalance > 0) {
                     // If and only if this is pool 1 (where the reward token is held - then we can pay it out)
                     if (this.poolId.value === 1) {
-                        const validatorConfig = abiCall(ValidatorRegistryInterface.prototype.getValidatorConfig, {
+                        const validatorConfig = abiCall<typeof ValidatorRegistry.prototype.getValidatorConfig>({
                             appId: this.creatingValidatorContractAppId.value,
                             args: [this.validatorId.value],
                         }).returnValue
@@ -383,12 +375,12 @@ export class StakingPool extends Contract {
 
                 const roundsLeftInBin: uint64 = this.binRoundStart.value + this.roundsPerDay.value - Global.round
                 const subtractAmount = BigUint(amountToUnstake * roundsLeftInBin)
-                this.stakeAccumulator.value = new Uint128(this.stakeAccumulator.value.native - subtractAmount)
+                this.stakeAccumulator.value = new Uint128(this.stakeAccumulator.value.asBigUint() - subtractAmount)
 
                 // Call the validator contract and tell it we're removing stake
                 // It'll verify we're a valid staking pool id and update it
                 // stakeRemoved(poolKey: ValidatorPoolKey, staker: Address, amountRemoved: uint64, rewardRemoved: uint64, stakerRemoved: boolean): void
-                abiCall(ValidatorRegistryInterface.prototype.stakeRemoved, {
+                abiCall<typeof ValidatorRegistry.prototype.stakeRemoved>({
                     appId: this.creatingValidatorContractAppId.value,
                     args: [
                         {
@@ -429,7 +421,7 @@ export class StakingPool extends Contract {
                 let amountRewardTokenRemoved: uint64 = 0
                 // If and only if this is pool 1 (where the reward token is held - then we can pay it out)
                 if (this.poolId.value === 1) {
-                    const validatorConfig = abiCall(ValidatorRegistryInterface.prototype.getValidatorConfig, {
+                    const validatorConfig = abiCall<typeof ValidatorRegistry.prototype.getValidatorConfig>({
                         appId: this.creatingValidatorContractAppId.value,
                         args: [this.validatorId.value],
                     }).returnValue
@@ -457,7 +449,7 @@ export class StakingPool extends Contract {
                 // Call the validator contract and tell it we're removing stake
                 // It'll verify we're a valid staking pool id and update it
                 // stakeRemoved(poolKey: ValidatorPoolKey, staker: Address, amountRemoved: uint64, rewardRemoved: uint64, stakerRemoved: boolean): void
-                abiCall(ValidatorRegistryInterface.prototype.stakeRemoved, {
+                abiCall<typeof ValidatorRegistry.prototype.stakeRemoved>({
                     appId: this.creatingValidatorContractAppId.value,
                     args: [
                         {
@@ -546,7 +538,7 @@ export class StakingPool extends Contract {
      */
     epochBalanceUpdate(): void {
         // call the validator contract to get our payout config data
-        const validatorConfig = abiCall(ValidatorRegistryInterface.prototype.getValidatorConfig, {
+        const validatorConfig = abiCall<typeof ValidatorRegistry.prototype.getValidatorConfig>({
             appId: this.creatingValidatorContractAppId.value,
             args: [this.validatorId.value],
         }).returnValue
@@ -555,7 +547,7 @@ export class StakingPool extends Contract {
         // Establish base 'epoch' info for future calcs and ensure full Epoch has passed before allowing a new
         // Epoch update to occur.
         // =====
-        const epochRoundLength = validatorConfig.epochRoundLength.native
+        const epochRoundLength = validatorConfig.epochRoundLength.asUint64()
         const curRound = Global.round
         const thisEpochBegin: uint64 = curRound - (curRound % epochRoundLength)
 
@@ -583,7 +575,7 @@ export class StakingPool extends Contract {
         if (isTokenEligible) {
             if (this.poolId.value !== 1) {
                 // If we're not pool 1 - figure out its address..
-                poolOneAppID = abiCall(ValidatorRegistryInterface.prototype.getPoolAppId, {
+                poolOneAppID = abiCall<typeof ValidatorRegistry.prototype.getPoolAppId>({
                     appId: this.creatingValidatorContractAppId.value,
                     args: [this.validatorId.value, 1],
                 }).returnValue
@@ -594,13 +586,13 @@ export class StakingPool extends Contract {
             // Snapshot the ratio of token stake per pool across the pools so the token rewards across pools
             // can be based on a stable cross-pool ratio.
             if (this.poolId.value === 1) {
-                tokenPayoutRatio = abiCall(ValidatorRegistryInterface.prototype.setTokenPayoutRatio, {
+                tokenPayoutRatio = abiCall<typeof ValidatorRegistry.prototype.setTokenPayoutRatio>({
                     appId: this.creatingValidatorContractAppId.value,
                     args: [this.validatorId.value],
                 }).returnValue
             } else {
                 // This isn't pool 1 - so call pool 1 to then ask IT to call the validator to call setTokenPayoutRatio
-                tokenPayoutRatio = abiCall(StakingPool.prototype.proxiedSetTokenPayoutRatio, {
+                tokenPayoutRatio = abiCall<typeof StakingPool.prototype.proxiedSetTokenPayoutRatio>({
                     appId: Application(poolOneAppID),
                     args: [
                         {
@@ -615,7 +607,7 @@ export class StakingPool extends Contract {
 
         // Get the validator state as well - so we know the total staked for the entire validator, and how much token
         // has been held back
-        const validatorState = abiCall(ValidatorRegistryInterface.prototype.getValidatorState, {
+        const validatorState = abiCall<typeof ValidatorRegistry.prototype.getValidatorState>({
             appId: this.creatingValidatorContractAppId.value,
             args: [this.validatorId.value],
         }).returnValue
@@ -686,7 +678,7 @@ export class StakingPool extends Contract {
             //  since validator gets nothing and stakers get a reward amount calculated differently we need to make
             //  sure it's always <= reward they would've received had the validator taken their cut.
             const normalValidatorCommission = wideRatio(
-                [algoRewardAvail, validatorConfig.percentToValidator.native],
+                [algoRewardAvail, validatorConfig.percentToValidator.asUint64()],
                 [1_000_000],
             )
             // diminishedReward = (reward * maxStakePerPool) / stakeForValidator
@@ -707,11 +699,11 @@ export class StakingPool extends Contract {
             }).submit()
             // then distribute the smaller reward amount like normal (skipping validator payout entirely)
             algoRewardAvail = diminishedReward
-        } else if (validatorConfig.percentToValidator.native !== 0) {
+        } else if (validatorConfig.percentToValidator.asUint64() !== 0) {
             // determine the % that goes to validator...
             // ie: 100[algo] * 50_000 (5% w/4 decimals) / 1_000_000 == 5 [algo]
             validatorCommissionPaidOut = wideRatio(
-                [algoRewardAvail, validatorConfig.percentToValidator.native],
+                [algoRewardAvail, validatorConfig.percentToValidator.asUint64()],
                 [1_000_000],
             )
 
@@ -889,7 +881,7 @@ export class StakingPool extends Contract {
         const roundsLeftInBin: uint64 = this.binRoundStart.value + this.roundsPerDay.value - Global.round
         this.totalAlgoStaked.value += increasedStake
         this.stakeAccumulator.value = new Uint128(
-            this.stakeAccumulator.value.native + BigUint(increasedStake) * BigUint(roundsLeftInBin),
+            this.stakeAccumulator.value.asBigUint() + BigUint(increasedStake) * BigUint(roundsLeftInBin),
         )
         this.rewardAccumulator.value = this.rewardAccumulator.value + increasedStake
 
@@ -897,7 +889,7 @@ export class StakingPool extends Contract {
         // It'll verify we're a valid staking pool id and update the various stats, also logging an event to
         // track the data.
         // stakeUpdatedViaRewards(poolKey,algoToAdd,rewardTokenAmountReserved,validatorCommission,saturatedBurnToFeeSink)
-        abiCall(ValidatorRegistryInterface.prototype.stakeUpdatedViaRewards, {
+        abiCall<typeof ValidatorRegistry.prototype.stakeUpdatedViaRewards>({
             appId: this.creatingValidatorContractAppId.value,
             args: [
                 { id: this.validatorId.value, poolId: this.poolId.value, poolAppId: Global.currentApplicationId.id },
@@ -989,21 +981,21 @@ export class StakingPool extends Contract {
         assert(this.poolId.value === 1, 'callee must be pool 1')
         assert(poolKey.poolId !== 1, 'caller must NOT be pool 1')
 
-        const callerPoolAppID = abiCall(ValidatorRegistryInterface.prototype.getPoolAppId, {
+        const callerPoolAppID = abiCall<typeof ValidatorRegistry.prototype.getPoolAppId>({
             appId: this.creatingValidatorContractAppId.value,
             args: [poolKey.id, poolKey.poolId],
         }).returnValue
         assert(callerPoolAppID === poolKey.poolAppId)
         assert(Txn.sender === Application(poolKey.poolAppId).address)
 
-        return abiCall(ValidatorRegistryInterface.prototype.setTokenPayoutRatio, {
+        return abiCall<typeof ValidatorRegistry.prototype.setTokenPayoutRatio>({
             appId: this.creatingValidatorContractAppId.value,
             args: [this.validatorId.value],
         }).returnValue
     }
 
     private isOwnerOrManagerCaller(): boolean {
-        const OwnerAndManager = abiCall(ValidatorRegistryInterface.prototype.getValidatorOwnerAndManager, {
+        const OwnerAndManager = abiCall<typeof ValidatorRegistry.prototype.getValidatorOwnerAndManager>({
             appId: this.creatingValidatorContractAppId.value,
             args: [this.validatorId.value],
         }).returnValue
@@ -1041,7 +1033,7 @@ export class StakingPool extends Contract {
         if (Global.round >= this.binRoundStart.value + currentBinSize) {
             ensureBudget(300)
             const approxRoundsPerYear = BigUint(currentBinSize * 365)
-            const avgStake = BigUint(this.stakeAccumulator.value.native / BigUint(currentBinSize))
+            const avgStake = BigUint(this.stakeAccumulator.value.asBigUint() / BigUint(currentBinSize))
             if (avgStake !== 0n) {
                 // do APR in hundredths (final result), so we multiply by 1,000,000 (*100 for extra precision on low stake)
                 // before we divide by avgStake.  We divide by 100 at end so final apr is in hundredths.
@@ -1060,11 +1052,11 @@ export class StakingPool extends Contract {
                 }
                 // If this is first time setting weightedMovingAverage - set to absolute percentage instead
                 // of trying to very slowly trend there.
-                if (this.weightedMovingAverage.value.native === 0n) {
+                if (this.weightedMovingAverage.value.asBigUint() === 0n) {
                     this.weightedMovingAverage.value = new Uint128(apr)
                 } else {
                     this.weightedMovingAverage.value = new Uint128(
-                        (this.weightedMovingAverage.value.native * (BigUint(100) - alpha)) / BigUint(100) +
+                        (this.weightedMovingAverage.value.asBigUint() * (BigUint(100) - alpha)) / BigUint(100) +
                             (apr * alpha) / BigUint(100),
                     )
                 }
