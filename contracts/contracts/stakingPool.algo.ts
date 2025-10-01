@@ -58,7 +58,6 @@ const nfdRegistryAppId = TemplateVar<uint64>('NFD_REGISTRY_APP_ID')
  * authoritatively has (validator id X, pool Y - has to come from contract address of that pool).  Calls the pools
  * validate coming from the validator are only allowed if it matches the validator id it was created with.
  */
-@contract({ avmVersion: 11 })
 export class StakingPool extends Contract {
     // When created, we track our creating validator contract so that only this contract can call us.  Independent
     // copies of this contract could be created but only the 'official' validator contract would be considered valid

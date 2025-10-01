@@ -86,7 +86,6 @@ const nfdRegistryAppId = TemplateVar<uint64>('NFD_REGISTRY_APP_ID')
  * within the StakingPool contract instance, also in global state and box storage.
  * See the StakingPool contract comments for details on how this contract creates new instances of them.
  */
-@contract({ avmVersion: 11 })
 export class ValidatorRegistry extends Contract {
     // ======
     // GLOBAL STATE AND TEMPLATES
