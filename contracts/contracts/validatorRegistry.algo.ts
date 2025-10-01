@@ -108,7 +108,7 @@ export class ValidatorRegistry extends Contract {
 
     // For given user staker address, which of up to MAX_POOLS_PER_STAKER validator/pools are they in
     // We use this to find a particular addresses deposits (in up to X independent pools w/ any validators)
-    stakerPoolSet = BoxMap<Address, FixedArray<ValidatorPoolKey, typeof MAX_POOLS_PER_STAKER>>({ keyPrefix: 'sps' })
+    stakerPoolSet = BoxMap<Account, FixedArray<ValidatorPoolKey, typeof MAX_POOLS_PER_STAKER>>({ keyPrefix: 'sps' })
 
     // ======
     // PUBLIC CONTRACT METHODS
@@ -218,7 +218,7 @@ export class ValidatorRegistry extends Contract {
     }
 
     @abimethod({ readonly: true })
-    getValidatorOwnerAndManager(validatorId: ValidatorIdType): [Address, Address] {
+    getValidatorOwnerAndManager(validatorId: ValidatorIdType): [Account, Account] {
         return [
             this.validatorList(validatorId).value.config.owner,
             this.validatorList(validatorId).value.config.manager,
@@ -290,7 +290,7 @@ export class ValidatorRegistry extends Contract {
      * @param staker
      */
     @abimethod({ readonly: true })
-    doesStakerNeedToPayMBR(staker: Address): boolean {
+    doesStakerNeedToPayMBR(staker: Account): boolean {
         return !this.stakerPoolSet(staker).exists
     }
 
@@ -301,7 +301,7 @@ export class ValidatorRegistry extends Contract {
      * @return {ValidatorPoolKey[]} - The array of staked pools for the account.
      */
     @abimethod({ readonly: true })
-    getStakedPoolsForAccount(staker: Address): ValidatorPoolKey[] {
+    getStakedPoolsForAccount(staker: Account): ValidatorPoolKey[] {
         if (!this.stakerPoolSet(staker).exists) {
             return []
         }
@@ -397,9 +397,9 @@ export class ValidatorRegistry extends Contract {
      * @param {ValidatorIdType} validatorId - The id of the validator to change the manager for.
      * @param {Address} manager - The new manager address.
      */
-    changeValidatorManager(validatorId: ValidatorIdType, manager: Address): void {
+    changeValidatorManager(validatorId: ValidatorIdType, manager: Account): void {
         this.callerMustBeOwner(validatorId)
-        assert(manager.native !== Global.zeroAddress, 'needs to at least be valid address')
+        assert(manager !== Global.zeroAddress, 'needs to at least be valid address')
         this.validatorList(validatorId).value.config.manager = manager
     }
 
@@ -442,9 +442,9 @@ export class ValidatorRegistry extends Contract {
      * Change the commission address that validator rewards are sent to.
      [ ONLY OWNER CAN CHANGE ]
      */
-    changeValidatorCommissionAddress(validatorId: ValidatorIdType, commissionAddress: Address): void {
+    changeValidatorCommissionAddress(validatorId: ValidatorIdType, commissionAddress: Account): void {
         this.callerMustBeOwner(validatorId)
-        assert(commissionAddress.native !== Global.zeroAddress)
+        assert(commissionAddress !== Global.zeroAddress)
         this.validatorList(validatorId).value.config.validatorCommissionAddress = commissionAddress
     }
 
@@ -455,7 +455,7 @@ export class ValidatorRegistry extends Contract {
     changeValidatorRewardInfo(
         validatorId: ValidatorIdType,
         EntryGatingType: Uint8,
-        EntryGatingAddress: Address,
+        EntryGatingAddress: Account,
         EntryGatingAssets: FixedArray<uint64, 4>,
         GatingAssetMinBalance: uint64,
         RewardPerPayout: uint64,
@@ -467,7 +467,7 @@ export class ValidatorRegistry extends Contract {
             'invalid Entry gating type',
         )
         if (EntryGatingType.asUint64() === GATING_TYPE_ASSETS_CREATED_BY) {
-            assert(EntryGatingAddress.native !== Global.zeroAddress)
+            assert(EntryGatingAddress !== Global.zeroAddress)
         }
         if (
             EntryGatingType.asUint64() === GATING_TYPE_CREATED_BY_NFD_ADDRESSES ||
@@ -570,12 +570,12 @@ export class ValidatorRegistry extends Contract {
             )
         }
 
-        const staker = new Address(Txn.sender)
+        const staker = Txn.sender
         // The prior transaction should be a payment to this pool for the amount specified.  If this is stakers
         // first time staking, then we subtract the required MBR from their payment as that MBR amount needs to stay
         // behind in this contract to cover the MBR needed for creating the 'stakerPoolSet' storage.
         assertMatch(stakedAmountPayment, {
-            sender: staker.native,
+            sender: staker,
             receiver: Global.currentApplicationAddress,
         })
 
@@ -747,7 +747,7 @@ export class ValidatorRegistry extends Contract {
      */
     stakeRemoved(
         poolKey: ValidatorPoolKey,
-        staker: Address,
+        staker: Account,
         amountRemoved: uint64,
         rewardRemoved: uint64,
         stakerRemoved: boolean,
@@ -843,7 +843,7 @@ export class ValidatorRegistry extends Contract {
     @abimethod({ readonly: true })
     findPoolForStaker(
         validatorId: ValidatorIdType,
-        staker: Address,
+        staker: Account,
         amountToStake: uint64,
     ): [ValidatorPoolKey, boolean, boolean] {
         let isNewStakerToValidator = true
@@ -952,7 +952,7 @@ export class ValidatorRegistry extends Contract {
      * @param {Address} receiver - the account to send the tokens to (must already be opted-in to the reward token)
      * @returns {uint64} the amount of reward token sent
      */
-    emptyTokenRewards(validatorId: ValidatorIdType, receiver: Address): uint64 {
+    emptyTokenRewards(validatorId: ValidatorIdType, receiver: Account): uint64 {
         this.callerMustBeOwner(validatorId)
         const rewardTokenId = this.validatorList(validatorId).value.config.rewardTokenId
         const rewardTokenHeldBack = this.validatorList(validatorId).value.state.rewardTokenHeldBack
@@ -980,15 +980,15 @@ export class ValidatorRegistry extends Contract {
     // ======
     private callerMustBeOwner(validatorId: ValidatorIdType): void {
         assert(
-            Txn.sender === this.validatorList(validatorId).value.config.owner.native,
+            Txn.sender === this.validatorList(validatorId).value.config.owner,
             'can only be called by validator owner',
         )
     }
 
     private callerMustBeOwnerOrManager(validatorId: ValidatorIdType): void {
         assert(
-            Txn.sender === this.validatorList(validatorId).value.config.owner.native ||
-                Txn.sender === this.validatorList(validatorId).value.config.manager.native,
+            Txn.sender === this.validatorList(validatorId).value.config.owner ||
+                Txn.sender === this.validatorList(validatorId).value.config.manager,
             'can only be called by owner or manager of validator',
         )
     }
@@ -1031,6 +1031,8 @@ export class ValidatorRegistry extends Contract {
             // the nfd is real anymore, just that its still owned by the validator.
             // const nfdOwner = Application(validatorConfig.nfdForInfo).globalState('i.owner.a') as Address
             const nfdOwner = new Address(op.AppGlobal.getExBytes(validatorConfig.nfdForInfo, Bytes('i.owner.a'))[0])
+                .native
+
             // If they no longer own the nfd - remove it (!) from the validator config
             if (validatorConfig.owner !== nfdOwner && validatorConfig.manager !== nfdOwner) {
                 // Remove the NFD from this validator !
@@ -1041,9 +1043,9 @@ export class ValidatorRegistry extends Contract {
 
     private validateConfig(config: ValidatorConfig): void {
         // Verify all the values in the ValidatorConfig are correct
-        assert(config.owner.native !== Global.zeroAddress)
-        assert(config.manager.native !== Global.zeroAddress)
-        assert(Txn.sender === config.owner.native, 'sender must be owner to add new validator')
+        assert(config.owner !== Global.zeroAddress)
+        assert(config.manager !== Global.zeroAddress)
+        assert(Txn.sender === config.owner, 'sender must be owner to add new validator')
 
         assert(
             config.entryGatingType.asUint64() >= GATING_TYPE_NONE &&
@@ -1062,7 +1064,7 @@ export class ValidatorRegistry extends Contract {
         )
         if (config.percentToValidator.asUint64() !== 0) {
             assert(
-                config.validatorCommissionAddress.native !== Global.zeroAddress,
+                config.validatorCommissionAddress !== Global.zeroAddress,
                 'validatorCommissionAddress must be set if percent to validator is not 0',
             )
         }
@@ -1109,7 +1111,7 @@ export class ValidatorRegistry extends Contract {
                     receiver: Application(poolAppId).address,
                 }),
                 // =======
-                new Address(stakedAmountPayment.sender),
+                stakedAmountPayment.sender,
             ],
         })
         ensureBudget(500)
@@ -1134,7 +1136,7 @@ export class ValidatorRegistry extends Contract {
         this.totalAlgoStaked.value += stakedAmountPayment.amount - mbrAmtPaid
     }
 
-    private updateStakerPoolSet(staker: Address, poolKey: ValidatorPoolKey) {
+    private updateStakerPoolSet(staker: Account, poolKey: ValidatorPoolKey) {
         assert(this.stakerPoolSet(staker).exists)
 
         const poolSet = clone(this.stakerPoolSet(staker).value)
@@ -1166,7 +1168,7 @@ export class ValidatorRegistry extends Contract {
      *
      * @return [boolean, boolean] [is the staker gone from ALL pools of the given VALIDATOR, and is staker gone from ALL pools]
      */
-    private removeFromStakerPoolSet(staker: Address, poolKey: ValidatorPoolKey): [boolean, boolean] {
+    private removeFromStakerPoolSet(staker: Account, poolKey: ValidatorPoolKey): [boolean, boolean] {
         // track how many pools staker is in, so we  can know if they remove all stake from all pools of this validator
         let inSameValidatorPoolCount: uint64 = 0
         let inAnyPoolCount: uint64 = 0
@@ -1248,7 +1250,7 @@ export class ValidatorRegistry extends Contract {
         }
         if (type.asUint64() === GATING_TYPE_ASSETS_CREATED_BY) {
             assert(
-                Asset(valueToVerify).creator === config.entryGatingAddress.native,
+                Asset(valueToVerify).creator === config.entryGatingAddress,
                 'specified asset must be created by creator that the validator defined as a requirement to stake',
             )
         }
@@ -1266,7 +1268,7 @@ export class ValidatorRegistry extends Contract {
             // Walk all the linked addresses defined by the gating NFD (stored packed in v.caAlgo.0.as as a 'set' of 32-byte PKs)
             // if any are the creator of the specified asset then we pass.
             assert(
-                this.isAddressInNFDCAAlgoList(config.entryGatingAssets[0], new Address(Asset(valueToVerify).creator)),
+                this.isAddressInNFDCAAlgoList(config.entryGatingAssets[0], Asset(valueToVerify).creator),
                 'specified asset must be created by creator that is one of the linked addresses in an nfd',
             )
         }
@@ -1278,7 +1280,7 @@ export class ValidatorRegistry extends Contract {
             // now see if specified NFD's owner, or any of its caAlgo fields matches the staker's address
             assert(
                 op.AppGlobal.getExBytes(userOfferedNFDAppID, Bytes('i.owner.a'))[0] === encodeArc4(staker) ||
-                    this.isAddressInNFDCAAlgoList(userOfferedNFDAppID, new Address(staker)),
+                    this.isAddressInNFDCAAlgoList(userOfferedNFDAppID, staker),
                 "provided nfd for entry isn't owned or linked to the staker",
             )
 
@@ -1324,7 +1326,7 @@ export class ValidatorRegistry extends Contract {
      * @param {Address} addrToFind - The address to find in the v.caAlgo.0.as property
      * @return {boolean} - `true` if the address is present, `false` otherwise.
      */
-    private isAddressInNFDCAAlgoList(nfdAppID: uint64, addrToFind: Address): boolean {
+    private isAddressInNFDCAAlgoList(nfdAppID: uint64, addrToFind: Account): boolean {
         itxn.applicationCall({
             appId: Application(nfdAppID),
             appArgs: [Bytes('read_property'), Bytes('v.caAlgo.0.as')],
@@ -1410,9 +1412,9 @@ type retiOP_addedValidator = {
     // Assigned Validator ID
     id: uint64
     // Owner account
-    owner: Address
+    owner: Account
     // Manager account
-    manager: Address
+    manager: Account
 }
 
 /**
@@ -1438,7 +1440,7 @@ type retiOP_stakeAdded = {
     // Pool application ID
     poolAppId: uint64
     // Staker account
-    staker: Address
+    staker: Account
     // Amount staked
     amountStaked: uint64
 }
@@ -1475,7 +1477,7 @@ type retiOP_stakeRemoved = {
     // Pool application ID
     poolAppId: uint64
     // Staker account
-    staker: Address
+    staker: Account
     // Amount of stake removed
     amountUnstaked: uint64
     // Number of reward tokens also received

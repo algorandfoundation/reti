@@ -5,7 +5,7 @@
 main:
     intcblock 0 1 64 16 200 157 300 2100000 1000000 30857 TMPL_NFD_REGISTRY_APP_ID
     bytecblock "stakers" "creatorApp" "validatorId" "poolId" 0x151f7c75 "staked" "roundsPerDay" "stakeAccumulator" 0x0002 "binRoundStart" "numStakers" "rewardAccumulator" "ewma" 0x75aff61d 0x64 "minEntryStake" "lastPayout" "epochNumber" 0x000100000000000f4240 0x0001 0x0c2245e1 0x068101 0x00000000000000000000000000000001 0x00000000000000000000000000000000 0xa2dc51b5 0x572767d1 0x4df8d86e 0x0003
-    // contracts/stakingPool.algo.ts:60-61
+    // contracts/stakingPool.algo.ts:61-62
     // @contract({ avmVersion: 11 })
     // export class StakingPool extends Contract {
     txn OnCompletion
@@ -20,13 +20,13 @@ main:
     err
 
 main_gas_route@3:
-    // contracts/stakingPool.algo.ts:155
+    // contracts/stakingPool.algo.ts:156
     // gas(): void {}
     intc_1 // 1
     return
 
 main_create_NoOp@17:
-    // contracts/stakingPool.algo.ts:60-61
+    // contracts/stakingPool.algo.ts:61-62
     // @contract({ avmVersion: 11 })
     // export class StakingPool extends Contract {
     pushbytes 0x59e90aa6 // method "createApplication(uint64,uint64,uint64,uint64)void"
@@ -204,7 +204,7 @@ wideRatio_after_for@8:
 
 // contracts/stakingPool.algo.ts::StakingPool.createApplication[routing]() -> void:
 createApplication:
-    // contracts/stakingPool.algo.ts:121-126
+    // contracts/stakingPool.algo.ts:122-127
     // createApplication(
     //     creatingContractId: Application,
     //     validatorId: uint64,
@@ -223,129 +223,129 @@ createApplication:
     txna ApplicationArgs 4
     btoi
     swap
-    // contracts/stakingPool.algo.ts:127
+    // contracts/stakingPool.algo.ts:128
     // if (creatingContractId === Application(0)) {
     bnz createApplication_else_body@3
-    // contracts/stakingPool.algo.ts:129
+    // contracts/stakingPool.algo.ts:130
     // assert(validatorId === 0)
     dig 2
     !
     assert
-    // contracts/stakingPool.algo.ts:130
+    // contracts/stakingPool.algo.ts:131
     // assert(poolId === 0)
     dig 1
     !
     assert
 
 createApplication_after_if_else@4:
-    // contracts/stakingPool.algo.ts:135
+    // contracts/stakingPool.algo.ts:136
     // assert(minEntryStake >= MIN_ALGO_STAKE_PER_POOL, 'staking pool must have minimum entry of 1 algo')
     dupn 2
     intc 8 // 1000000
     >=
     assert // staking pool must have minimum entry of 1 algo
-    // contracts/stakingPool.algo.ts:66
+    // contracts/stakingPool.algo.ts:67
     // creatingValidatorContractAppId = GlobalState<uint64>({ key: 'creatorApp' })
     bytec_1 // "creatorApp"
-    // contracts/stakingPool.algo.ts:136
+    // contracts/stakingPool.algo.ts:137
     // this.creatingValidatorContractAppId.value = creatingContractId.id
     dig 5
     app_global_put
-    // contracts/stakingPool.algo.ts:69
+    // contracts/stakingPool.algo.ts:70
     // validatorId = GlobalState<uint64>({ key: 'validatorId' })
     bytec_2 // "validatorId"
-    // contracts/stakingPool.algo.ts:137
+    // contracts/stakingPool.algo.ts:138
     // this.validatorId.value = validatorId
     dig 4
     app_global_put
-    // contracts/stakingPool.algo.ts:72
+    // contracts/stakingPool.algo.ts:73
     // poolId = GlobalState<uint64>({ key: 'poolId' })
     bytec_3 // "poolId"
-    // contracts/stakingPool.algo.ts:138
+    // contracts/stakingPool.algo.ts:139
     // this.poolId.value = poolId
     dig 3
     app_global_put
-    // contracts/stakingPool.algo.ts:75
+    // contracts/stakingPool.algo.ts:76
     // numStakers = GlobalState<uint64>({ key: 'numStakers' })
     bytec 10 // "numStakers"
-    // contracts/stakingPool.algo.ts:139
+    // contracts/stakingPool.algo.ts:140
     // this.numStakers.value = 0
     intc_0 // 0
     app_global_put
-    // contracts/stakingPool.algo.ts:78
+    // contracts/stakingPool.algo.ts:79
     // totalAlgoStaked = GlobalState<uint64>({ key: 'staked' })
     bytec 5 // "staked"
-    // contracts/stakingPool.algo.ts:140
+    // contracts/stakingPool.algo.ts:141
     // this.totalAlgoStaked.value = 0
     intc_0 // 0
     app_global_put
-    // contracts/stakingPool.algo.ts:80
+    // contracts/stakingPool.algo.ts:81
     // minEntryStake = GlobalState<uint64>({ key: 'minEntryStake' })
     bytec 15 // "minEntryStake"
-    // contracts/stakingPool.algo.ts:141
+    // contracts/stakingPool.algo.ts:142
     // this.minEntryStake.value = minEntryStake
     swap
     app_global_put
-    // contracts/stakingPool.algo.ts:83
+    // contracts/stakingPool.algo.ts:84
     // lastPayout = GlobalState<uint64>({ key: 'lastPayout' })
     bytec 16 // "lastPayout"
-    // contracts/stakingPool.algo.ts:142
+    // contracts/stakingPool.algo.ts:143
     // this.lastPayout.value = Global.round // set to init block to establish baseline
     global Round
     app_global_put
-    // contracts/stakingPool.algo.ts:86
+    // contracts/stakingPool.algo.ts:87
     // epochNumber = GlobalState<uint64>({ key: 'epochNumber' })
     bytec 17 // "epochNumber"
-    // contracts/stakingPool.algo.ts:143
+    // contracts/stakingPool.algo.ts:144
     // this.epochNumber.value = 0
     intc_0 // 0
     app_global_put
-    // contracts/stakingPool.algo.ts:145
+    // contracts/stakingPool.algo.ts:146
     // this.setRoundsPerDay()
     callsub setRoundsPerDay
-    // contracts/stakingPool.algo.ts:146
+    // contracts/stakingPool.algo.ts:147
     // this.binRoundStart.value = Global.round - (Global.round % this.roundsPerDay.value) // place at start of bin
     global Round
     dup
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:96
+    // contracts/stakingPool.algo.ts:97
     // roundsPerDay = GlobalState<uint64>({ key: 'roundsPerDay' })
     bytec 6 // "roundsPerDay"
-    // contracts/stakingPool.algo.ts:146
+    // contracts/stakingPool.algo.ts:147
     // this.binRoundStart.value = Global.round - (Global.round % this.roundsPerDay.value) // place at start of bin
     app_global_get_ex
     assert // check GlobalState exists
     %
     -
-    // contracts/stakingPool.algo.ts:98
+    // contracts/stakingPool.algo.ts:99
     // binRoundStart = GlobalState<uint64>({ key: 'binRoundStart' })
     bytec 9 // "binRoundStart"
-    // contracts/stakingPool.algo.ts:146
+    // contracts/stakingPool.algo.ts:147
     // this.binRoundStart.value = Global.round - (Global.round % this.roundsPerDay.value) // place at start of bin
     swap
     app_global_put
-    // contracts/stakingPool.algo.ts:103
+    // contracts/stakingPool.algo.ts:104
     // stakeAccumulator = GlobalState<Uint128>({ key: 'stakeAccumulator' })
     bytec 7 // "stakeAccumulator"
-    // contracts/stakingPool.algo.ts:147
+    // contracts/stakingPool.algo.ts:148
     // this.stakeAccumulator.value = new Uint128(0)
     bytec 23 // 0x00000000000000000000000000000000
     app_global_put
-    // contracts/stakingPool.algo.ts:107
+    // contracts/stakingPool.algo.ts:108
     // rewardAccumulator = GlobalState<uint64>({ key: 'rewardAccumulator' })
     bytec 11 // "rewardAccumulator"
-    // contracts/stakingPool.algo.ts:148
+    // contracts/stakingPool.algo.ts:149
     // this.rewardAccumulator.value = 0
     intc_0 // 0
     app_global_put
-    // contracts/stakingPool.algo.ts:110
+    // contracts/stakingPool.algo.ts:111
     // weightedMovingAverage = GlobalState<Uint128>({ key: 'ewma' })
     bytec 12 // "ewma"
-    // contracts/stakingPool.algo.ts:149
+    // contracts/stakingPool.algo.ts:150
     // this.weightedMovingAverage.value = new Uint128(0)
     bytec 23 // 0x00000000000000000000000000000000
     app_global_put
-    // contracts/stakingPool.algo.ts:121-126
+    // contracts/stakingPool.algo.ts:122-127
     // createApplication(
     //     creatingContractId: Application,
     //     validatorId: uint64,
@@ -356,11 +356,11 @@ createApplication_after_if_else@4:
     return
 
 createApplication_else_body@3:
-    // contracts/stakingPool.algo.ts:132
+    // contracts/stakingPool.algo.ts:133
     // assert(validatorId !== 0)
     dig 2
     assert
-    // contracts/stakingPool.algo.ts:133
+    // contracts/stakingPool.algo.ts:134
     // assert(poolId !== 0)
     dig 1
     assert
@@ -369,7 +369,7 @@ createApplication_else_body@3:
 
 // contracts/stakingPool.algo.ts::StakingPool.initStorage[routing]() -> void:
 initStorage:
-    // contracts/stakingPool.algo.ts:171
+    // contracts/stakingPool.algo.ts:172
     // initStorage(mbrPayment: gtxn.PaymentTxn): void {
     txn GroupIndex
     intc_1 // 1
@@ -379,43 +379,43 @@ initStorage:
     intc_1 // pay
     ==
     assert // transaction type is pay
-    // contracts/stakingPool.algo.ts:92
+    // contracts/stakingPool.algo.ts:93
     // stakers = Box<FixedArray<StakedInfo, typeof MAX_STAKERS_PER_POOL>>({ key: 'stakers' })
     bytec_0 // "stakers"
-    // contracts/stakingPool.algo.ts:172
+    // contracts/stakingPool.algo.ts:173
     // assert(!this.stakers.exists, 'staking pool already initialized')
     box_len
     bury 1
     !
     assert // staking pool already initialized
-    // contracts/stakingPool.algo.ts:175-178
+    // contracts/stakingPool.algo.ts:176-179
     // const validatorConfig = abiCall<typeof ValidatorRegistry.prototype.getValidatorConfig>({
     //     appId: this.creatingValidatorContractAppId.value,
     //     args: [this.validatorId.value],
     // }).returnValue
     itxn_begin
-    // contracts/stakingPool.algo.ts:176
+    // contracts/stakingPool.algo.ts:177
     // appId: this.creatingValidatorContractAppId.value,
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:66
+    // contracts/stakingPool.algo.ts:67
     // creatingValidatorContractAppId = GlobalState<uint64>({ key: 'creatorApp' })
     bytec_1 // "creatorApp"
-    // contracts/stakingPool.algo.ts:176
+    // contracts/stakingPool.algo.ts:177
     // appId: this.creatingValidatorContractAppId.value,
     app_global_get_ex
     assert // check GlobalState exists
-    // contracts/stakingPool.algo.ts:177
+    // contracts/stakingPool.algo.ts:178
     // args: [this.validatorId.value],
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:69
+    // contracts/stakingPool.algo.ts:70
     // validatorId = GlobalState<uint64>({ key: 'validatorId' })
     bytec_2 // "validatorId"
-    // contracts/stakingPool.algo.ts:177
+    // contracts/stakingPool.algo.ts:178
     // args: [this.validatorId.value],
     app_global_get_ex
     assert // check GlobalState exists
     itob
-    // contracts/stakingPool.algo.ts:175-178
+    // contracts/stakingPool.algo.ts:176-179
     // const validatorConfig = abiCall<typeof ValidatorRegistry.prototype.getValidatorConfig>({
     //     appId: this.creatingValidatorContractAppId.value,
     //     args: [this.validatorId.value],
@@ -436,18 +436,18 @@ initStorage:
     ==
     assert // Bytes has valid prefix
     intc 5 // 157
-    // contracts/stakingPool.algo.ts:180
+    // contracts/stakingPool.algo.ts:181
     // const isTokenEligible = validatorConfig.rewardTokenId !== 0
     extract_uint64
     dup
-    // contracts/stakingPool.algo.ts:181
+    // contracts/stakingPool.algo.ts:182
     // const extraMBR: uint64 = isTokenEligible && this.poolId.value === 1 ? ASSET_HOLDING_FEE : 0
     bz initStorage_bool_false@5
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:72
+    // contracts/stakingPool.algo.ts:73
     // poolId = GlobalState<uint64>({ key: 'poolId' })
     bytec_3 // "poolId"
-    // contracts/stakingPool.algo.ts:181
+    // contracts/stakingPool.algo.ts:182
     // const extraMBR: uint64 = isTokenEligible && this.poolId.value === 1 ? ASSET_HOLDING_FEE : 0
     app_global_get_ex
     assert // check GlobalState exists
@@ -457,17 +457,17 @@ initStorage:
     intc_1 // 1
 
 initStorage_bool_merge@6:
-    // contracts/stakingPool.algo.ts:181
+    // contracts/stakingPool.algo.ts:182
     // const extraMBR: uint64 = isTokenEligible && this.poolId.value === 1 ? ASSET_HOLDING_FEE : 0
     pushint 100000 // 100000
     *
-    // contracts/stakingPool.algo.ts:183-185
+    // contracts/stakingPool.algo.ts:184-186
     // ALGORAND_ACCOUNT_MIN_BALANCE +
     // extraMBR +
     // this.costForBoxStorage(7 /* 'stakers' name */ + sizeOf<StakedInfo>() * MAX_STAKERS_PER_POOL)
     pushint 5225300 // 5225300
     +
-    // contracts/stakingPool.algo.ts:188
+    // contracts/stakingPool.algo.ts:189
     // assertMatch(mbrPayment, { receiver: Global.currentApplicationAddress, amount: PoolInitMbr })
     dig 2
     dup
@@ -480,47 +480,47 @@ initStorage_bool_merge@6:
     ==
     &&
     assert // assert target is match for conditions
-    // contracts/stakingPool.algo.ts:92
+    // contracts/stakingPool.algo.ts:93
     // stakers = Box<FixedArray<StakedInfo, typeof MAX_STAKERS_PER_POOL>>({ key: 'stakers' })
     bytec_0 // "stakers"
-    // contracts/stakingPool.algo.ts:189
+    // contracts/stakingPool.algo.ts:190
     // this.stakers.create()
     pushint 12800 // 12800
     box_create
     pop
-    // contracts/stakingPool.algo.ts:191
+    // contracts/stakingPool.algo.ts:192
     // if (isTokenEligible && this.poolId.value === 1) {
     dup
     bz initStorage_after_if_else@10
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:72
+    // contracts/stakingPool.algo.ts:73
     // poolId = GlobalState<uint64>({ key: 'poolId' })
     bytec_3 // "poolId"
-    // contracts/stakingPool.algo.ts:191
+    // contracts/stakingPool.algo.ts:192
     // if (isTokenEligible && this.poolId.value === 1) {
     app_global_get_ex
     assert // check GlobalState exists
     intc_1 // 1
     ==
     bz initStorage_after_if_else@10
-    // contracts/stakingPool.algo.ts:193-197
+    // contracts/stakingPool.algo.ts:194-198
     // itxn.assetTransfer({
     //     xferAsset: validatorConfig.rewardTokenId,
     //     assetReceiver: Global.currentApplicationAddress,
     //     assetAmount: 0,
     // }).submit()
     itxn_begin
-    // contracts/stakingPool.algo.ts:195
+    // contracts/stakingPool.algo.ts:196
     // assetReceiver: Global.currentApplicationAddress,
     global CurrentApplicationAddress
-    // contracts/stakingPool.algo.ts:196
+    // contracts/stakingPool.algo.ts:197
     // assetAmount: 0,
     intc_0 // 0
     itxn_field AssetAmount
     itxn_field AssetReceiver
     dup
     itxn_field XferAsset
-    // contracts/stakingPool.algo.ts:193-197
+    // contracts/stakingPool.algo.ts:194-198
     // itxn.assetTransfer({
     //     xferAsset: validatorConfig.rewardTokenId,
     //     assetReceiver: Global.currentApplicationAddress,
@@ -533,7 +533,7 @@ initStorage_bool_merge@6:
     itxn_submit
 
 initStorage_after_if_else@10:
-    // contracts/stakingPool.algo.ts:171
+    // contracts/stakingPool.algo.ts:172
     // initStorage(mbrPayment: gtxn.PaymentTxn): void {
     intc_1 // 1
     return
@@ -548,8 +548,8 @@ addStake:
     intc_0 // 0
     dup
     pushbytes ""
-    // contracts/stakingPool.algo.ts:211
-    // addStake(stakedAmountPayment: gtxn.PaymentTxn, staker: Address): uint64 {
+    // contracts/stakingPool.algo.ts:212
+    // addStake(stakedAmountPayment: gtxn.PaymentTxn, staker: Account): uint64 {
     txn GroupIndex
     intc_1 // 1
     -
@@ -561,43 +561,43 @@ addStake:
     txna ApplicationArgs 1
     dup
     cover 2
-    // contracts/stakingPool.algo.ts:92
+    // contracts/stakingPool.algo.ts:93
     // stakers = Box<FixedArray<StakedInfo, typeof MAX_STAKERS_PER_POOL>>({ key: 'stakers' })
     bytec_0 // "stakers"
-    // contracts/stakingPool.algo.ts:212
+    // contracts/stakingPool.algo.ts:213
     // assert(this.stakers.exists, 'staking pool must be initialized first')
     box_len
     bury 1
     assert // staking pool must be initialized first
-    // contracts/stakingPool.algo.ts:216
+    // contracts/stakingPool.algo.ts:217
     // Txn.sender === Application(this.creatingValidatorContractAppId.value).address,
     txn Sender
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:66
+    // contracts/stakingPool.algo.ts:67
     // creatingValidatorContractAppId = GlobalState<uint64>({ key: 'creatorApp' })
     bytec_1 // "creatorApp"
-    // contracts/stakingPool.algo.ts:216
+    // contracts/stakingPool.algo.ts:217
     // Txn.sender === Application(this.creatingValidatorContractAppId.value).address,
     app_global_get_ex
     assert // check GlobalState exists
     app_params_get AppAddress
     assert // application exists
     ==
-    // contracts/stakingPool.algo.ts:215-218
+    // contracts/stakingPool.algo.ts:216-219
     // assert(
     //     Txn.sender === Application(this.creatingValidatorContractAppId.value).address,
     //     'stake can only be added via the validator contract',
     // )
     assert // stake can only be added via the validator contract
-    // contracts/stakingPool.algo.ts:219
-    // assert(staker.native !== Global.zeroAddress)
+    // contracts/stakingPool.algo.ts:220
+    // assert(staker !== Global.zeroAddress)
     global ZeroAddress
     !=
     assert
-    // contracts/stakingPool.algo.ts:222
+    // contracts/stakingPool.algo.ts:223
     // this.checkIfBinClosed()
     callsub checkIfBinClosed
-    // contracts/stakingPool.algo.ts:226-230
+    // contracts/stakingPool.algo.ts:227-231
     // assertMatch(stakedAmountPayment, {
     //     sender: Application(this.creatingValidatorContractAppId.value).address,
     //     receiver: Global.currentApplicationAddress,
@@ -605,19 +605,19 @@ addStake:
     // })
     dup
     gtxns Sender
-    // contracts/stakingPool.algo.ts:227
+    // contracts/stakingPool.algo.ts:228
     // sender: Application(this.creatingValidatorContractAppId.value).address,
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:66
+    // contracts/stakingPool.algo.ts:67
     // creatingValidatorContractAppId = GlobalState<uint64>({ key: 'creatorApp' })
     bytec_1 // "creatorApp"
-    // contracts/stakingPool.algo.ts:227
+    // contracts/stakingPool.algo.ts:228
     // sender: Application(this.creatingValidatorContractAppId.value).address,
     app_global_get_ex
     assert // check GlobalState exists
     app_params_get AppAddress
     assert // application exists
-    // contracts/stakingPool.algo.ts:226-230
+    // contracts/stakingPool.algo.ts:227-231
     // assertMatch(stakedAmountPayment, {
     //     sender: Application(this.creatingValidatorContractAppId.value).address,
     //     receiver: Global.currentApplicationAddress,
@@ -626,10 +626,10 @@ addStake:
     ==
     dig 1
     gtxns Receiver
-    // contracts/stakingPool.algo.ts:228
+    // contracts/stakingPool.algo.ts:229
     // receiver: Global.currentApplicationAddress,
     global CurrentApplicationAddress
-    // contracts/stakingPool.algo.ts:226-230
+    // contracts/stakingPool.algo.ts:227-231
     // assertMatch(stakedAmountPayment, {
     //     sender: Application(this.creatingValidatorContractAppId.value).address,
     //     receiver: Global.currentApplicationAddress,
@@ -644,63 +644,63 @@ addStake:
     intc_1 // 1
     &&
     assert // assert target is match for conditions
-    // contracts/stakingPool.algo.ts:235
+    // contracts/stakingPool.algo.ts:236
     // const entryRound: uint64 = Global.round + ALGORAND_STAKING_BLOCK_DELAY
     global Round
     pushint 320 // 320
     +
     swap
-    // contracts/stakingPool.algo.ts:236
+    // contracts/stakingPool.algo.ts:237
     // let firstEmpty: uint64 = 0
     intc_0 // 0
     swap
-    // contracts/stakingPool.algo.ts:238
+    // contracts/stakingPool.algo.ts:239
     // this.totalAlgoStaked.value += stakedAmountPayment.amount
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:78
+    // contracts/stakingPool.algo.ts:79
     // totalAlgoStaked = GlobalState<uint64>({ key: 'staked' })
     bytec 5 // "staked"
-    // contracts/stakingPool.algo.ts:238
+    // contracts/stakingPool.algo.ts:239
     // this.totalAlgoStaked.value += stakedAmountPayment.amount
     app_global_get_ex
     assert // check GlobalState exists
     dig 1
     +
-    // contracts/stakingPool.algo.ts:78
+    // contracts/stakingPool.algo.ts:79
     // totalAlgoStaked = GlobalState<uint64>({ key: 'staked' })
     bytec 5 // "staked"
-    // contracts/stakingPool.algo.ts:238
+    // contracts/stakingPool.algo.ts:239
     // this.totalAlgoStaked.value += stakedAmountPayment.amount
     swap
     app_global_put
-    // contracts/stakingPool.algo.ts:240
+    // contracts/stakingPool.algo.ts:241
     // const roundsLeftInBin: uint64 = this.binRoundStart.value + this.roundsPerDay.value - Global.round
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:98
+    // contracts/stakingPool.algo.ts:99
     // binRoundStart = GlobalState<uint64>({ key: 'binRoundStart' })
     bytec 9 // "binRoundStart"
-    // contracts/stakingPool.algo.ts:240
+    // contracts/stakingPool.algo.ts:241
     // const roundsLeftInBin: uint64 = this.binRoundStart.value + this.roundsPerDay.value - Global.round
     app_global_get_ex
     assert // check GlobalState exists
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:96
+    // contracts/stakingPool.algo.ts:97
     // roundsPerDay = GlobalState<uint64>({ key: 'roundsPerDay' })
     bytec 6 // "roundsPerDay"
-    // contracts/stakingPool.algo.ts:240
+    // contracts/stakingPool.algo.ts:241
     // const roundsLeftInBin: uint64 = this.binRoundStart.value + this.roundsPerDay.value - Global.round
     app_global_get_ex
     assert // check GlobalState exists
     +
     global Round
     -
-    // contracts/stakingPool.algo.ts:242
+    // contracts/stakingPool.algo.ts:243
     // this.stakeAccumulator.value.asBigUint() + BigUint(stakedAmountPayment.amount) * BigUint(roundsLeftInBin),
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:103
+    // contracts/stakingPool.algo.ts:104
     // stakeAccumulator = GlobalState<Uint128>({ key: 'stakeAccumulator' })
     bytec 7 // "stakeAccumulator"
-    // contracts/stakingPool.algo.ts:242
+    // contracts/stakingPool.algo.ts:243
     // this.stakeAccumulator.value.asBigUint() + BigUint(stakedAmountPayment.amount) * BigUint(roundsLeftInBin),
     app_global_get_ex
     assert // check GlobalState exists
@@ -712,7 +712,7 @@ addStake:
     itob
     b*
     b+
-    // contracts/stakingPool.algo.ts:241-243
+    // contracts/stakingPool.algo.ts:242-244
     // this.stakeAccumulator.value = new Uint128(
     //     this.stakeAccumulator.value.asBigUint() + BigUint(stakedAmountPayment.amount) * BigUint(roundsLeftInBin),
     // )
@@ -724,24 +724,24 @@ addStake:
     intc_3 // 16
     bzero
     b|
-    // contracts/stakingPool.algo.ts:103
+    // contracts/stakingPool.algo.ts:104
     // stakeAccumulator = GlobalState<Uint128>({ key: 'stakeAccumulator' })
     bytec 7 // "stakeAccumulator"
-    // contracts/stakingPool.algo.ts:241-243
+    // contracts/stakingPool.algo.ts:242-244
     // this.stakeAccumulator.value = new Uint128(
     //     this.stakeAccumulator.value.asBigUint() + BigUint(stakedAmountPayment.amount) * BigUint(roundsLeftInBin),
     // )
     swap
     app_global_put
-    // contracts/stakingPool.algo.ts:246
+    // contracts/stakingPool.algo.ts:247
     // for (let i: uint64 = 0; i < this.stakers.value.length; i += 1) {
     intc_0 // 0
 
 addStake_while_top@2:
-    // contracts/stakingPool.algo.ts:92
+    // contracts/stakingPool.algo.ts:93
     // stakers = Box<FixedArray<StakedInfo, typeof MAX_STAKERS_PER_POOL>>({ key: 'stakers' })
     bytec_0 // "stakers"
-    // contracts/stakingPool.algo.ts:246
+    // contracts/stakingPool.algo.ts:247
     // for (let i: uint64 = 0; i < this.stakers.value.length; i += 1) {
     box_len
     bury 1
@@ -750,43 +750,43 @@ addStake_while_top@2:
     intc 4 // 200
     <
     bz addStake_after_while@9
-    // contracts/stakingPool.algo.ts:247
+    // contracts/stakingPool.algo.ts:248
     // ensureBudget(300)
     intc 6 // 300
     intc_0 // 0
     callsub ensure_budget
-    // contracts/stakingPool.algo.ts:248
+    // contracts/stakingPool.algo.ts:249
     // const cmpStaker = clone(this.stakers.value[i])
     dup
     intc_2 // 64
     *
     dup
     bury 8
-    // contracts/stakingPool.algo.ts:92
+    // contracts/stakingPool.algo.ts:93
     // stakers = Box<FixedArray<StakedInfo, typeof MAX_STAKERS_PER_POOL>>({ key: 'stakers' })
     bytec_0 // "stakers"
-    // contracts/stakingPool.algo.ts:248
+    // contracts/stakingPool.algo.ts:249
     // const cmpStaker = clone(this.stakers.value[i])
     swap
     intc_2 // 64
     box_extract
     dup
     bury 9
-    // contracts/stakingPool.algo.ts:248-249
+    // contracts/stakingPool.algo.ts:249-250
     // const cmpStaker = clone(this.stakers.value[i])
     // if (cmpStaker.account === staker) {
     extract 0 32
     dup
     bury 10
-    // contracts/stakingPool.algo.ts:249
+    // contracts/stakingPool.algo.ts:250
     // if (cmpStaker.account === staker) {
     dig 6
     ==
     bz addStake_after_if_else@5
-    // contracts/stakingPool.algo.ts:92
+    // contracts/stakingPool.algo.ts:93
     // stakers = Box<FixedArray<StakedInfo, typeof MAX_STAKERS_PER_POOL>>({ key: 'stakers' })
     bytec_0 // "stakers"
-    // contracts/stakingPool.algo.ts:251
+    // contracts/stakingPool.algo.ts:252
     // cmpStaker.balance += stakedAmountPayment.amount
     dig 7
     dup
@@ -801,22 +801,22 @@ addStake_while_top@2:
     dig 9
     swap
     replace2 32
-    // contracts/stakingPool.algo.ts:252
+    // contracts/stakingPool.algo.ts:253
     // cmpStaker.entryRound = entryRound
     dig 5
     itob
     replace2 56
-    // contracts/stakingPool.algo.ts:92
+    // contracts/stakingPool.algo.ts:93
     // stakers = Box<FixedArray<StakedInfo, typeof MAX_STAKERS_PER_POOL>>({ key: 'stakers' })
     bytec_0 // "stakers"
-    // contracts/stakingPool.algo.ts:255
+    // contracts/stakingPool.algo.ts:256
     // this.stakers.value[i] = clone(cmpStaker)
     cover 2
     box_replace
 
 addStake_after_inlined_contracts/stakingPool.algo.ts::StakingPool.addStake@12:
-    // contracts/stakingPool.algo.ts:211
-    // addStake(stakedAmountPayment: gtxn.PaymentTxn, staker: Address): uint64 {
+    // contracts/stakingPool.algo.ts:212
+    // addStake(stakedAmountPayment: gtxn.PaymentTxn, staker: Account): uint64 {
     dig 3
     itob
     bytec 4 // 0x151f7c75
@@ -827,15 +827,15 @@ addStake_after_inlined_contracts/stakingPool.algo.ts::StakingPool.addStake@12:
     return
 
 addStake_after_if_else@5:
-    // contracts/stakingPool.algo.ts:259
-    // if (firstEmpty === 0 && cmpStaker.account.native === Global.zeroAddress) {
+    // contracts/stakingPool.algo.ts:260
+    // if (firstEmpty === 0 && cmpStaker.account === Global.zeroAddress) {
     dig 2
     bnz addStake_after_if_else@8
     dig 8
     global ZeroAddress
     ==
     bz addStake_after_if_else@8
-    // contracts/stakingPool.algo.ts:260
+    // contracts/stakingPool.algo.ts:261
     // firstEmpty = i + 1
     dup
     intc_1 // 1
@@ -843,7 +843,7 @@ addStake_after_if_else@5:
     bury 3
 
 addStake_after_if_else@8:
-    // contracts/stakingPool.algo.ts:246
+    // contracts/stakingPool.algo.ts:247
     // for (let i: uint64 = 0; i < this.stakers.value.length; i += 1) {
     dup
     intc_1 // 1
@@ -852,37 +852,37 @@ addStake_after_if_else@8:
     b addStake_while_top@2
 
 addStake_after_while@9:
-    // contracts/stakingPool.algo.ts:264
+    // contracts/stakingPool.algo.ts:265
     // if (firstEmpty === 0) {
     dig 2
     dup
     !
     !
     assert // Staking pool full
-    // contracts/stakingPool.algo.ts:271
+    // contracts/stakingPool.algo.ts:272
     // assert(stakedAmountPayment.amount >= this.minEntryStake.value, 'must stake at least the minimum for this pool')
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:80
+    // contracts/stakingPool.algo.ts:81
     // minEntryStake = GlobalState<uint64>({ key: 'minEntryStake' })
     bytec 15 // "minEntryStake"
-    // contracts/stakingPool.algo.ts:271
+    // contracts/stakingPool.algo.ts:272
     // assert(stakedAmountPayment.amount >= this.minEntryStake.value, 'must stake at least the minimum for this pool')
     app_global_get_ex
     assert // check GlobalState exists
     dig 6
     <=
     assert // must stake at least the minimum for this pool
-    // contracts/stakingPool.algo.ts:273
-    // assert(this.stakers.value[firstEmpty - 1].account.native === Global.zeroAddress)
+    // contracts/stakingPool.algo.ts:274
+    // assert(this.stakers.value[firstEmpty - 1].account === Global.zeroAddress)
     intc_1 // 1
     -
     intc_2 // 64
     *
-    // contracts/stakingPool.algo.ts:92
+    // contracts/stakingPool.algo.ts:93
     // stakers = Box<FixedArray<StakedInfo, typeof MAX_STAKERS_PER_POOL>>({ key: 'stakers' })
     bytec_0 // "stakers"
-    // contracts/stakingPool.algo.ts:273
-    // assert(this.stakers.value[firstEmpty - 1].account.native === Global.zeroAddress)
+    // contracts/stakingPool.algo.ts:274
+    // assert(this.stakers.value[firstEmpty - 1].account === Global.zeroAddress)
     dig 1
     intc_2 // 64
     box_extract
@@ -890,7 +890,7 @@ addStake_after_while@9:
     global ZeroAddress
     ==
     assert
-    // contracts/stakingPool.algo.ts:274-280
+    // contracts/stakingPool.algo.ts:275-281
     // this.stakers.value[firstEmpty - 1] = {
     //     account: staker,
     //     balance: stakedAmountPayment.amount,
@@ -901,10 +901,10 @@ addStake_after_while@9:
     dig 6
     dig 3
     concat
-    // contracts/stakingPool.algo.ts:277
+    // contracts/stakingPool.algo.ts:278
     // totalRewarded: 0,
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:274-280
+    // contracts/stakingPool.algo.ts:275-281
     // this.stakers.value[firstEmpty - 1] = {
     //     account: staker,
     //     balance: stakedAmountPayment.amount,
@@ -921,10 +921,10 @@ addStake_after_while@9:
     dig 5
     itob
     concat
-    // contracts/stakingPool.algo.ts:92
+    // contracts/stakingPool.algo.ts:93
     // stakers = Box<FixedArray<StakedInfo, typeof MAX_STAKERS_PER_POOL>>({ key: 'stakers' })
     bytec_0 // "stakers"
-    // contracts/stakingPool.algo.ts:274-280
+    // contracts/stakingPool.algo.ts:275-281
     // this.stakers.value[firstEmpty - 1] = {
     //     account: staker,
     //     balance: stakedAmountPayment.amount,
@@ -934,27 +934,27 @@ addStake_after_while@9:
     // }
     cover 2
     box_replace
-    // contracts/stakingPool.algo.ts:281
+    // contracts/stakingPool.algo.ts:282
     // this.numStakers.value += 1
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:75
+    // contracts/stakingPool.algo.ts:76
     // numStakers = GlobalState<uint64>({ key: 'numStakers' })
     bytec 10 // "numStakers"
-    // contracts/stakingPool.algo.ts:281
+    // contracts/stakingPool.algo.ts:282
     // this.numStakers.value += 1
     app_global_get_ex
     assert // check GlobalState exists
     intc_1 // 1
     +
-    // contracts/stakingPool.algo.ts:75
+    // contracts/stakingPool.algo.ts:76
     // numStakers = GlobalState<uint64>({ key: 'numStakers' })
     bytec 10 // "numStakers"
-    // contracts/stakingPool.algo.ts:281
+    // contracts/stakingPool.algo.ts:282
     // this.numStakers.value += 1
     swap
     app_global_put
-    // contracts/stakingPool.algo.ts:211
-    // addStake(stakedAmountPayment: gtxn.PaymentTxn, staker: Address): uint64 {
+    // contracts/stakingPool.algo.ts:212
+    // addStake(stakedAmountPayment: gtxn.PaymentTxn, staker: Account): uint64 {
     b addStake_after_inlined_contracts/stakingPool.algo.ts::StakingPool.addStake@12
 
 
@@ -963,22 +963,22 @@ removeStake:
     intc_0 // 0
     pushbytes ""
     dupn 5
-    // contracts/stakingPool.algo.ts:296
-    // removeStake(staker: Address, amountToUnstake: uint64): void {
+    // contracts/stakingPool.algo.ts:297
+    // removeStake(staker: Account, amountToUnstake: uint64): void {
     txna ApplicationArgs 1
     dup
     txna ApplicationArgs 2
     btoi
     swap
-    // contracts/stakingPool.algo.ts:299
-    // if (staker.native !== Txn.sender) {
+    // contracts/stakingPool.algo.ts:300
+    // if (staker !== Txn.sender) {
     txn Sender
     !=
     bz removeStake_after_if_else@3
-    // contracts/stakingPool.algo.ts:301
+    // contracts/stakingPool.algo.ts:302
     // this.isOwnerOrManagerCaller(),
     callsub isOwnerOrManagerCaller
-    // contracts/stakingPool.algo.ts:300-303
+    // contracts/stakingPool.algo.ts:301-304
     // assert(
     //     this.isOwnerOrManagerCaller(),
     //     'If staker is not sender in removeStake call, then sender MUST be owner or manager of validator',
@@ -986,19 +986,19 @@ removeStake:
     assert // If staker is not sender in removeStake call, then sender MUST be owner or manager of validator
 
 removeStake_after_if_else@3:
-    // contracts/stakingPool.algo.ts:306
+    // contracts/stakingPool.algo.ts:307
     // this.checkIfBinClosed()
     callsub checkIfBinClosed
-    // contracts/stakingPool.algo.ts:308
+    // contracts/stakingPool.algo.ts:309
     // for (let i: uint64 = 0; i < this.stakers.value.length; i += 1) {
     intc_0 // 0
     bury 5
 
 removeStake_while_top@4:
-    // contracts/stakingPool.algo.ts:92
+    // contracts/stakingPool.algo.ts:93
     // stakers = Box<FixedArray<StakedInfo, typeof MAX_STAKERS_PER_POOL>>({ key: 'stakers' })
     bytec_0 // "stakers"
-    // contracts/stakingPool.algo.ts:308
+    // contracts/stakingPool.algo.ts:309
     // for (let i: uint64 = 0; i < this.stakers.value.length; i += 1) {
     box_len
     bury 1
@@ -1008,44 +1008,44 @@ removeStake_while_top@4:
     intc 4 // 200
     <
     assert // account not found
-    // contracts/stakingPool.algo.ts:309
+    // contracts/stakingPool.algo.ts:310
     // ensureBudget(300)
     intc 6 // 300
     intc_0 // 0
     callsub ensure_budget
-    // contracts/stakingPool.algo.ts:310
+    // contracts/stakingPool.algo.ts:311
     // const cmpStaker = clone(this.stakers.value[i])
     intc_2 // 64
     *
     dup
     bury 7
-    // contracts/stakingPool.algo.ts:92
+    // contracts/stakingPool.algo.ts:93
     // stakers = Box<FixedArray<StakedInfo, typeof MAX_STAKERS_PER_POOL>>({ key: 'stakers' })
     bytec_0 // "stakers"
-    // contracts/stakingPool.algo.ts:310
+    // contracts/stakingPool.algo.ts:311
     // const cmpStaker = clone(this.stakers.value[i])
     swap
     intc_2 // 64
     box_extract
     dup
     bury 10
-    // contracts/stakingPool.algo.ts:310-311
+    // contracts/stakingPool.algo.ts:311-312
     // const cmpStaker = clone(this.stakers.value[i])
     // if (cmpStaker.account === staker) {
     extract 0 32
-    // contracts/stakingPool.algo.ts:311
+    // contracts/stakingPool.algo.ts:312
     // if (cmpStaker.account === staker) {
     dig 2
     ==
     bz removeStake_after_if_else@26
-    // contracts/stakingPool.algo.ts:312
+    // contracts/stakingPool.algo.ts:313
     // if (amountToUnstake === 0) {
     dup
     bnz removeStake_after_if_else@8
-    // contracts/stakingPool.algo.ts:92
+    // contracts/stakingPool.algo.ts:93
     // stakers = Box<FixedArray<StakedInfo, typeof MAX_STAKERS_PER_POOL>>({ key: 'stakers' })
     bytec_0 // "stakers"
-    // contracts/stakingPool.algo.ts:314
+    // contracts/stakingPool.algo.ts:315
     // amountToUnstake = cmpStaker.balance
     dig 6
     intc_2 // 64
@@ -1055,10 +1055,10 @@ removeStake_while_top@4:
     bury 1
 
 removeStake_after_if_else@8:
-    // contracts/stakingPool.algo.ts:92
+    // contracts/stakingPool.algo.ts:93
     // stakers = Box<FixedArray<StakedInfo, typeof MAX_STAKERS_PER_POOL>>({ key: 'stakers' })
     bytec_0 // "stakers"
-    // contracts/stakingPool.algo.ts:316
+    // contracts/stakingPool.algo.ts:317
     // if (cmpStaker.balance < amountToUnstake) {
     dig 6
     intc_2 // 64
@@ -1072,7 +1072,7 @@ removeStake_after_if_else@8:
     <
     !
     assert // Insufficient balance
-    // contracts/stakingPool.algo.ts:319
+    // contracts/stakingPool.algo.ts:320
     // cmpStaker.balance -= amountToUnstake
     dig 1
     -
@@ -1082,77 +1082,77 @@ removeStake_after_if_else@8:
     replace2 32
     dup
     bury 11
-    // contracts/stakingPool.algo.ts:320
+    // contracts/stakingPool.algo.ts:321
     // this.totalAlgoStaked.value -= amountToUnstake
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:78
+    // contracts/stakingPool.algo.ts:79
     // totalAlgoStaked = GlobalState<uint64>({ key: 'staked' })
     bytec 5 // "staked"
-    // contracts/stakingPool.algo.ts:320
+    // contracts/stakingPool.algo.ts:321
     // this.totalAlgoStaked.value -= amountToUnstake
     app_global_get_ex
     assert // check GlobalState exists
     uncover 2
     -
-    // contracts/stakingPool.algo.ts:78
+    // contracts/stakingPool.algo.ts:79
     // totalAlgoStaked = GlobalState<uint64>({ key: 'staked' })
     bytec 5 // "staked"
-    // contracts/stakingPool.algo.ts:320
+    // contracts/stakingPool.algo.ts:321
     // this.totalAlgoStaked.value -= amountToUnstake
     swap
     app_global_put
-    // contracts/stakingPool.algo.ts:322
+    // contracts/stakingPool.algo.ts:323
     // let amountRewardTokenRemoved: uint64 = 0
     intc_0 // 0
     bury 9
-    // contracts/stakingPool.algo.ts:323
+    // contracts/stakingPool.algo.ts:324
     // if (cmpStaker.rewardTokenBalance > 0) {
     pushint 48 // 48
     extract_uint64
     dup
     bury 8
     bz removeStake_after_if_else@17
-    // contracts/stakingPool.algo.ts:325
+    // contracts/stakingPool.algo.ts:326
     // if (this.poolId.value === 1) {
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:72
+    // contracts/stakingPool.algo.ts:73
     // poolId = GlobalState<uint64>({ key: 'poolId' })
     bytec_3 // "poolId"
-    // contracts/stakingPool.algo.ts:325
+    // contracts/stakingPool.algo.ts:326
     // if (this.poolId.value === 1) {
     app_global_get_ex
     assert // check GlobalState exists
     intc_1 // 1
     ==
     bz removeStake_else_body@15
-    // contracts/stakingPool.algo.ts:326-329
+    // contracts/stakingPool.algo.ts:327-330
     // const validatorConfig = abiCall<typeof ValidatorRegistry.prototype.getValidatorConfig>({
     //     appId: this.creatingValidatorContractAppId.value,
     //     args: [this.validatorId.value],
     // }).returnValue
     itxn_begin
-    // contracts/stakingPool.algo.ts:327
+    // contracts/stakingPool.algo.ts:328
     // appId: this.creatingValidatorContractAppId.value,
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:66
+    // contracts/stakingPool.algo.ts:67
     // creatingValidatorContractAppId = GlobalState<uint64>({ key: 'creatorApp' })
     bytec_1 // "creatorApp"
-    // contracts/stakingPool.algo.ts:327
+    // contracts/stakingPool.algo.ts:328
     // appId: this.creatingValidatorContractAppId.value,
     app_global_get_ex
     assert // check GlobalState exists
-    // contracts/stakingPool.algo.ts:328
+    // contracts/stakingPool.algo.ts:329
     // args: [this.validatorId.value],
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:69
+    // contracts/stakingPool.algo.ts:70
     // validatorId = GlobalState<uint64>({ key: 'validatorId' })
     bytec_2 // "validatorId"
-    // contracts/stakingPool.algo.ts:328
+    // contracts/stakingPool.algo.ts:329
     // args: [this.validatorId.value],
     app_global_get_ex
     assert // check GlobalState exists
     itob
-    // contracts/stakingPool.algo.ts:326-329
+    // contracts/stakingPool.algo.ts:327-330
     // const validatorConfig = abiCall<typeof ValidatorRegistry.prototype.getValidatorConfig>({
     //     appId: this.creatingValidatorContractAppId.value,
     //     args: [this.validatorId.value],
@@ -1172,15 +1172,15 @@ removeStake_after_if_else@8:
     bytec 4 // 0x151f7c75
     ==
     assert // Bytes has valid prefix
-    // contracts/stakingPool.algo.ts:334-338
+    // contracts/stakingPool.algo.ts:335-339
     // itxn.assetTransfer({
     //     xferAsset: validatorConfig.rewardTokenId,
-    //     assetReceiver: staker.native,
+    //     assetReceiver: staker,
     //     assetAmount: cmpStaker.rewardTokenBalance,
     // }).submit()
     itxn_begin
     intc 5 // 157
-    // contracts/stakingPool.algo.ts:335
+    // contracts/stakingPool.algo.ts:336
     // xferAsset: validatorConfig.rewardTokenId,
     extract_uint64
     dig 7
@@ -1188,10 +1188,10 @@ removeStake_after_if_else@8:
     dig 2
     itxn_field AssetReceiver
     itxn_field XferAsset
-    // contracts/stakingPool.algo.ts:334-338
+    // contracts/stakingPool.algo.ts:335-339
     // itxn.assetTransfer({
     //     xferAsset: validatorConfig.rewardTokenId,
-    //     assetReceiver: staker.native,
+    //     assetReceiver: staker,
     //     assetAmount: cmpStaker.rewardTokenBalance,
     // }).submit()
     pushint 4 // 4
@@ -1199,7 +1199,7 @@ removeStake_after_if_else@8:
     intc_0 // 0
     itxn_field Fee
     itxn_submit
-    // contracts/stakingPool.algo.ts:340
+    // contracts/stakingPool.algo.ts:341
     // cmpStaker.rewardTokenBalance = 0
     intc_0 // 0
     itob
@@ -1213,7 +1213,7 @@ removeStake_after_if_else@16:
     bury 8
 
 removeStake_after_if_else@17:
-    // contracts/stakingPool.algo.ts:352
+    // contracts/stakingPool.algo.ts:353
     // cmpStaker.balance === 0 || cmpStaker.balance >= this.minEntryStake.value,
     dig 8
     pushint 32 // 32
@@ -1222,10 +1222,10 @@ removeStake_after_if_else@17:
     bury 4
     bz removeStake_bool_true@19
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:80
+    // contracts/stakingPool.algo.ts:81
     // minEntryStake = GlobalState<uint64>({ key: 'minEntryStake' })
     bytec 15 // "minEntryStake"
-    // contracts/stakingPool.algo.ts:352
+    // contracts/stakingPool.algo.ts:353
     // cmpStaker.balance === 0 || cmpStaker.balance >= this.minEntryStake.value,
     app_global_get_ex
     assert // check GlobalState exists
@@ -1237,20 +1237,20 @@ removeStake_bool_true@19:
     intc_1 // 1
 
 removeStake_bool_merge@21:
-    // contracts/stakingPool.algo.ts:351-354
+    // contracts/stakingPool.algo.ts:352-355
     // assert(
     //     cmpStaker.balance === 0 || cmpStaker.balance >= this.minEntryStake.value,
     //     'cannot reduce balance below minimum allowed stake unless all is removed',
     // )
     assert // cannot reduce balance below minimum allowed stake unless all is removed
-    // contracts/stakingPool.algo.ts:359-363
+    // contracts/stakingPool.algo.ts:360-364
     // itxn.payment({
     //     amount: amountToUnstake,
-    //     receiver: staker.native,
+    //     receiver: staker,
     //     note: 'unstaked',
     // }).submit()
     itxn_begin
-    // contracts/stakingPool.algo.ts:362
+    // contracts/stakingPool.algo.ts:363
     // note: 'unstaked',
     pushbytes "unstaked"
     itxn_field Note
@@ -1258,10 +1258,10 @@ removeStake_bool_merge@21:
     itxn_field Receiver
     dup
     itxn_field Amount
-    // contracts/stakingPool.algo.ts:359-363
+    // contracts/stakingPool.algo.ts:360-364
     // itxn.payment({
     //     amount: amountToUnstake,
-    //     receiver: staker.native,
+    //     receiver: staker,
     //     note: 'unstaked',
     // }).submit()
     intc_1 // 1
@@ -1269,99 +1269,99 @@ removeStake_bool_merge@21:
     intc_0 // 0
     itxn_field Fee
     itxn_submit
-    // contracts/stakingPool.algo.ts:364
+    // contracts/stakingPool.algo.ts:365
     // let stakerRemoved = false
     intc_0 // 0
     bury 4
-    // contracts/stakingPool.algo.ts:365
+    // contracts/stakingPool.algo.ts:366
     // if (cmpStaker.balance === 0) {
     dig 2
     bnz removeStake_after_if_else@24
-    // contracts/stakingPool.algo.ts:367
+    // contracts/stakingPool.algo.ts:368
     // this.numStakers.value -= 1
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:75
+    // contracts/stakingPool.algo.ts:76
     // numStakers = GlobalState<uint64>({ key: 'numStakers' })
     bytec 10 // "numStakers"
-    // contracts/stakingPool.algo.ts:367
+    // contracts/stakingPool.algo.ts:368
     // this.numStakers.value -= 1
     app_global_get_ex
     assert // check GlobalState exists
     intc_1 // 1
     -
-    // contracts/stakingPool.algo.ts:75
+    // contracts/stakingPool.algo.ts:76
     // numStakers = GlobalState<uint64>({ key: 'numStakers' })
     bytec 10 // "numStakers"
-    // contracts/stakingPool.algo.ts:367
+    // contracts/stakingPool.algo.ts:368
     // this.numStakers.value -= 1
     swap
     app_global_put
-    // contracts/stakingPool.algo.ts:368
-    // cmpStaker.account = new Address(Global.zeroAddress)
+    // contracts/stakingPool.algo.ts:369
+    // cmpStaker.account = Global.zeroAddress
     dig 8
     global ZeroAddress
     replace2 0
-    // contracts/stakingPool.algo.ts:369
+    // contracts/stakingPool.algo.ts:370
     // cmpStaker.totalRewarded = 0
     intc_0 // 0
     itob
     swap
     dig 1
     replace2 40
-    // contracts/stakingPool.algo.ts:370
+    // contracts/stakingPool.algo.ts:371
     // cmpStaker.rewardTokenBalance = 0
     swap
     replace2 48
     bury 9
-    // contracts/stakingPool.algo.ts:371
+    // contracts/stakingPool.algo.ts:372
     // stakerRemoved = true
     intc_1 // 1
     bury 4
 
 removeStake_after_if_else@24:
-    // contracts/stakingPool.algo.ts:92
+    // contracts/stakingPool.algo.ts:93
     // stakers = Box<FixedArray<StakedInfo, typeof MAX_STAKERS_PER_POOL>>({ key: 'stakers' })
     bytec_0 // "stakers"
-    // contracts/stakingPool.algo.ts:374
+    // contracts/stakingPool.algo.ts:375
     // this.stakers.value[i] = clone(cmpStaker)
     dig 6
     dig 10
     box_replace
-    // contracts/stakingPool.algo.ts:376
+    // contracts/stakingPool.algo.ts:377
     // const roundsLeftInBin: uint64 = this.binRoundStart.value + this.roundsPerDay.value - Global.round
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:98
+    // contracts/stakingPool.algo.ts:99
     // binRoundStart = GlobalState<uint64>({ key: 'binRoundStart' })
     bytec 9 // "binRoundStart"
-    // contracts/stakingPool.algo.ts:376
+    // contracts/stakingPool.algo.ts:377
     // const roundsLeftInBin: uint64 = this.binRoundStart.value + this.roundsPerDay.value - Global.round
     app_global_get_ex
     assert // check GlobalState exists
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:96
+    // contracts/stakingPool.algo.ts:97
     // roundsPerDay = GlobalState<uint64>({ key: 'roundsPerDay' })
     bytec 6 // "roundsPerDay"
-    // contracts/stakingPool.algo.ts:376
+    // contracts/stakingPool.algo.ts:377
     // const roundsLeftInBin: uint64 = this.binRoundStart.value + this.roundsPerDay.value - Global.round
     app_global_get_ex
     assert // check GlobalState exists
     +
     global Round
     -
-    // contracts/stakingPool.algo.ts:377
+    // contracts/stakingPool.algo.ts:378
     // const subtractAmount = BigUint(amountToUnstake * roundsLeftInBin)
     dig 1
     dup
     uncover 2
     *
     itob
-    // contracts/stakingPool.algo.ts:378
+    // contracts/stakingPool.algo.ts:379
     // this.stakeAccumulator.value = new Uint128(this.stakeAccumulator.value.asBigUint() - subtractAmount)
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:103
+    // contracts/stakingPool.algo.ts:104
     // stakeAccumulator = GlobalState<Uint128>({ key: 'stakeAccumulator' })
     bytec 7 // "stakeAccumulator"
-    // contracts/stakingPool.algo.ts:378
+    // contracts/stakingPool.algo.ts:379
     // this.stakeAccumulator.value = new Uint128(this.stakeAccumulator.value.asBigUint() - subtractAmount)
     app_global_get_ex
     assert // check GlobalState exists
@@ -1375,14 +1375,14 @@ removeStake_after_if_else@24:
     intc_3 // 16
     bzero
     b|
-    // contracts/stakingPool.algo.ts:103
+    // contracts/stakingPool.algo.ts:104
     // stakeAccumulator = GlobalState<Uint128>({ key: 'stakeAccumulator' })
     bytec 7 // "stakeAccumulator"
-    // contracts/stakingPool.algo.ts:378
+    // contracts/stakingPool.algo.ts:379
     // this.stakeAccumulator.value = new Uint128(this.stakeAccumulator.value.asBigUint() - subtractAmount)
     swap
     app_global_put
-    // contracts/stakingPool.algo.ts:383-396
+    // contracts/stakingPool.algo.ts:384-397
     // abiCall<typeof ValidatorRegistry.prototype.stakeRemoved>({
     //     appId: this.creatingValidatorContractAppId.value,
     //     args: [
@@ -1398,40 +1398,40 @@ removeStake_after_if_else@24:
     //     ],
     // })
     itxn_begin
-    // contracts/stakingPool.algo.ts:384
+    // contracts/stakingPool.algo.ts:385
     // appId: this.creatingValidatorContractAppId.value,
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:66
+    // contracts/stakingPool.algo.ts:67
     // creatingValidatorContractAppId = GlobalState<uint64>({ key: 'creatorApp' })
     bytec_1 // "creatorApp"
-    // contracts/stakingPool.algo.ts:384
+    // contracts/stakingPool.algo.ts:385
     // appId: this.creatingValidatorContractAppId.value,
     app_global_get_ex
     assert // check GlobalState exists
-    // contracts/stakingPool.algo.ts:387
+    // contracts/stakingPool.algo.ts:388
     // id: this.validatorId.value,
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:69
+    // contracts/stakingPool.algo.ts:70
     // validatorId = GlobalState<uint64>({ key: 'validatorId' })
     bytec_2 // "validatorId"
-    // contracts/stakingPool.algo.ts:387
+    // contracts/stakingPool.algo.ts:388
     // id: this.validatorId.value,
-    app_global_get_ex
-    assert // check GlobalState exists
-    // contracts/stakingPool.algo.ts:388
-    // poolId: this.poolId.value,
-    intc_0 // 0
-    // contracts/stakingPool.algo.ts:72
-    // poolId = GlobalState<uint64>({ key: 'poolId' })
-    bytec_3 // "poolId"
-    // contracts/stakingPool.algo.ts:388
-    // poolId: this.poolId.value,
     app_global_get_ex
     assert // check GlobalState exists
     // contracts/stakingPool.algo.ts:389
+    // poolId: this.poolId.value,
+    intc_0 // 0
+    // contracts/stakingPool.algo.ts:73
+    // poolId = GlobalState<uint64>({ key: 'poolId' })
+    bytec_3 // "poolId"
+    // contracts/stakingPool.algo.ts:389
+    // poolId: this.poolId.value,
+    app_global_get_ex
+    assert // check GlobalState exists
+    // contracts/stakingPool.algo.ts:390
     // poolAppId: Global.currentApplicationId.id,
     global CurrentApplicationID
-    // contracts/stakingPool.algo.ts:386-390
+    // contracts/stakingPool.algo.ts:387-391
     // {
     //     id: this.validatorId.value,
     //     poolId: this.poolId.value,
@@ -1445,21 +1445,21 @@ removeStake_after_if_else@24:
     swap
     itob
     concat
-    // contracts/stakingPool.algo.ts:392
+    // contracts/stakingPool.algo.ts:393
     // amountToUnstake,
     uncover 2
     itob
-    // contracts/stakingPool.algo.ts:393
+    // contracts/stakingPool.algo.ts:394
     // amountRewardTokenRemoved,
     dig 10
     itob
-    // contracts/stakingPool.algo.ts:394
+    // contracts/stakingPool.algo.ts:395
     // stakerRemoved,
     pushbytes 0x00
     intc_0 // 0
     dig 9
     setbit
-    // contracts/stakingPool.algo.ts:383-396
+    // contracts/stakingPool.algo.ts:384-397
     // abiCall<typeof ValidatorRegistry.prototype.stakeRemoved>({
     //     appId: this.creatingValidatorContractAppId.value,
     //     args: [
@@ -1491,8 +1491,8 @@ removeStake_after_if_else@24:
     intc_0 // 0
     itxn_field Fee
     itxn_submit
-    // contracts/stakingPool.algo.ts:296
-    // removeStake(staker: Address, amountToUnstake: uint64): void {
+    // contracts/stakingPool.algo.ts:297
+    // removeStake(staker: Account, amountToUnstake: uint64): void {
     intc_1 // 1
     return
 
@@ -1501,7 +1501,7 @@ removeStake_bool_false@20:
     b removeStake_bool_merge@21
 
 removeStake_else_body@15:
-    // contracts/stakingPool.algo.ts:346
+    // contracts/stakingPool.algo.ts:347
     // cmpStaker.rewardTokenBalance = 0
     intc_0 // 0
     itob
@@ -1512,7 +1512,7 @@ removeStake_else_body@15:
     b removeStake_after_if_else@16
 
 removeStake_after_if_else@26:
-    // contracts/stakingPool.algo.ts:308
+    // contracts/stakingPool.algo.ts:309
     // for (let i: uint64 = 0; i < this.stakers.value.length; i += 1) {
     dig 4
     intc_1 // 1
@@ -1527,18 +1527,18 @@ claimTokens:
     dup
     pushbytes ""
     dup
-    // contracts/stakingPool.algo.ts:412
+    // contracts/stakingPool.algo.ts:413
     // const staker = Txn.sender
     txn Sender
-    // contracts/stakingPool.algo.ts:414
+    // contracts/stakingPool.algo.ts:415
     // for (let i: uint64 = 0; i < this.stakers.value.length; i += 1) {
     intc_0 // 0
 
 claimTokens_while_top@2:
-    // contracts/stakingPool.algo.ts:92
+    // contracts/stakingPool.algo.ts:93
     // stakers = Box<FixedArray<StakedInfo, typeof MAX_STAKERS_PER_POOL>>({ key: 'stakers' })
     bytec_0 // "stakers"
-    // contracts/stakingPool.algo.ts:414
+    // contracts/stakingPool.algo.ts:415
     // for (let i: uint64 = 0; i < this.stakers.value.length; i += 1) {
     box_len
     bury 1
@@ -1547,40 +1547,40 @@ claimTokens_while_top@2:
     intc 4 // 200
     <
     assert // account not found
-    // contracts/stakingPool.algo.ts:415
+    // contracts/stakingPool.algo.ts:416
     // ensureBudget(300)
     intc 6 // 300
     intc_0 // 0
     callsub ensure_budget
-    // contracts/stakingPool.algo.ts:416
+    // contracts/stakingPool.algo.ts:417
     // const cmpStaker = clone(this.stakers.value[i])
     intc_2 // 64
     *
     dup
     bury 4
-    // contracts/stakingPool.algo.ts:92
+    // contracts/stakingPool.algo.ts:93
     // stakers = Box<FixedArray<StakedInfo, typeof MAX_STAKERS_PER_POOL>>({ key: 'stakers' })
     bytec_0 // "stakers"
-    // contracts/stakingPool.algo.ts:416
+    // contracts/stakingPool.algo.ts:417
     // const cmpStaker = clone(this.stakers.value[i])
     swap
     intc_2 // 64
     box_extract
     dup
     bury 6
-    // contracts/stakingPool.algo.ts:416-417
+    // contracts/stakingPool.algo.ts:417-418
     // const cmpStaker = clone(this.stakers.value[i])
-    // if (cmpStaker.account.native === staker) {
+    // if (cmpStaker.account === staker) {
     extract 0 32
-    // contracts/stakingPool.algo.ts:417
-    // if (cmpStaker.account.native === staker) {
+    // contracts/stakingPool.algo.ts:418
+    // if (cmpStaker.account === staker) {
     dig 2
     ==
     bz claimTokens_after_if_else@13
-    // contracts/stakingPool.algo.ts:92
+    // contracts/stakingPool.algo.ts:93
     // stakers = Box<FixedArray<StakedInfo, typeof MAX_STAKERS_PER_POOL>>({ key: 'stakers' })
     bytec_0 // "stakers"
-    // contracts/stakingPool.algo.ts:418
+    // contracts/stakingPool.algo.ts:419
     // if (cmpStaker.rewardTokenBalance === 0) {
     dig 3
     intc_2 // 64
@@ -1593,47 +1593,47 @@ claimTokens_while_top@2:
     dup
     bury 5
     bz claimTokens_after_inlined_contracts/stakingPool.algo.ts::StakingPool.claimTokens@15
-    // contracts/stakingPool.algo.ts:423
+    // contracts/stakingPool.algo.ts:424
     // if (this.poolId.value === 1) {
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:72
+    // contracts/stakingPool.algo.ts:73
     // poolId = GlobalState<uint64>({ key: 'poolId' })
     bytec_3 // "poolId"
-    // contracts/stakingPool.algo.ts:423
+    // contracts/stakingPool.algo.ts:424
     // if (this.poolId.value === 1) {
     app_global_get_ex
     assert // check GlobalState exists
     intc_1 // 1
     ==
     bz claimTokens_else_body@10
-    // contracts/stakingPool.algo.ts:424-427
+    // contracts/stakingPool.algo.ts:425-428
     // const validatorConfig = abiCall<typeof ValidatorRegistry.prototype.getValidatorConfig>({
     //     appId: this.creatingValidatorContractAppId.value,
     //     args: [this.validatorId.value],
     // }).returnValue
     itxn_begin
-    // contracts/stakingPool.algo.ts:425
+    // contracts/stakingPool.algo.ts:426
     // appId: this.creatingValidatorContractAppId.value,
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:66
+    // contracts/stakingPool.algo.ts:67
     // creatingValidatorContractAppId = GlobalState<uint64>({ key: 'creatorApp' })
     bytec_1 // "creatorApp"
-    // contracts/stakingPool.algo.ts:425
+    // contracts/stakingPool.algo.ts:426
     // appId: this.creatingValidatorContractAppId.value,
     app_global_get_ex
     assert // check GlobalState exists
-    // contracts/stakingPool.algo.ts:426
+    // contracts/stakingPool.algo.ts:427
     // args: [this.validatorId.value],
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:69
+    // contracts/stakingPool.algo.ts:70
     // validatorId = GlobalState<uint64>({ key: 'validatorId' })
     bytec_2 // "validatorId"
-    // contracts/stakingPool.algo.ts:426
+    // contracts/stakingPool.algo.ts:427
     // args: [this.validatorId.value],
     app_global_get_ex
     assert // check GlobalState exists
     itob
-    // contracts/stakingPool.algo.ts:424-427
+    // contracts/stakingPool.algo.ts:425-428
     // const validatorConfig = abiCall<typeof ValidatorRegistry.prototype.getValidatorConfig>({
     //     appId: this.creatingValidatorContractAppId.value,
     //     args: [this.validatorId.value],
@@ -1653,7 +1653,7 @@ claimTokens_while_top@2:
     bytec 4 // 0x151f7c75
     ==
     assert // Bytes has valid prefix
-    // contracts/stakingPool.algo.ts:431-435
+    // contracts/stakingPool.algo.ts:432-436
     // itxn.assetTransfer({
     //     xferAsset: validatorConfig.rewardTokenId,
     //     assetReceiver: staker,
@@ -1661,7 +1661,7 @@ claimTokens_while_top@2:
     // }).submit()
     itxn_begin
     intc 5 // 157
-    // contracts/stakingPool.algo.ts:432
+    // contracts/stakingPool.algo.ts:433
     // xferAsset: validatorConfig.rewardTokenId,
     extract_uint64
     dig 4
@@ -1669,7 +1669,7 @@ claimTokens_while_top@2:
     dig 2
     itxn_field AssetReceiver
     itxn_field XferAsset
-    // contracts/stakingPool.algo.ts:431-435
+    // contracts/stakingPool.algo.ts:432-436
     // itxn.assetTransfer({
     //     xferAsset: validatorConfig.rewardTokenId,
     //     assetReceiver: staker,
@@ -1680,7 +1680,7 @@ claimTokens_while_top@2:
     intc_0 // 0
     itxn_field Fee
     itxn_submit
-    // contracts/stakingPool.algo.ts:437
+    // contracts/stakingPool.algo.ts:438
     // cmpStaker.rewardTokenBalance = 0
     intc_0 // 0
     itob
@@ -1690,15 +1690,15 @@ claimTokens_while_top@2:
     bury 5
 
 claimTokens_after_if_else@11:
-    // contracts/stakingPool.algo.ts:92
+    // contracts/stakingPool.algo.ts:93
     // stakers = Box<FixedArray<StakedInfo, typeof MAX_STAKERS_PER_POOL>>({ key: 'stakers' })
     bytec_0 // "stakers"
-    // contracts/stakingPool.algo.ts:447
+    // contracts/stakingPool.algo.ts:448
     // this.stakers.value[i] = clone(cmpStaker)
     dig 3
     dig 6
     box_replace
-    // contracts/stakingPool.algo.ts:452-465
+    // contracts/stakingPool.algo.ts:453-466
     // abiCall<typeof ValidatorRegistry.prototype.stakeRemoved>({
     //     appId: this.creatingValidatorContractAppId.value,
     //     args: [
@@ -1707,47 +1707,47 @@ claimTokens_after_if_else@11:
     //             poolId: this.poolId.value,
     //             poolAppId: Global.currentApplicationId.id,
     //         },
-    //         new Address(staker),
+    //         staker,
     //         0, // no algo removed
     //         amountRewardTokenRemoved,
     //         false, // staker isn't being removed.
     //     ],
     // })
     itxn_begin
-    // contracts/stakingPool.algo.ts:453
+    // contracts/stakingPool.algo.ts:454
     // appId: this.creatingValidatorContractAppId.value,
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:66
+    // contracts/stakingPool.algo.ts:67
     // creatingValidatorContractAppId = GlobalState<uint64>({ key: 'creatorApp' })
     bytec_1 // "creatorApp"
-    // contracts/stakingPool.algo.ts:453
+    // contracts/stakingPool.algo.ts:454
     // appId: this.creatingValidatorContractAppId.value,
     app_global_get_ex
     assert // check GlobalState exists
-    // contracts/stakingPool.algo.ts:456
+    // contracts/stakingPool.algo.ts:457
     // id: this.validatorId.value,
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:69
+    // contracts/stakingPool.algo.ts:70
     // validatorId = GlobalState<uint64>({ key: 'validatorId' })
     bytec_2 // "validatorId"
-    // contracts/stakingPool.algo.ts:456
+    // contracts/stakingPool.algo.ts:457
     // id: this.validatorId.value,
-    app_global_get_ex
-    assert // check GlobalState exists
-    // contracts/stakingPool.algo.ts:457
-    // poolId: this.poolId.value,
-    intc_0 // 0
-    // contracts/stakingPool.algo.ts:72
-    // poolId = GlobalState<uint64>({ key: 'poolId' })
-    bytec_3 // "poolId"
-    // contracts/stakingPool.algo.ts:457
-    // poolId: this.poolId.value,
     app_global_get_ex
     assert // check GlobalState exists
     // contracts/stakingPool.algo.ts:458
+    // poolId: this.poolId.value,
+    intc_0 // 0
+    // contracts/stakingPool.algo.ts:73
+    // poolId = GlobalState<uint64>({ key: 'poolId' })
+    bytec_3 // "poolId"
+    // contracts/stakingPool.algo.ts:458
+    // poolId: this.poolId.value,
+    app_global_get_ex
+    assert // check GlobalState exists
+    // contracts/stakingPool.algo.ts:459
     // poolAppId: Global.currentApplicationId.id,
     global CurrentApplicationID
-    // contracts/stakingPool.algo.ts:455-459
+    // contracts/stakingPool.algo.ts:456-460
     // {
     //     id: this.validatorId.value,
     //     poolId: this.poolId.value,
@@ -1761,11 +1761,11 @@ claimTokens_after_if_else@11:
     swap
     itob
     concat
-    // contracts/stakingPool.algo.ts:461
+    // contracts/stakingPool.algo.ts:462
     // 0, // no algo removed
     intc_0 // 0
     itob
-    // contracts/stakingPool.algo.ts:452-465
+    // contracts/stakingPool.algo.ts:453-466
     // abiCall<typeof ValidatorRegistry.prototype.stakeRemoved>({
     //     appId: this.creatingValidatorContractAppId.value,
     //     args: [
@@ -1774,7 +1774,7 @@ claimTokens_after_if_else@11:
     //             poolId: this.poolId.value,
     //             poolAppId: Global.currentApplicationId.id,
     //         },
-    //         new Address(staker),
+    //         staker,
     //         0, // no algo removed
     //         amountRewardTokenRemoved,
     //         false, // staker isn't being removed.
@@ -1789,12 +1789,12 @@ claimTokens_after_if_else@11:
     itxn_field ApplicationArgs
     dig 6
     itxn_field ApplicationArgs
-    // contracts/stakingPool.algo.ts:463
+    // contracts/stakingPool.algo.ts:464
     // false, // staker isn't being removed.
     pushbytes 0x00
     itxn_field ApplicationArgs
     itxn_field ApplicationID
-    // contracts/stakingPool.algo.ts:452-465
+    // contracts/stakingPool.algo.ts:453-466
     // abiCall<typeof ValidatorRegistry.prototype.stakeRemoved>({
     //     appId: this.creatingValidatorContractAppId.value,
     //     args: [
@@ -1803,7 +1803,7 @@ claimTokens_after_if_else@11:
     //             poolId: this.poolId.value,
     //             poolAppId: Global.currentApplicationId.id,
     //         },
-    //         new Address(staker),
+    //         staker,
     //         0, // no algo removed
     //         amountRewardTokenRemoved,
     //         false, // staker isn't being removed.
@@ -1816,13 +1816,13 @@ claimTokens_after_if_else@11:
     itxn_submit
 
 claimTokens_after_inlined_contracts/stakingPool.algo.ts::StakingPool.claimTokens@15:
-    // contracts/stakingPool.algo.ts:408
+    // contracts/stakingPool.algo.ts:409
     // claimTokens(): void {
     intc_1 // 1
     return
 
 claimTokens_else_body@10:
-    // contracts/stakingPool.algo.ts:443
+    // contracts/stakingPool.algo.ts:444
     // cmpStaker.rewardTokenBalance = 0
     intc_0 // 0
     itob
@@ -1833,7 +1833,7 @@ claimTokens_else_body@10:
     b claimTokens_after_if_else@11
 
 claimTokens_after_if_else@13:
-    // contracts/stakingPool.algo.ts:414
+    // contracts/stakingPool.algo.ts:415
     // for (let i: uint64 = 0; i < this.stakers.value.length; i += 1) {
     dup
     intc_1 // 1
@@ -1845,18 +1845,18 @@ claimTokens_after_if_else@13:
 // contracts/stakingPool.algo.ts::StakingPool.getStakerInfo[routing]() -> void:
 getStakerInfo:
     pushbytes ""
-    // contracts/stakingPool.algo.ts:479
+    // contracts/stakingPool.algo.ts:480
     // @abimethod({ readonly: true })
     txna ApplicationArgs 1
-    // contracts/stakingPool.algo.ts:481
+    // contracts/stakingPool.algo.ts:482
     // for (let i: uint64 = 0; i < this.stakers.value.length; i += 1) {
     intc_0 // 0
 
 getStakerInfo_while_top@2:
-    // contracts/stakingPool.algo.ts:92
+    // contracts/stakingPool.algo.ts:93
     // stakers = Box<FixedArray<StakedInfo, typeof MAX_STAKERS_PER_POOL>>({ key: 'stakers' })
     bytec_0 // "stakers"
-    // contracts/stakingPool.algo.ts:481
+    // contracts/stakingPool.algo.ts:482
     // for (let i: uint64 = 0; i < this.stakers.value.length; i += 1) {
     box_len
     bury 1
@@ -1865,21 +1865,21 @@ getStakerInfo_while_top@2:
     intc 4 // 200
     <
     assert // account not found
-    // contracts/stakingPool.algo.ts:482
+    // contracts/stakingPool.algo.ts:483
     // ensureBudget(200)
     intc 4 // 200
     intc_0 // 0
     callsub ensure_budget
-    // contracts/stakingPool.algo.ts:483
+    // contracts/stakingPool.algo.ts:484
     // if (this.stakers.value[i].account === staker) {
     intc_2 // 64
     *
     dup
     bury 4
-    // contracts/stakingPool.algo.ts:92
+    // contracts/stakingPool.algo.ts:93
     // stakers = Box<FixedArray<StakedInfo, typeof MAX_STAKERS_PER_POOL>>({ key: 'stakers' })
     bytec_0 // "stakers"
-    // contracts/stakingPool.algo.ts:483
+    // contracts/stakingPool.algo.ts:484
     // if (this.stakers.value[i].account === staker) {
     swap
     intc_2 // 64
@@ -1888,15 +1888,15 @@ getStakerInfo_while_top@2:
     dig 2
     ==
     bz getStakerInfo_after_if_else@5
-    // contracts/stakingPool.algo.ts:92
+    // contracts/stakingPool.algo.ts:93
     // stakers = Box<FixedArray<StakedInfo, typeof MAX_STAKERS_PER_POOL>>({ key: 'stakers' })
     bytec_0 // "stakers"
-    // contracts/stakingPool.algo.ts:484
+    // contracts/stakingPool.algo.ts:485
     // return this.stakers.value[i]
     dig 3
     intc_2 // 64
     box_extract
-    // contracts/stakingPool.algo.ts:479
+    // contracts/stakingPool.algo.ts:480
     // @abimethod({ readonly: true })
     bytec 4 // 0x151f7c75
     swap
@@ -1906,7 +1906,7 @@ getStakerInfo_while_top@2:
     return
 
 getStakerInfo_after_if_else@5:
-    // contracts/stakingPool.algo.ts:481
+    // contracts/stakingPool.algo.ts:482
     // for (let i: uint64 = 0; i < this.stakers.value.length; i += 1) {
     dup
     intc_1 // 1
@@ -1917,54 +1917,54 @@ getStakerInfo_after_if_else@5:
 
 // contracts/stakingPool.algo.ts::StakingPool.payTokenReward[routing]() -> void:
 payTokenReward:
-    // contracts/stakingPool.algo.ts:500
-    // payTokenReward(staker: Address, rewardToken: uint64, amountToSend: uint64): void {
+    // contracts/stakingPool.algo.ts:501
+    // payTokenReward(staker: Account, rewardToken: uint64, amountToSend: uint64): void {
     txna ApplicationArgs 1
     txna ApplicationArgs 2
     btoi
     txna ApplicationArgs 3
     btoi
-    // contracts/stakingPool.algo.ts:503
+    // contracts/stakingPool.algo.ts:504
     // Txn.sender === Application(this.creatingValidatorContractAppId.value).address,
     txn Sender
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:66
+    // contracts/stakingPool.algo.ts:67
     // creatingValidatorContractAppId = GlobalState<uint64>({ key: 'creatorApp' })
     bytec_1 // "creatorApp"
-    // contracts/stakingPool.algo.ts:503
+    // contracts/stakingPool.algo.ts:504
     // Txn.sender === Application(this.creatingValidatorContractAppId.value).address,
     app_global_get_ex
     assert // check GlobalState exists
     app_params_get AppAddress
     assert // application exists
     ==
-    // contracts/stakingPool.algo.ts:502-505
+    // contracts/stakingPool.algo.ts:503-506
     // assert(
     //     Txn.sender === Application(this.creatingValidatorContractAppId.value).address,
     //     'this can only be called via the validator contract',
     // )
     assert // this can only be called via the validator contract
-    // contracts/stakingPool.algo.ts:506
+    // contracts/stakingPool.algo.ts:507
     // assert(this.poolId.value === 1, 'must be pool 1 in order to be called to pay out token rewards')
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:72
+    // contracts/stakingPool.algo.ts:73
     // poolId = GlobalState<uint64>({ key: 'poolId' })
     bytec_3 // "poolId"
-    // contracts/stakingPool.algo.ts:506
+    // contracts/stakingPool.algo.ts:507
     // assert(this.poolId.value === 1, 'must be pool 1 in order to be called to pay out token rewards')
     app_global_get_ex
     assert // check GlobalState exists
     intc_1 // 1
     ==
     assert // must be pool 1 in order to be called to pay out token rewards
-    // contracts/stakingPool.algo.ts:507
+    // contracts/stakingPool.algo.ts:508
     // assert(rewardToken !== 0, 'can only claim token rewards from validator that has them')
     dig 1
     assert // can only claim token rewards from validator that has them
-    // contracts/stakingPool.algo.ts:510-514
+    // contracts/stakingPool.algo.ts:511-515
     // itxn.assetTransfer({
     //     xferAsset: rewardToken,
-    //     assetReceiver: staker.native,
+    //     assetReceiver: staker,
     //     assetAmount: amountToSend,
     // }).submit()
     itxn_begin
@@ -1976,30 +1976,30 @@ payTokenReward:
     intc_0 // 0
     itxn_field Fee
     itxn_submit
-    // contracts/stakingPool.algo.ts:500
-    // payTokenReward(staker: Address, rewardToken: uint64, amountToSend: uint64): void {
+    // contracts/stakingPool.algo.ts:501
+    // payTokenReward(staker: Account, rewardToken: uint64, amountToSend: uint64): void {
     intc_1 // 1
     return
 
 
 // contracts/stakingPool.algo.ts::StakingPool.updateAlgodVer[routing]() -> void:
 updateAlgodVer:
-    // contracts/stakingPool.algo.ts:526
+    // contracts/stakingPool.algo.ts:527
     // updateAlgodVer(algodVer: string): void {
     txna ApplicationArgs 1
     extract 2 0
-    // contracts/stakingPool.algo.ts:527
+    // contracts/stakingPool.algo.ts:528
     // assert(this.isOwnerOrManagerCaller(), 'can only be called by owner or manager of validator')
     callsub isOwnerOrManagerCaller
     assert // can only be called by owner or manager of validator
-    // contracts/stakingPool.algo.ts:89
+    // contracts/stakingPool.algo.ts:90
     // algodVer = GlobalState<bytes>({ key: 'algodVer' })
     pushbytes "algodVer"
-    // contracts/stakingPool.algo.ts:528
+    // contracts/stakingPool.algo.ts:529
     // this.algodVer.value = Bytes(algodVer)
     swap
     app_global_put
-    // contracts/stakingPool.algo.ts:526
+    // contracts/stakingPool.algo.ts:527
     // updateAlgodVer(algodVer: string): void {
     intc_1 // 1
     return
@@ -2012,34 +2012,34 @@ epochBalanceUpdate:
     pushbytes ""
     dupn 28
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:541-544
+    // contracts/stakingPool.algo.ts:542-545
     // const validatorConfig = abiCall<typeof ValidatorRegistry.prototype.getValidatorConfig>({
     //     appId: this.creatingValidatorContractAppId.value,
     //     args: [this.validatorId.value],
     // }).returnValue
     itxn_begin
-    // contracts/stakingPool.algo.ts:542
+    // contracts/stakingPool.algo.ts:543
     // appId: this.creatingValidatorContractAppId.value,
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:66
+    // contracts/stakingPool.algo.ts:67
     // creatingValidatorContractAppId = GlobalState<uint64>({ key: 'creatorApp' })
     bytec_1 // "creatorApp"
-    // contracts/stakingPool.algo.ts:542
+    // contracts/stakingPool.algo.ts:543
     // appId: this.creatingValidatorContractAppId.value,
     app_global_get_ex
     assert // check GlobalState exists
-    // contracts/stakingPool.algo.ts:543
+    // contracts/stakingPool.algo.ts:544
     // args: [this.validatorId.value],
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:69
+    // contracts/stakingPool.algo.ts:70
     // validatorId = GlobalState<uint64>({ key: 'validatorId' })
     bytec_2 // "validatorId"
-    // contracts/stakingPool.algo.ts:543
+    // contracts/stakingPool.algo.ts:544
     // args: [this.validatorId.value],
     app_global_get_ex
     assert // check GlobalState exists
     itob
-    // contracts/stakingPool.algo.ts:541-544
+    // contracts/stakingPool.algo.ts:542-545
     // const validatorConfig = abiCall<typeof ValidatorRegistry.prototype.getValidatorConfig>({
     //     appId: this.creatingValidatorContractAppId.value,
     //     args: [this.validatorId.value],
@@ -2059,17 +2059,17 @@ epochBalanceUpdate:
     bytec 4 // 0x151f7c75
     ==
     assert // Bytes has valid prefix
-    // contracts/stakingPool.algo.ts:550
+    // contracts/stakingPool.algo.ts:551
     // const epochRoundLength = validatorConfig.epochRoundLength.asUint64()
     dup
     pushint 173 // 173
     extract_uint32
     dup
     cover 2
-    // contracts/stakingPool.algo.ts:551
+    // contracts/stakingPool.algo.ts:552
     // const curRound = Global.round
     global Round
-    // contracts/stakingPool.algo.ts:552
+    // contracts/stakingPool.algo.ts:553
     // const thisEpochBegin: uint64 = curRound - (curRound % epochRoundLength)
     dup
     dig 2
@@ -2080,13 +2080,13 @@ epochBalanceUpdate:
     dup
     cover 2
     cover 4
-    // contracts/stakingPool.algo.ts:555
+    // contracts/stakingPool.algo.ts:556
     // const lastPayoutEpoch: uint64 = this.lastPayout.value - (this.lastPayout.value % epochRoundLength)
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:83
+    // contracts/stakingPool.algo.ts:84
     // lastPayout = GlobalState<uint64>({ key: 'lastPayout' })
     bytec 16 // "lastPayout"
-    // contracts/stakingPool.algo.ts:555
+    // contracts/stakingPool.algo.ts:556
     // const lastPayoutEpoch: uint64 = this.lastPayout.value - (this.lastPayout.value % epochRoundLength)
     app_global_get_ex
     assert // check GlobalState exists
@@ -2094,99 +2094,99 @@ epochBalanceUpdate:
     uncover 4
     %
     -
-    // contracts/stakingPool.algo.ts:557
+    // contracts/stakingPool.algo.ts:558
     // assert(lastPayoutEpoch !== thisEpochBegin, "can't call epochBalanceUpdate in same epoch as prior call")
     uncover 2
     !=
     assert // can't call epochBalanceUpdate in same epoch as prior call
-    // contracts/stakingPool.algo.ts:559
+    // contracts/stakingPool.algo.ts:560
     // this.checkIfBinClosed()
     callsub checkIfBinClosed
-    // contracts/stakingPool.algo.ts:83
+    // contracts/stakingPool.algo.ts:84
     // lastPayout = GlobalState<uint64>({ key: 'lastPayout' })
     bytec 16 // "lastPayout"
-    // contracts/stakingPool.algo.ts:562
+    // contracts/stakingPool.algo.ts:563
     // this.lastPayout.value = curRound
     swap
     app_global_put
-    // contracts/stakingPool.algo.ts:563
+    // contracts/stakingPool.algo.ts:564
     // this.epochNumber.value += 1
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:86
+    // contracts/stakingPool.algo.ts:87
     // epochNumber = GlobalState<uint64>({ key: 'epochNumber' })
     bytec 17 // "epochNumber"
-    // contracts/stakingPool.algo.ts:563
+    // contracts/stakingPool.algo.ts:564
     // this.epochNumber.value += 1
     app_global_get_ex
     assert // check GlobalState exists
     intc_1 // 1
     +
-    // contracts/stakingPool.algo.ts:86
+    // contracts/stakingPool.algo.ts:87
     // epochNumber = GlobalState<uint64>({ key: 'epochNumber' })
     bytec 17 // "epochNumber"
-    // contracts/stakingPool.algo.ts:563
+    // contracts/stakingPool.algo.ts:564
     // this.epochNumber.value += 1
     swap
     app_global_put
     intc 5 // 157
-    // contracts/stakingPool.algo.ts:568
+    // contracts/stakingPool.algo.ts:569
     // const isTokenEligible = validatorConfig.rewardTokenId !== 0
     extract_uint64
     dup
-    // contracts/stakingPool.algo.ts:569
+    // contracts/stakingPool.algo.ts:570
     // let poolOneAppID = Global.currentApplicationId.id
     global CurrentApplicationID
     swap
-    // contracts/stakingPool.algo.ts:570
+    // contracts/stakingPool.algo.ts:571
     // let poolOneAddress = Global.currentApplicationAddress
     global CurrentApplicationAddress
     swap
-    // contracts/stakingPool.algo.ts:575
+    // contracts/stakingPool.algo.ts:576
     // if (isTokenEligible) {
     bz epochBalanceUpdate_after_if_else@12
-    // contracts/stakingPool.algo.ts:576
+    // contracts/stakingPool.algo.ts:577
     // if (this.poolId.value !== 1) {
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:72
+    // contracts/stakingPool.algo.ts:73
     // poolId = GlobalState<uint64>({ key: 'poolId' })
     bytec_3 // "poolId"
-    // contracts/stakingPool.algo.ts:576
+    // contracts/stakingPool.algo.ts:577
     // if (this.poolId.value !== 1) {
     app_global_get_ex
     assert // check GlobalState exists
     intc_1 // 1
     !=
     bz epochBalanceUpdate_after_if_else@6
-    // contracts/stakingPool.algo.ts:578-581
+    // contracts/stakingPool.algo.ts:579-582
     // poolOneAppID = abiCall<typeof ValidatorRegistry.prototype.getPoolAppId>({
     //     appId: this.creatingValidatorContractAppId.value,
     //     args: [this.validatorId.value, 1],
     // }).returnValue
     itxn_begin
-    // contracts/stakingPool.algo.ts:579
+    // contracts/stakingPool.algo.ts:580
     // appId: this.creatingValidatorContractAppId.value,
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:66
+    // contracts/stakingPool.algo.ts:67
     // creatingValidatorContractAppId = GlobalState<uint64>({ key: 'creatorApp' })
     bytec_1 // "creatorApp"
-    // contracts/stakingPool.algo.ts:579
+    // contracts/stakingPool.algo.ts:580
     // appId: this.creatingValidatorContractAppId.value,
     app_global_get_ex
     assert // check GlobalState exists
-    // contracts/stakingPool.algo.ts:580
+    // contracts/stakingPool.algo.ts:581
     // args: [this.validatorId.value, 1],
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:69
+    // contracts/stakingPool.algo.ts:70
     // validatorId = GlobalState<uint64>({ key: 'validatorId' })
     bytec_2 // "validatorId"
-    // contracts/stakingPool.algo.ts:580
+    // contracts/stakingPool.algo.ts:581
     // args: [this.validatorId.value, 1],
     app_global_get_ex
     assert // check GlobalState exists
     itob
     intc_1 // 1
     itob
-    // contracts/stakingPool.algo.ts:578-581
+    // contracts/stakingPool.algo.ts:579-582
     // poolOneAppID = abiCall<typeof ValidatorRegistry.prototype.getPoolAppId>({
     //     appId: this.creatingValidatorContractAppId.value,
     //     args: [this.validatorId.value, 1],
@@ -2213,7 +2213,7 @@ epochBalanceUpdate:
     btoi
     dup
     bury 3
-    // contracts/stakingPool.algo.ts:583
+    // contracts/stakingPool.algo.ts:584
     // poolOneAddress = Application(poolOneAppID).address
     app_params_get AppAddress
     swap
@@ -2221,47 +2221,47 @@ epochBalanceUpdate:
     assert // application exists
 
 epochBalanceUpdate_after_if_else@6:
-    // contracts/stakingPool.algo.ts:588
+    // contracts/stakingPool.algo.ts:589
     // if (this.poolId.value === 1) {
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:72
+    // contracts/stakingPool.algo.ts:73
     // poolId = GlobalState<uint64>({ key: 'poolId' })
     bytec_3 // "poolId"
-    // contracts/stakingPool.algo.ts:588
+    // contracts/stakingPool.algo.ts:589
     // if (this.poolId.value === 1) {
     app_global_get_ex
     assert // check GlobalState exists
     intc_1 // 1
     ==
     bz epochBalanceUpdate_else_body@9
-    // contracts/stakingPool.algo.ts:589-592
+    // contracts/stakingPool.algo.ts:590-593
     // tokenPayoutRatio = abiCall<typeof ValidatorRegistry.prototype.setTokenPayoutRatio>({
     //     appId: this.creatingValidatorContractAppId.value,
     //     args: [this.validatorId.value],
     // }).returnValue
     itxn_begin
-    // contracts/stakingPool.algo.ts:590
+    // contracts/stakingPool.algo.ts:591
     // appId: this.creatingValidatorContractAppId.value,
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:66
+    // contracts/stakingPool.algo.ts:67
     // creatingValidatorContractAppId = GlobalState<uint64>({ key: 'creatorApp' })
     bytec_1 // "creatorApp"
-    // contracts/stakingPool.algo.ts:590
+    // contracts/stakingPool.algo.ts:591
     // appId: this.creatingValidatorContractAppId.value,
     app_global_get_ex
     assert // check GlobalState exists
-    // contracts/stakingPool.algo.ts:591
+    // contracts/stakingPool.algo.ts:592
     // args: [this.validatorId.value],
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:69
+    // contracts/stakingPool.algo.ts:70
     // validatorId = GlobalState<uint64>({ key: 'validatorId' })
     bytec_2 // "validatorId"
-    // contracts/stakingPool.algo.ts:591
+    // contracts/stakingPool.algo.ts:592
     // args: [this.validatorId.value],
     app_global_get_ex
     assert // check GlobalState exists
     itob
-    // contracts/stakingPool.algo.ts:589-592
+    // contracts/stakingPool.algo.ts:590-593
     // tokenPayoutRatio = abiCall<typeof ValidatorRegistry.prototype.setTokenPayoutRatio>({
     //     appId: this.creatingValidatorContractAppId.value,
     //     args: [this.validatorId.value],
@@ -2285,34 +2285,34 @@ epochBalanceUpdate_after_if_else@6:
     assert // Bytes has valid prefix
 
 epochBalanceUpdate_after_if_else@12:
-    // contracts/stakingPool.algo.ts:610-613
+    // contracts/stakingPool.algo.ts:611-614
     // const validatorState = abiCall<typeof ValidatorRegistry.prototype.getValidatorState>({
     //     appId: this.creatingValidatorContractAppId.value,
     //     args: [this.validatorId.value],
     // }).returnValue
     itxn_begin
-    // contracts/stakingPool.algo.ts:611
+    // contracts/stakingPool.algo.ts:612
     // appId: this.creatingValidatorContractAppId.value,
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:66
+    // contracts/stakingPool.algo.ts:67
     // creatingValidatorContractAppId = GlobalState<uint64>({ key: 'creatorApp' })
     bytec_1 // "creatorApp"
-    // contracts/stakingPool.algo.ts:611
+    // contracts/stakingPool.algo.ts:612
     // appId: this.creatingValidatorContractAppId.value,
     app_global_get_ex
     assert // check GlobalState exists
-    // contracts/stakingPool.algo.ts:612
+    // contracts/stakingPool.algo.ts:613
     // args: [this.validatorId.value],
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:69
+    // contracts/stakingPool.algo.ts:70
     // validatorId = GlobalState<uint64>({ key: 'validatorId' })
     bytec_2 // "validatorId"
-    // contracts/stakingPool.algo.ts:612
+    // contracts/stakingPool.algo.ts:613
     // args: [this.validatorId.value],
     app_global_get_ex
     assert // check GlobalState exists
     itob
-    // contracts/stakingPool.algo.ts:610-613
+    // contracts/stakingPool.algo.ts:611-614
     // const validatorState = abiCall<typeof ValidatorRegistry.prototype.getValidatorState>({
     //     appId: this.creatingValidatorContractAppId.value,
     //     args: [this.validatorId.value],
@@ -2332,50 +2332,50 @@ epochBalanceUpdate_after_if_else@12:
     bytec 4 // 0x151f7c75
     ==
     assert // Bytes has valid prefix
-    // contracts/stakingPool.algo.ts:614
+    // contracts/stakingPool.algo.ts:615
     // const rewardTokenHeldBack = validatorState.rewardTokenHeldBack
     dup
     pushint 22 // 22
     extract_uint64
     bury 22
-    // contracts/stakingPool.algo.ts:621
+    // contracts/stakingPool.algo.ts:622
     // Global.currentApplicationAddress.balance -
     global CurrentApplicationAddress
     acct_params_get AcctBalance
     assert // account funded
-    // contracts/stakingPool.algo.ts:622
+    // contracts/stakingPool.algo.ts:623
     // this.totalAlgoStaked.value -
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:78
+    // contracts/stakingPool.algo.ts:79
     // totalAlgoStaked = GlobalState<uint64>({ key: 'staked' })
     bytec 5 // "staked"
-    // contracts/stakingPool.algo.ts:622
+    // contracts/stakingPool.algo.ts:623
     // this.totalAlgoStaked.value -
     app_global_get_ex
     assert // check GlobalState exists
-    // contracts/stakingPool.algo.ts:621-622
+    // contracts/stakingPool.algo.ts:622-623
     // Global.currentApplicationAddress.balance -
     // this.totalAlgoStaked.value -
     -
-    // contracts/stakingPool.algo.ts:623
+    // contracts/stakingPool.algo.ts:624
     // Global.currentApplicationAddress.minBalance
     global CurrentApplicationAddress
     acct_params_get AcctMinBalance
     assert // account funded
-    // contracts/stakingPool.algo.ts:621-623
+    // contracts/stakingPool.algo.ts:622-624
     // Global.currentApplicationAddress.balance -
     // this.totalAlgoStaked.value -
     // Global.currentApplicationAddress.minBalance
     -
     bury 37
-    // contracts/stakingPool.algo.ts:624
+    // contracts/stakingPool.algo.ts:625
     // let isPoolSaturated = false
     intc_0 // 0
     bury 27
-    // contracts/stakingPool.algo.ts:1025
+    // contracts/stakingPool.algo.ts:1026
     // return op.onlineStake()
     online_stake
-    // contracts/stakingPool.algo.ts:1012
+    // contracts/stakingPool.algo.ts:1013
     // return wideRatio([online, MAX_VALIDATOR_SOFT_PCT_OF_ONLINE_1DECIMAL], [1000])
     itob
     bytec 8 // 0x0002
@@ -2392,7 +2392,7 @@ epochBalanceUpdate_after_if_else@12:
     popn 2
     dup
     bury 36
-    // contracts/stakingPool.algo.ts:633
+    // contracts/stakingPool.algo.ts:634
     // if (validatorState.totalAlgoStaked > algoSaturationAmt) {
     swap
     pushint 14 // 14
@@ -2401,59 +2401,59 @@ epochBalanceUpdate_after_if_else@12:
     bury 12
     <
     bz epochBalanceUpdate_after_if_else@15
-    // contracts/stakingPool.algo.ts:634
+    // contracts/stakingPool.algo.ts:635
     // isPoolSaturated = true
     intc_1 // 1
     bury 26
 
 epochBalanceUpdate_after_if_else@15:
-    // contracts/stakingPool.algo.ts:640
+    // contracts/stakingPool.algo.ts:641
     // let tokenRewardAvail: uint64 = 0
     intc_0 // 0
     bury 16
-    // contracts/stakingPool.algo.ts:641
+    // contracts/stakingPool.algo.ts:642
     // let tokenRewardPaidOut: uint64 = 0
     intc_0 // 0
     bury 14
-    // contracts/stakingPool.algo.ts:642
+    // contracts/stakingPool.algo.ts:643
     // let validatorCommissionPaidOut: uint64 = 0
     intc_0 // 0
     bury 13
-    // contracts/stakingPool.algo.ts:643
+    // contracts/stakingPool.algo.ts:644
     // let excessToFeeSink: uint64 = 0
     intc_0 // 0
     bury 29
-    // contracts/stakingPool.algo.ts:644
+    // contracts/stakingPool.algo.ts:645
     // if (isTokenEligible) {
     dig 2
     bz epochBalanceUpdate_after_if_else@19
-    // contracts/stakingPool.algo.ts:646
+    // contracts/stakingPool.algo.ts:647
     // op.AssetHolding.assetBalance(poolOneAddress, validatorConfig.rewardTokenId)[0] -
     dup
     dig 3
     asset_holding_get AssetBalance
     pop
-    // contracts/stakingPool.algo.ts:646-647
+    // contracts/stakingPool.algo.ts:647-648
     // op.AssetHolding.assetBalance(poolOneAddress, validatorConfig.rewardTokenId)[0] -
     // op.btoi(Bytes(rewardTokenHeldBack))
     dig 21
     -
-    // contracts/stakingPool.algo.ts:651
+    // contracts/stakingPool.algo.ts:652
     // if (tokenRewardBal >= validatorConfig.rewardPerPayout) {
     dig 6
     pushint 165 // 165
     extract_uint64
     dup
-    bury 11
+    bury 10
     >=
     bz epochBalanceUpdate_after_if_else@19
-    // contracts/stakingPool.algo.ts:657
+    // contracts/stakingPool.algo.ts:658
     // const ourPoolPctOfWhole = tokenPayoutRatio.poolPctOfWhole[this.poolId.value - 1]
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:72
+    // contracts/stakingPool.algo.ts:73
     // poolId = GlobalState<uint64>({ key: 'poolId' })
     bytec_3 // "poolId"
-    // contracts/stakingPool.algo.ts:657
+    // contracts/stakingPool.algo.ts:658
     // const ourPoolPctOfWhole = tokenPayoutRatio.poolPctOfWhole[this.poolId.value - 1]
     app_global_get_ex
     assert // check GlobalState exists
@@ -2466,9 +2466,9 @@ epochBalanceUpdate_after_if_else@15:
     *
     pushint 8 // 8
     extract3 // on error: index access is out of bounds
-    // contracts/stakingPool.algo.ts:660
+    // contracts/stakingPool.algo.ts:661
     // tokenRewardAvail = wideRatio([validatorConfig.rewardPerPayout, ourPoolPctOfWhole], [1_000_000])
-    dig 9
+    dig 8
     itob
     bytec 8 // 0x0002
     swap
@@ -2481,33 +2481,33 @@ epochBalanceUpdate_after_if_else@15:
     bury 16
 
 epochBalanceUpdate_after_if_else@19:
-    // contracts/stakingPool.algo.ts:663
+    // contracts/stakingPool.algo.ts:664
     // if (tokenRewardAvail === 0) {
     dig 15
     bnz epochBalanceUpdate_after_if_else@23
-    // contracts/stakingPool.algo.ts:668
+    // contracts/stakingPool.algo.ts:669
     // if (algoRewardAvail < 1_000_000) {
     dig 35
     intc 8 // 1000000
     <
     bz epochBalanceUpdate_after_if_else@23
-    // contracts/stakingPool.algo.ts:669
+    // contracts/stakingPool.algo.ts:670
     // log('!token&&!noalgo to pay')
     pushbytes "!token&&!noalgo to pay"
     log
 
 epochBalanceUpdate_after_inlined_contracts/stakingPool.algo.ts::StakingPool.epochBalanceUpdate@71:
-    // contracts/stakingPool.algo.ts:539
+    // contracts/stakingPool.algo.ts:540
     // epochBalanceUpdate(): void {
     intc_1 // 1
     return
 
 epochBalanceUpdate_after_if_else@23:
-    // contracts/stakingPool.algo.ts:674
+    // contracts/stakingPool.algo.ts:675
     // if (isPoolSaturated) {
     dig 25
     bz epochBalanceUpdate_else_body@28
-    // contracts/stakingPool.algo.ts:681
+    // contracts/stakingPool.algo.ts:682
     // [algoRewardAvail, validatorConfig.percentToValidator.asUint64()],
     dig 5
     pushint 177 // 177
@@ -2524,10 +2524,10 @@ epochBalanceUpdate_after_if_else@23:
     dig 1
     swap
     concat
-    // contracts/stakingPool.algo.ts:682
+    // contracts/stakingPool.algo.ts:683
     // [1_000_000],
     bytec 18 // 0x000100000000000f4240
-    // contracts/stakingPool.algo.ts:680-683
+    // contracts/stakingPool.algo.ts:681-684
     // const normalValidatorCommission = wideRatio(
     //     [algoRewardAvail, validatorConfig.percentToValidator.asUint64()],
     //     [1_000_000],
@@ -2535,19 +2535,19 @@ epochBalanceUpdate_after_if_else@23:
     callsub wideRatio
     popn 2
     swap
-    // contracts/stakingPool.algo.ts:686
+    // contracts/stakingPool.algo.ts:687
     // [algoRewardAvail, algoSaturationAmt],
     dig 36
     itob
     concat
-    // contracts/stakingPool.algo.ts:687
+    // contracts/stakingPool.algo.ts:688
     // [op.btoi(Bytes(validatorState.totalAlgoStaked))],
     dig 12
     itob
     bytec 19 // 0x0001
     swap
     concat
-    // contracts/stakingPool.algo.ts:685-688
+    // contracts/stakingPool.algo.ts:686-689
     // let diminishedReward = wideRatio(
     //     [algoRewardAvail, algoSaturationAmt],
     //     [op.btoi(Bytes(validatorState.totalAlgoStaked))],
@@ -2556,7 +2556,7 @@ epochBalanceUpdate_after_if_else@23:
     popn 2
     dup
     bury 34
-    // contracts/stakingPool.algo.ts:690
+    // contracts/stakingPool.algo.ts:691
     // if (diminishedReward > algoRewardAvail - normalValidatorCommission) {
     cover 2
     -
@@ -2568,7 +2568,7 @@ epochBalanceUpdate_after_if_else@23:
     bury 31
 
 epochBalanceUpdate_after_if_else@26:
-    // contracts/stakingPool.algo.ts:694
+    // contracts/stakingPool.algo.ts:695
     // excessToFeeSink = algoRewardAvail - diminishedReward
     dig 35
     dig 31
@@ -2577,26 +2577,26 @@ epochBalanceUpdate_after_if_else@26:
     -
     dup
     bury 31
-    // contracts/stakingPool.algo.ts:695-699
+    // contracts/stakingPool.algo.ts:696-700
     // itxn.payment({
     //     amount: excessToFeeSink,
     //     receiver: op.Block.blkFeeSink(Txn.firstValid - 1),
     //     note: 'pool saturated, excess to fee sink',
     // }).submit()
     itxn_begin
-    // contracts/stakingPool.algo.ts:697
+    // contracts/stakingPool.algo.ts:698
     // receiver: op.Block.blkFeeSink(Txn.firstValid - 1),
     txn FirstValid
     intc_1 // 1
     -
     block BlkFeeSink
-    // contracts/stakingPool.algo.ts:698
+    // contracts/stakingPool.algo.ts:699
     // note: 'pool saturated, excess to fee sink',
     pushbytes "pool saturated, excess to fee sink"
     itxn_field Note
     itxn_field Receiver
     itxn_field Amount
-    // contracts/stakingPool.algo.ts:695-699
+    // contracts/stakingPool.algo.ts:696-700
     // itxn.payment({
     //     amount: excessToFeeSink,
     //     receiver: op.Block.blkFeeSink(Txn.firstValid - 1),
@@ -2610,11 +2610,11 @@ epochBalanceUpdate_after_if_else@26:
     bury 36
 
 epochBalanceUpdate_after_if_else@40:
-    // contracts/stakingPool.algo.ts:749
+    // contracts/stakingPool.algo.ts:750
     // let increasedStake: uint64 = 0
     intc_0 // 0
     bury 27
-    // contracts/stakingPool.algo.ts:773
+    // contracts/stakingPool.algo.ts:774
     // if (algoRewardAvail !== 0 || tokenRewardAvail !== 0) {
     dig 35
     bnz epochBalanceUpdate_if_body@42
@@ -2622,11 +2622,11 @@ epochBalanceUpdate_after_if_else@40:
     bz epochBalanceUpdate_after_if_else@69
 
 epochBalanceUpdate_if_body@42:
-    // contracts/stakingPool.algo.ts:774
+    // contracts/stakingPool.algo.ts:775
     // let partialStakersTotalStake: uint64 = 0
     intc_0 // 0
     bury 22
-    // contracts/stakingPool.algo.ts:778
+    // contracts/stakingPool.algo.ts:779
     // for (let i: uint64 = 0; i < this.stakers.value.length; i += 1) {
     intc_0 // 0
     bury 28
@@ -2636,10 +2636,10 @@ epochBalanceUpdate_if_body@42:
     bury 15
 
 epochBalanceUpdate_while_top@43:
-    // contracts/stakingPool.algo.ts:92
+    // contracts/stakingPool.algo.ts:93
     // stakers = Box<FixedArray<StakedInfo, typeof MAX_STAKERS_PER_POOL>>({ key: 'stakers' })
     bytec_0 // "stakers"
-    // contracts/stakingPool.algo.ts:778
+    // contracts/stakingPool.algo.ts:779
     // for (let i: uint64 = 0; i < this.stakers.value.length; i += 1) {
     box_len
     bury 1
@@ -2648,41 +2648,41 @@ epochBalanceUpdate_while_top@43:
     intc 4 // 200
     <
     bz epochBalanceUpdate_after_while@54
-    // contracts/stakingPool.algo.ts:779
+    // contracts/stakingPool.algo.ts:780
     // ensureBudget(400)
     pushint 400 // 400
     intc_0 // 0
     callsub ensure_budget
-    // contracts/stakingPool.algo.ts:780
+    // contracts/stakingPool.algo.ts:781
     // const cmpStaker = clone(this.stakers.value[i])
     dig 27
     intc_2 // 64
     *
     dup
     bury 34
-    // contracts/stakingPool.algo.ts:92
+    // contracts/stakingPool.algo.ts:93
     // stakers = Box<FixedArray<StakedInfo, typeof MAX_STAKERS_PER_POOL>>({ key: 'stakers' })
     bytec_0 // "stakers"
-    // contracts/stakingPool.algo.ts:780
+    // contracts/stakingPool.algo.ts:781
     // const cmpStaker = clone(this.stakers.value[i])
     swap
     intc_2 // 64
     box_extract
     dup
     bury 39
-    // contracts/stakingPool.algo.ts:780-781
+    // contracts/stakingPool.algo.ts:781-782
     // const cmpStaker = clone(this.stakers.value[i])
-    // if (cmpStaker.account.native !== Global.zeroAddress) {
+    // if (cmpStaker.account !== Global.zeroAddress) {
     extract 0 32
-    // contracts/stakingPool.algo.ts:781
-    // if (cmpStaker.account.native !== Global.zeroAddress) {
+    // contracts/stakingPool.algo.ts:782
+    // if (cmpStaker.account !== Global.zeroAddress) {
     global ZeroAddress
     !=
     bz epochBalanceUpdate_after_if_else@53
-    // contracts/stakingPool.algo.ts:92
+    // contracts/stakingPool.algo.ts:93
     // stakers = Box<FixedArray<StakedInfo, typeof MAX_STAKERS_PER_POOL>>({ key: 'stakers' })
     bytec_0 // "stakers"
-    // contracts/stakingPool.algo.ts:782
+    // contracts/stakingPool.algo.ts:783
     // if (cmpStaker.entryRound >= thisEpochBegin) {
     dig 33
     intc_2 // 64
@@ -2690,14 +2690,14 @@ epochBalanceUpdate_while_top@43:
     pushint 56 // 56
     extract_uint64
     dup
-    bury 9
+    bury 13
     dig 4
     >=
     bz epochBalanceUpdate_else_body@47
-    // contracts/stakingPool.algo.ts:92
+    // contracts/stakingPool.algo.ts:93
     // stakers = Box<FixedArray<StakedInfo, typeof MAX_STAKERS_PER_POOL>>({ key: 'stakers' })
     bytec_0 // "stakers"
-    // contracts/stakingPool.algo.ts:785
+    // contracts/stakingPool.algo.ts:786
     // partialStakersTotalStake += cmpStaker.balance
     dig 33
     intc_2 // 64
@@ -2709,7 +2709,7 @@ epochBalanceUpdate_while_top@43:
     bury 22
 
 epochBalanceUpdate_after_if_else@53:
-    // contracts/stakingPool.algo.ts:778
+    // contracts/stakingPool.algo.ts:779
     // for (let i: uint64 = 0; i < this.stakers.value.length; i += 1) {
     dig 27
     intc_1 // 1
@@ -2718,22 +2718,22 @@ epochBalanceUpdate_after_if_else@53:
     b epochBalanceUpdate_while_top@43
 
 epochBalanceUpdate_else_body@47:
-    // contracts/stakingPool.algo.ts:789
+    // contracts/stakingPool.algo.ts:790
     // const timeInPool: uint64 = thisEpochBegin - cmpStaker.entryRound
     dig 3
-    dig 8
+    dig 12
     -
     dup
     bury 21
-    // contracts/stakingPool.algo.ts:793
+    // contracts/stakingPool.algo.ts:794
     // if (timeInPool < epochRoundLength) {
     dig 5
     <
     bz epochBalanceUpdate_after_if_else@53
-    // contracts/stakingPool.algo.ts:92
+    // contracts/stakingPool.algo.ts:93
     // stakers = Box<FixedArray<StakedInfo, typeof MAX_STAKERS_PER_POOL>>({ key: 'stakers' })
     bytec_0 // "stakers"
-    // contracts/stakingPool.algo.ts:794
+    // contracts/stakingPool.algo.ts:795
     // partialStakersTotalStake += cmpStaker.balance
     dig 33
     intc_2 // 64
@@ -2741,11 +2741,11 @@ epochBalanceUpdate_else_body@47:
     pushint 32 // 32
     extract_uint64
     dup
-    bury 13
+    bury 12
     dig 22
     +
     bury 22
-    // contracts/stakingPool.algo.ts:795
+    // contracts/stakingPool.algo.ts:796
     // timePercentage = (timeInPool * 1000) / epochRoundLength
     dig 19
     pushint 1000 // 1000
@@ -2753,13 +2753,13 @@ epochBalanceUpdate_else_body@47:
     dig 5
     /
     bury 19
-    // contracts/stakingPool.algo.ts:797
+    // contracts/stakingPool.algo.ts:798
     // if (tokenRewardAvail > 0) {
     dig 14
     bz epochBalanceUpdate_after_if_else@50
-    // contracts/stakingPool.algo.ts:800
+    // contracts/stakingPool.algo.ts:801
     // [cmpStaker.balance, origTokenReward, timePercentage],
-    dig 11
+    dig 10
     itob
     bytec 27 // 0x0003
     swap
@@ -2770,13 +2770,13 @@ epochBalanceUpdate_else_body@47:
     dig 19
     itob
     concat
-    // contracts/stakingPool.algo.ts:801
+    // contracts/stakingPool.algo.ts:802
     // [this.totalAlgoStaked.value, 1000],
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:78
+    // contracts/stakingPool.algo.ts:79
     // totalAlgoStaked = GlobalState<uint64>({ key: 'staked' })
     bytec 5 // "staked"
-    // contracts/stakingPool.algo.ts:801
+    // contracts/stakingPool.algo.ts:802
     // [this.totalAlgoStaked.value, 1000],
     app_global_get_ex
     assert // check GlobalState exists
@@ -2786,23 +2786,23 @@ epochBalanceUpdate_else_body@47:
     concat
     dig 40
     concat
-    // contracts/stakingPool.algo.ts:799-802
+    // contracts/stakingPool.algo.ts:800-803
     // const stakerTokenReward = wideRatio(
     //     [cmpStaker.balance, origTokenReward, timePercentage],
     //     [this.totalAlgoStaked.value, 1000],
     // )
     callsub wideRatio
     popn 2
-    // contracts/stakingPool.algo.ts:806
+    // contracts/stakingPool.algo.ts:807
     // tokenRewardAvail -= stakerTokenReward
     dig 15
     dig 1
     -
     bury 16
-    // contracts/stakingPool.algo.ts:92
+    // contracts/stakingPool.algo.ts:93
     // stakers = Box<FixedArray<StakedInfo, typeof MAX_STAKERS_PER_POOL>>({ key: 'stakers' })
     bytec_0 // "stakers"
-    // contracts/stakingPool.algo.ts:807
+    // contracts/stakingPool.algo.ts:808
     // cmpStaker.rewardTokenBalance += stakerTokenReward
     dig 34
     intc_2 // 64
@@ -2816,14 +2816,14 @@ epochBalanceUpdate_else_body@47:
     swap
     replace2 48
     bury 39
-    // contracts/stakingPool.algo.ts:808
+    // contracts/stakingPool.algo.ts:809
     // tokenRewardPaidOut += stakerTokenReward
     dig 14
     +
     bury 14
 
 epochBalanceUpdate_after_if_else@50:
-    // contracts/stakingPool.algo.ts:812
+    // contracts/stakingPool.algo.ts:813
     // [cmpStaker.balance, origAlgoReward, timePercentage],
     dig 37
     dup
@@ -2840,13 +2840,13 @@ epochBalanceUpdate_after_if_else@50:
     dig 21
     itob
     concat
-    // contracts/stakingPool.algo.ts:813
+    // contracts/stakingPool.algo.ts:814
     // [this.totalAlgoStaked.value, 1000],
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:78
+    // contracts/stakingPool.algo.ts:79
     // totalAlgoStaked = GlobalState<uint64>({ key: 'staked' })
     bytec 5 // "staked"
-    // contracts/stakingPool.algo.ts:813
+    // contracts/stakingPool.algo.ts:814
     // [this.totalAlgoStaked.value, 1000],
     app_global_get_ex
     assert // check GlobalState exists
@@ -2856,20 +2856,20 @@ epochBalanceUpdate_after_if_else@50:
     concat
     dig 42
     concat
-    // contracts/stakingPool.algo.ts:811-814
+    // contracts/stakingPool.algo.ts:812-815
     // const stakerReward = wideRatio(
     //     [cmpStaker.balance, origAlgoReward, timePercentage],
     //     [this.totalAlgoStaked.value, 1000],
     // )
     callsub wideRatio
     popn 2
-    // contracts/stakingPool.algo.ts:817
+    // contracts/stakingPool.algo.ts:818
     // algoRewardAvail -= stakerReward
     dig 37
     dig 1
     -
     bury 38
-    // contracts/stakingPool.algo.ts:820
+    // contracts/stakingPool.algo.ts:821
     // cmpStaker.balance += stakerReward
     swap
     dig 1
@@ -2878,7 +2878,7 @@ epochBalanceUpdate_after_if_else@50:
     uncover 2
     swap
     replace2 32
-    // contracts/stakingPool.algo.ts:821
+    // contracts/stakingPool.algo.ts:822
     // cmpStaker.totalRewarded += stakerReward
     dup
     pushint 40 // 40
@@ -2887,16 +2887,16 @@ epochBalanceUpdate_after_if_else@50:
     +
     itob
     replace2 40
-    // contracts/stakingPool.algo.ts:822
+    // contracts/stakingPool.algo.ts:823
     // increasedStake += stakerReward
     dig 28
     uncover 2
     +
     bury 28
-    // contracts/stakingPool.algo.ts:92
+    // contracts/stakingPool.algo.ts:93
     // stakers = Box<FixedArray<StakedInfo, typeof MAX_STAKERS_PER_POOL>>({ key: 'stakers' })
     bytec_0 // "stakers"
-    // contracts/stakingPool.algo.ts:824
+    // contracts/stakingPool.algo.ts:825
     // this.stakers.value[i] = clone(cmpStaker)
     dig 34
     uncover 2
@@ -2904,13 +2904,13 @@ epochBalanceUpdate_after_if_else@50:
     b epochBalanceUpdate_after_if_else@53
 
 epochBalanceUpdate_after_while@54:
-    // contracts/stakingPool.algo.ts:832
+    // contracts/stakingPool.algo.ts:833
     // const newPoolTotalStake: uint64 = this.totalAlgoStaked.value - partialStakersTotalStake
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:78
+    // contracts/stakingPool.algo.ts:79
     // totalAlgoStaked = GlobalState<uint64>({ key: 'staked' })
     bytec 5 // "staked"
-    // contracts/stakingPool.algo.ts:832
+    // contracts/stakingPool.algo.ts:833
     // const newPoolTotalStake: uint64 = this.totalAlgoStaked.value - partialStakersTotalStake
     app_global_get_ex
     assert // check GlobalState exists
@@ -2918,19 +2918,19 @@ epochBalanceUpdate_after_while@54:
     -
     dup
     bury 24
-    // contracts/stakingPool.algo.ts:836
+    // contracts/stakingPool.algo.ts:837
     // if (newPoolTotalStake > 0) {
     bz epochBalanceUpdate_after_if_else@69
-    // contracts/stakingPool.algo.ts:838
+    // contracts/stakingPool.algo.ts:839
     // for (let i: uint64 = 0; i < this.stakers.value.length; i += 1) {
     intc_0 // 0
     bury 25
 
 epochBalanceUpdate_while_top@56:
-    // contracts/stakingPool.algo.ts:92
+    // contracts/stakingPool.algo.ts:93
     // stakers = Box<FixedArray<StakedInfo, typeof MAX_STAKERS_PER_POOL>>({ key: 'stakers' })
     bytec_0 // "stakers"
-    // contracts/stakingPool.algo.ts:838
+    // contracts/stakingPool.algo.ts:839
     // for (let i: uint64 = 0; i < this.stakers.value.length; i += 1) {
     box_len
     bury 1
@@ -2939,73 +2939,73 @@ epochBalanceUpdate_while_top@56:
     intc 4 // 200
     <
     bz epochBalanceUpdate_after_if_else@69
-    // contracts/stakingPool.algo.ts:839
+    // contracts/stakingPool.algo.ts:840
     // ensureBudget(200)
     intc 4 // 200
     intc_0 // 0
     callsub ensure_budget
-    // contracts/stakingPool.algo.ts:840
+    // contracts/stakingPool.algo.ts:841
     // const cmpStaker = clone(this.stakers.value[i])
     dig 24
     intc_2 // 64
     *
     dup
     bury 33
-    // contracts/stakingPool.algo.ts:92
+    // contracts/stakingPool.algo.ts:93
     // stakers = Box<FixedArray<StakedInfo, typeof MAX_STAKERS_PER_POOL>>({ key: 'stakers' })
     bytec_0 // "stakers"
-    // contracts/stakingPool.algo.ts:840
+    // contracts/stakingPool.algo.ts:841
     // const cmpStaker = clone(this.stakers.value[i])
     swap
     intc_2 // 64
     box_extract
     dup
     bury 38
-    // contracts/stakingPool.algo.ts:840-841
+    // contracts/stakingPool.algo.ts:841-842
     // const cmpStaker = clone(this.stakers.value[i])
-    // if (cmpStaker.account.native !== Global.zeroAddress && cmpStaker.entryRound < thisEpochBegin) {
+    // if (cmpStaker.account !== Global.zeroAddress && cmpStaker.entryRound < thisEpochBegin) {
     extract 0 32
-    // contracts/stakingPool.algo.ts:841
-    // if (cmpStaker.account.native !== Global.zeroAddress && cmpStaker.entryRound < thisEpochBegin) {
+    // contracts/stakingPool.algo.ts:842
+    // if (cmpStaker.account !== Global.zeroAddress && cmpStaker.entryRound < thisEpochBegin) {
     global ZeroAddress
     !=
     bz epochBalanceUpdate_after_if_else@66
-    // contracts/stakingPool.algo.ts:92
+    // contracts/stakingPool.algo.ts:93
     // stakers = Box<FixedArray<StakedInfo, typeof MAX_STAKERS_PER_POOL>>({ key: 'stakers' })
     bytec_0 // "stakers"
-    // contracts/stakingPool.algo.ts:840-841
+    // contracts/stakingPool.algo.ts:841-842
     // const cmpStaker = clone(this.stakers.value[i])
-    // if (cmpStaker.account.native !== Global.zeroAddress && cmpStaker.entryRound < thisEpochBegin) {
+    // if (cmpStaker.account !== Global.zeroAddress && cmpStaker.entryRound < thisEpochBegin) {
     dig 32
     intc_2 // 64
     box_extract
     pushint 56 // 56
-    // contracts/stakingPool.algo.ts:841
-    // if (cmpStaker.account.native !== Global.zeroAddress && cmpStaker.entryRound < thisEpochBegin) {
+    // contracts/stakingPool.algo.ts:842
+    // if (cmpStaker.account !== Global.zeroAddress && cmpStaker.entryRound < thisEpochBegin) {
     extract_uint64
     dup
-    bury 12
+    bury 10
     dig 4
     <
     bz epochBalanceUpdate_after_if_else@66
-    // contracts/stakingPool.algo.ts:842
+    // contracts/stakingPool.algo.ts:843
     // const timeInPool: uint64 = thisEpochBegin - cmpStaker.entryRound
     dig 3
-    dig 11
+    dig 9
     -
-    // contracts/stakingPool.algo.ts:844
+    // contracts/stakingPool.algo.ts:845
     // if (timeInPool >= epochRoundLength) {
     dig 5
     >=
     bz epochBalanceUpdate_after_if_else@66
-    // contracts/stakingPool.algo.ts:849
+    // contracts/stakingPool.algo.ts:850
     // if (tokenRewardAvail > 0) {
     dig 14
     bz epochBalanceUpdate_after_if_else@62
-    // contracts/stakingPool.algo.ts:92
+    // contracts/stakingPool.algo.ts:93
     // stakers = Box<FixedArray<StakedInfo, typeof MAX_STAKERS_PER_POOL>>({ key: 'stakers' })
     bytec_0 // "stakers"
-    // contracts/stakingPool.algo.ts:851
+    // contracts/stakingPool.algo.ts:852
     // [cmpStaker.balance, tokenRewardAvail],
     dig 32
     dup
@@ -3019,24 +3019,24 @@ epochBalanceUpdate_while_top@56:
     dig 16
     itob
     concat
-    // contracts/stakingPool.algo.ts:852
+    // contracts/stakingPool.algo.ts:853
     // [newPoolTotalStake],
     dig 24
     itob
     bytec 19 // 0x0001
     swap
     concat
-    // contracts/stakingPool.algo.ts:850-853
+    // contracts/stakingPool.algo.ts:851-854
     // const stakerTokenReward = wideRatio(
     //     [cmpStaker.balance, tokenRewardAvail],
     //     [newPoolTotalStake],
     // )
     callsub wideRatio
     popn 2
-    // contracts/stakingPool.algo.ts:92
+    // contracts/stakingPool.algo.ts:93
     // stakers = Box<FixedArray<StakedInfo, typeof MAX_STAKERS_PER_POOL>>({ key: 'stakers' })
     bytec_0 // "stakers"
-    // contracts/stakingPool.algo.ts:855
+    // contracts/stakingPool.algo.ts:856
     // cmpStaker.rewardTokenBalance += stakerTokenReward
     uncover 2
     intc_2 // 64
@@ -3050,18 +3050,18 @@ epochBalanceUpdate_while_top@56:
     swap
     replace2 48
     bury 38
-    // contracts/stakingPool.algo.ts:856
+    // contracts/stakingPool.algo.ts:857
     // tokenRewardPaidOut += stakerTokenReward
     dig 14
     +
     bury 14
 
 epochBalanceUpdate_after_if_else@62:
-    // contracts/stakingPool.algo.ts:858
+    // contracts/stakingPool.algo.ts:859
     // if (algoRewardAvail > 0) {
     dig 34
     bz epochBalanceUpdate_after_if_else@64
-    // contracts/stakingPool.algo.ts:860
+    // contracts/stakingPool.algo.ts:861
     // [cmpStaker.balance, algoRewardAvail],
     dig 36
     dup
@@ -3075,21 +3075,21 @@ epochBalanceUpdate_after_if_else@62:
     dig 37
     itob
     concat
-    // contracts/stakingPool.algo.ts:861
+    // contracts/stakingPool.algo.ts:862
     // [newPoolTotalStake],
     dig 25
     itob
     bytec 19 // 0x0001
     swap
     concat
-    // contracts/stakingPool.algo.ts:859-862
+    // contracts/stakingPool.algo.ts:860-863
     // const stakerReward = wideRatio(
     //     [cmpStaker.balance, algoRewardAvail],
     //     [newPoolTotalStake],
     // )
     callsub wideRatio
     popn 2
-    // contracts/stakingPool.algo.ts:865
+    // contracts/stakingPool.algo.ts:866
     // cmpStaker.balance += stakerReward
     swap
     dig 1
@@ -3098,7 +3098,7 @@ epochBalanceUpdate_after_if_else@62:
     uncover 2
     swap
     replace2 32
-    // contracts/stakingPool.algo.ts:866
+    // contracts/stakingPool.algo.ts:867
     // cmpStaker.totalRewarded += stakerReward
     dup
     pushint 40 // 40
@@ -3108,24 +3108,24 @@ epochBalanceUpdate_after_if_else@62:
     itob
     replace2 40
     bury 38
-    // contracts/stakingPool.algo.ts:867
+    // contracts/stakingPool.algo.ts:868
     // increasedStake += stakerReward
     dig 27
     +
     bury 27
 
 epochBalanceUpdate_after_if_else@64:
-    // contracts/stakingPool.algo.ts:92
+    // contracts/stakingPool.algo.ts:93
     // stakers = Box<FixedArray<StakedInfo, typeof MAX_STAKERS_PER_POOL>>({ key: 'stakers' })
     bytec_0 // "stakers"
-    // contracts/stakingPool.algo.ts:871
+    // contracts/stakingPool.algo.ts:872
     // this.stakers.value[i] = clone(cmpStaker)
     dig 32
     dig 38
     box_replace
 
 epochBalanceUpdate_after_if_else@66:
-    // contracts/stakingPool.algo.ts:838
+    // contracts/stakingPool.algo.ts:839
     // for (let i: uint64 = 0; i < this.stakers.value.length; i += 1) {
     dig 24
     intc_1 // 1
@@ -3134,34 +3134,34 @@ epochBalanceUpdate_after_if_else@66:
     b epochBalanceUpdate_while_top@56
 
 epochBalanceUpdate_after_if_else@69:
-    // contracts/stakingPool.algo.ts:881
+    // contracts/stakingPool.algo.ts:882
     // const roundsLeftInBin: uint64 = this.binRoundStart.value + this.roundsPerDay.value - Global.round
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:98
+    // contracts/stakingPool.algo.ts:99
     // binRoundStart = GlobalState<uint64>({ key: 'binRoundStart' })
     bytec 9 // "binRoundStart"
-    // contracts/stakingPool.algo.ts:881
+    // contracts/stakingPool.algo.ts:882
     // const roundsLeftInBin: uint64 = this.binRoundStart.value + this.roundsPerDay.value - Global.round
     app_global_get_ex
     assert // check GlobalState exists
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:96
+    // contracts/stakingPool.algo.ts:97
     // roundsPerDay = GlobalState<uint64>({ key: 'roundsPerDay' })
     bytec 6 // "roundsPerDay"
-    // contracts/stakingPool.algo.ts:881
+    // contracts/stakingPool.algo.ts:882
     // const roundsLeftInBin: uint64 = this.binRoundStart.value + this.roundsPerDay.value - Global.round
     app_global_get_ex
     assert // check GlobalState exists
     +
     global Round
     -
-    // contracts/stakingPool.algo.ts:882
+    // contracts/stakingPool.algo.ts:883
     // this.totalAlgoStaked.value += increasedStake
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:78
+    // contracts/stakingPool.algo.ts:79
     // totalAlgoStaked = GlobalState<uint64>({ key: 'staked' })
     bytec 5 // "staked"
-    // contracts/stakingPool.algo.ts:882
+    // contracts/stakingPool.algo.ts:883
     // this.totalAlgoStaked.value += increasedStake
     app_global_get_ex
     assert // check GlobalState exists
@@ -3169,20 +3169,20 @@ epochBalanceUpdate_after_if_else@69:
     dup
     cover 2
     +
-    // contracts/stakingPool.algo.ts:78
+    // contracts/stakingPool.algo.ts:79
     // totalAlgoStaked = GlobalState<uint64>({ key: 'staked' })
     bytec 5 // "staked"
-    // contracts/stakingPool.algo.ts:882
+    // contracts/stakingPool.algo.ts:883
     // this.totalAlgoStaked.value += increasedStake
     swap
     app_global_put
-    // contracts/stakingPool.algo.ts:884
+    // contracts/stakingPool.algo.ts:885
     // this.stakeAccumulator.value.asBigUint() + BigUint(increasedStake) * BigUint(roundsLeftInBin),
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:103
+    // contracts/stakingPool.algo.ts:104
     // stakeAccumulator = GlobalState<Uint128>({ key: 'stakeAccumulator' })
     bytec 7 // "stakeAccumulator"
-    // contracts/stakingPool.algo.ts:884
+    // contracts/stakingPool.algo.ts:885
     // this.stakeAccumulator.value.asBigUint() + BigUint(increasedStake) * BigUint(roundsLeftInBin),
     app_global_get_ex
     assert // check GlobalState exists
@@ -3194,7 +3194,7 @@ epochBalanceUpdate_after_if_else@69:
     b*
     uncover 2
     b+
-    // contracts/stakingPool.algo.ts:883-885
+    // contracts/stakingPool.algo.ts:884-886
     // this.stakeAccumulator.value = new Uint128(
     //     this.stakeAccumulator.value.asBigUint() + BigUint(increasedStake) * BigUint(roundsLeftInBin),
     // )
@@ -3206,35 +3206,35 @@ epochBalanceUpdate_after_if_else@69:
     intc_3 // 16
     bzero
     b|
-    // contracts/stakingPool.algo.ts:103
+    // contracts/stakingPool.algo.ts:104
     // stakeAccumulator = GlobalState<Uint128>({ key: 'stakeAccumulator' })
     bytec 7 // "stakeAccumulator"
-    // contracts/stakingPool.algo.ts:883-885
+    // contracts/stakingPool.algo.ts:884-886
     // this.stakeAccumulator.value = new Uint128(
     //     this.stakeAccumulator.value.asBigUint() + BigUint(increasedStake) * BigUint(roundsLeftInBin),
     // )
     swap
     app_global_put
-    // contracts/stakingPool.algo.ts:886
+    // contracts/stakingPool.algo.ts:887
     // this.rewardAccumulator.value = this.rewardAccumulator.value + increasedStake
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:107
+    // contracts/stakingPool.algo.ts:108
     // rewardAccumulator = GlobalState<uint64>({ key: 'rewardAccumulator' })
     bytec 11 // "rewardAccumulator"
-    // contracts/stakingPool.algo.ts:886
+    // contracts/stakingPool.algo.ts:887
     // this.rewardAccumulator.value = this.rewardAccumulator.value + increasedStake
     app_global_get_ex
     assert // check GlobalState exists
     uncover 2
     +
-    // contracts/stakingPool.algo.ts:107
+    // contracts/stakingPool.algo.ts:108
     // rewardAccumulator = GlobalState<uint64>({ key: 'rewardAccumulator' })
     bytec 11 // "rewardAccumulator"
-    // contracts/stakingPool.algo.ts:886
+    // contracts/stakingPool.algo.ts:887
     // this.rewardAccumulator.value = this.rewardAccumulator.value + increasedStake
     swap
     app_global_put
-    // contracts/stakingPool.algo.ts:892-901
+    // contracts/stakingPool.algo.ts:893-902
     // abiCall<typeof ValidatorRegistry.prototype.stakeUpdatedViaRewards>({
     //     appId: this.creatingValidatorContractAppId.value,
     //     args: [
@@ -3246,31 +3246,31 @@ epochBalanceUpdate_after_if_else@69:
     //     ],
     // })
     itxn_begin
-    // contracts/stakingPool.algo.ts:893
+    // contracts/stakingPool.algo.ts:894
     // appId: this.creatingValidatorContractAppId.value,
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:66
+    // contracts/stakingPool.algo.ts:67
     // creatingValidatorContractAppId = GlobalState<uint64>({ key: 'creatorApp' })
     bytec_1 // "creatorApp"
-    // contracts/stakingPool.algo.ts:893
+    // contracts/stakingPool.algo.ts:894
     // appId: this.creatingValidatorContractAppId.value,
     app_global_get_ex
     assert // check GlobalState exists
-    // contracts/stakingPool.algo.ts:895
+    // contracts/stakingPool.algo.ts:896
     // { id: this.validatorId.value, poolId: this.poolId.value, poolAppId: Global.currentApplicationId.id },
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:69
+    // contracts/stakingPool.algo.ts:70
     // validatorId = GlobalState<uint64>({ key: 'validatorId' })
     bytec_2 // "validatorId"
-    // contracts/stakingPool.algo.ts:895
+    // contracts/stakingPool.algo.ts:896
     // { id: this.validatorId.value, poolId: this.poolId.value, poolAppId: Global.currentApplicationId.id },
     app_global_get_ex
     assert // check GlobalState exists
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:72
+    // contracts/stakingPool.algo.ts:73
     // poolId = GlobalState<uint64>({ key: 'poolId' })
     bytec_3 // "poolId"
-    // contracts/stakingPool.algo.ts:895
+    // contracts/stakingPool.algo.ts:896
     // { id: this.validatorId.value, poolId: this.poolId.value, poolAppId: Global.currentApplicationId.id },
     app_global_get_ex
     assert // check GlobalState exists
@@ -3283,19 +3283,19 @@ epochBalanceUpdate_after_if_else@69:
     swap
     itob
     concat
-    // contracts/stakingPool.algo.ts:897
+    // contracts/stakingPool.algo.ts:898
     // tokenRewardPaidOut,
     dig 16
     itob
-    // contracts/stakingPool.algo.ts:898
+    // contracts/stakingPool.algo.ts:899
     // validatorCommissionPaidOut,
     dig 16
     itob
-    // contracts/stakingPool.algo.ts:899
+    // contracts/stakingPool.algo.ts:900
     // excessToFeeSink,
     dig 33
     itob
-    // contracts/stakingPool.algo.ts:892-901
+    // contracts/stakingPool.algo.ts:893-902
     // abiCall<typeof ValidatorRegistry.prototype.stakeUpdatedViaRewards>({
     //     appId: this.creatingValidatorContractAppId.value,
     //     args: [
@@ -3323,12 +3323,12 @@ epochBalanceUpdate_after_if_else@69:
     intc_0 // 0
     itxn_field Fee
     itxn_submit
-    // contracts/stakingPool.algo.ts:539
+    // contracts/stakingPool.algo.ts:540
     // epochBalanceUpdate(): void {
     b epochBalanceUpdate_after_inlined_contracts/stakingPool.algo.ts::StakingPool.epochBalanceUpdate@71
 
 epochBalanceUpdate_else_body@28:
-    // contracts/stakingPool.algo.ts:702
+    // contracts/stakingPool.algo.ts:703
     // } else if (validatorConfig.percentToValidator.asUint64() !== 0) {
     dig 5
     pushint 177 // 177
@@ -3336,7 +3336,7 @@ epochBalanceUpdate_else_body@28:
     dup
     bury 19
     bz epochBalanceUpdate_after_if_else@40
-    // contracts/stakingPool.algo.ts:706
+    // contracts/stakingPool.algo.ts:707
     // [algoRewardAvail, validatorConfig.percentToValidator.asUint64()],
     dig 35
     dup
@@ -3347,10 +3347,10 @@ epochBalanceUpdate_else_body@28:
     dig 19
     itob
     concat
-    // contracts/stakingPool.algo.ts:707
+    // contracts/stakingPool.algo.ts:708
     // [1_000_000],
     bytec 18 // 0x000100000000000f4240
-    // contracts/stakingPool.algo.ts:705-708
+    // contracts/stakingPool.algo.ts:706-709
     // validatorCommissionPaidOut = wideRatio(
     //     [algoRewardAvail, validatorConfig.percentToValidator.asUint64()],
     //     [1_000_000],
@@ -3359,20 +3359,20 @@ epochBalanceUpdate_else_body@28:
     popn 2
     dup
     bury 15
-    // contracts/stakingPool.algo.ts:711
+    // contracts/stakingPool.algo.ts:712
     // algoRewardAvail -= validatorCommissionPaidOut
     swap
     dig 1
     -
     bury 37
-    // contracts/stakingPool.algo.ts:718
+    // contracts/stakingPool.algo.ts:719
     // if (validatorCommissionPaidOut > 0) {
     bz epochBalanceUpdate_after_if_else@40
-    // contracts/stakingPool.algo.ts:721
+    // contracts/stakingPool.algo.ts:722
     // let managerTopOff: uint64 = 0
     intc_0 // 0
     bury 24
-    // contracts/stakingPool.algo.ts:723
+    // contracts/stakingPool.algo.ts:724
     // validatorConfig.manager !== validatorConfig.validatorCommissionAddress &&
     dig 5
     dup
@@ -3384,12 +3384,12 @@ epochBalanceUpdate_else_body@28:
     dup
     bury 42
     !=
-    // contracts/stakingPool.algo.ts:723-724
+    // contracts/stakingPool.algo.ts:724-725
     // validatorConfig.manager !== validatorConfig.validatorCommissionAddress &&
-    // validatorConfig.manager.native.balance - validatorConfig.manager.native.minBalance < 2_100_000
+    // validatorConfig.manager.balance - validatorConfig.manager.minBalance < 2_100_000
     bz epochBalanceUpdate_after_if_else@34
-    // contracts/stakingPool.algo.ts:724
-    // validatorConfig.manager.native.balance - validatorConfig.manager.native.minBalance < 2_100_000
+    // contracts/stakingPool.algo.ts:725
+    // validatorConfig.manager.balance - validatorConfig.manager.minBalance < 2_100_000
     dig 40
     dup
     acct_params_get AcctBalance
@@ -3400,11 +3400,11 @@ epochBalanceUpdate_else_body@28:
     -
     intc 7 // 2100000
     <
-    // contracts/stakingPool.algo.ts:723-724
+    // contracts/stakingPool.algo.ts:724-725
     // validatorConfig.manager !== validatorConfig.validatorCommissionAddress &&
-    // validatorConfig.manager.native.balance - validatorConfig.manager.native.minBalance < 2_100_000
+    // validatorConfig.manager.balance - validatorConfig.manager.minBalance < 2_100_000
     bz epochBalanceUpdate_after_if_else@34
-    // contracts/stakingPool.algo.ts:726
+    // contracts/stakingPool.algo.ts:727
     // managerTopOff = validatorCommissionPaidOut < 2_100_000 ? validatorCommissionPaidOut : 2_100_000
     dig 12
     dup
@@ -3415,24 +3415,24 @@ epochBalanceUpdate_else_body@28:
     select
     dup
     bury 25
-    // contracts/stakingPool.algo.ts:727-731
+    // contracts/stakingPool.algo.ts:728-732
     // itxn.payment({
     //     amount: managerTopOff,
-    //     receiver: validatorConfig.manager.native,
+    //     receiver: validatorConfig.manager,
     //     note: 'validator reward to manager for funding epoch updates',
     // }).submit()
     itxn_begin
-    // contracts/stakingPool.algo.ts:730
+    // contracts/stakingPool.algo.ts:731
     // note: 'validator reward to manager for funding epoch updates',
     pushbytes "validator reward to manager for funding epoch updates"
     itxn_field Note
     dig 41
     itxn_field Receiver
     itxn_field Amount
-    // contracts/stakingPool.algo.ts:727-731
+    // contracts/stakingPool.algo.ts:728-732
     // itxn.payment({
     //     amount: managerTopOff,
-    //     receiver: validatorConfig.manager.native,
+    //     receiver: validatorConfig.manager,
     //     note: 'validator reward to manager for funding epoch updates',
     // }).submit()
     intc_1 // 1
@@ -3442,7 +3442,7 @@ epochBalanceUpdate_else_body@28:
     itxn_submit
 
 epochBalanceUpdate_after_if_else@34:
-    // contracts/stakingPool.algo.ts:733
+    // contracts/stakingPool.algo.ts:734
     // if (validatorCommissionPaidOut - managerTopOff > 0) {
     dig 12
     dig 24
@@ -3450,14 +3450,14 @@ epochBalanceUpdate_after_if_else@34:
     dup
     bury 18
     bz epochBalanceUpdate_after_if_else@40
-    // contracts/stakingPool.algo.ts:734-738
+    // contracts/stakingPool.algo.ts:735-739
     // itxn.payment({
     //     amount: validatorCommissionPaidOut - managerTopOff,
-    //     receiver: validatorConfig.validatorCommissionAddress.native,
+    //     receiver: validatorConfig.validatorCommissionAddress,
     //     note: 'validator reward',
     // }).submit()
     itxn_begin
-    // contracts/stakingPool.algo.ts:737
+    // contracts/stakingPool.algo.ts:738
     // note: 'validator reward',
     pushbytes "validator reward"
     itxn_field Note
@@ -3465,10 +3465,10 @@ epochBalanceUpdate_after_if_else@34:
     itxn_field Receiver
     dig 16
     itxn_field Amount
-    // contracts/stakingPool.algo.ts:734-738
+    // contracts/stakingPool.algo.ts:735-739
     // itxn.payment({
     //     amount: validatorCommissionPaidOut - managerTopOff,
-    //     receiver: validatorConfig.validatorCommissionAddress.native,
+    //     receiver: validatorConfig.validatorCommissionAddress,
     //     note: 'validator reward',
     // }).submit()
     intc_1 // 1
@@ -3479,7 +3479,7 @@ epochBalanceUpdate_after_if_else@34:
     b epochBalanceUpdate_after_if_else@40
 
 epochBalanceUpdate_else_body@9:
-    // contracts/stakingPool.algo.ts:595-604
+    // contracts/stakingPool.algo.ts:596-605
     // tokenPayoutRatio = abiCall<typeof StakingPool.prototype.proxiedSetTokenPayoutRatio>({
     //     appId: Application(poolOneAppID),
     //     args: [
@@ -3491,30 +3491,30 @@ epochBalanceUpdate_else_body@9:
     //     ],
     // }).returnValue
     itxn_begin
-    // contracts/stakingPool.algo.ts:599
+    // contracts/stakingPool.algo.ts:600
     // id: this.validatorId.value,
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:69
+    // contracts/stakingPool.algo.ts:70
     // validatorId = GlobalState<uint64>({ key: 'validatorId' })
     bytec_2 // "validatorId"
-    // contracts/stakingPool.algo.ts:599
+    // contracts/stakingPool.algo.ts:600
     // id: this.validatorId.value,
-    app_global_get_ex
-    assert // check GlobalState exists
-    // contracts/stakingPool.algo.ts:600
-    // poolId: this.poolId.value,
-    intc_0 // 0
-    // contracts/stakingPool.algo.ts:72
-    // poolId = GlobalState<uint64>({ key: 'poolId' })
-    bytec_3 // "poolId"
-    // contracts/stakingPool.algo.ts:600
-    // poolId: this.poolId.value,
     app_global_get_ex
     assert // check GlobalState exists
     // contracts/stakingPool.algo.ts:601
+    // poolId: this.poolId.value,
+    intc_0 // 0
+    // contracts/stakingPool.algo.ts:73
+    // poolId = GlobalState<uint64>({ key: 'poolId' })
+    bytec_3 // "poolId"
+    // contracts/stakingPool.algo.ts:601
+    // poolId: this.poolId.value,
+    app_global_get_ex
+    assert // check GlobalState exists
+    // contracts/stakingPool.algo.ts:602
     // poolAppId: Global.currentApplicationId.id,
     global CurrentApplicationID
-    // contracts/stakingPool.algo.ts:598-602
+    // contracts/stakingPool.algo.ts:599-603
     // {
     //     id: this.validatorId.value,
     //     poolId: this.poolId.value,
@@ -3528,7 +3528,7 @@ epochBalanceUpdate_else_body@9:
     swap
     itob
     concat
-    // contracts/stakingPool.algo.ts:595-604
+    // contracts/stakingPool.algo.ts:596-605
     // tokenPayoutRatio = abiCall<typeof StakingPool.prototype.proxiedSetTokenPayoutRatio>({
     //     appId: Application(poolOneAppID),
     //     args: [
@@ -3562,7 +3562,7 @@ epochBalanceUpdate_else_body@9:
 
 // contracts/stakingPool.algo.ts::StakingPool.goOnline[routing]() -> void:
 goOnline:
-    // contracts/stakingPool.algo.ts:917-925
+    // contracts/stakingPool.algo.ts:918-926
     // goOnline(
     //     feePayment: gtxn.PaymentTxn,
     //     votePK: bytes<32>,
@@ -3589,22 +3589,22 @@ goOnline:
     btoi
     txna ApplicationArgs 6
     btoi
-    // contracts/stakingPool.algo.ts:926
+    // contracts/stakingPool.algo.ts:927
     // assert(this.isOwnerOrManagerCaller(), 'can only be called by owner or manager of validator')
     callsub isOwnerOrManagerCaller
     assert // can only be called by owner or manager of validator
-    // contracts/stakingPool.algo.ts:1018
+    // contracts/stakingPool.algo.ts:1019
     // if (!op.AcctParams.acctIncentiveEligible(Global.currentApplicationAddress)[0]) {
     global CurrentApplicationAddress
     acct_params_get AcctIncentiveEligible
     pop
     bnz goOnline_after_if_else@3
-    // contracts/stakingPool.algo.ts:1019
+    // contracts/stakingPool.algo.ts:1020
     // return Global.payoutsGoOnlineFee
     global PayoutsGoOnlineFee
 
 goOnline_after_inlined_contracts/stakingPool.algo.ts::StakingPool.getGoOnlineFee@4:
-    // contracts/stakingPool.algo.ts:928
+    // contracts/stakingPool.algo.ts:929
     // assertMatch(feePayment, { receiver: Global.currentApplicationAddress, amount: extraFee })
     dig 7
     dup
@@ -3617,7 +3617,7 @@ goOnline_after_inlined_contracts/stakingPool.algo.ts::StakingPool.getGoOnlineFee
     ==
     &&
     assert // assert target is match for conditions
-    // contracts/stakingPool.algo.ts:929-937
+    // contracts/stakingPool.algo.ts:930-938
     // itxn.keyRegistration({
     //     voteKey: votePK,
     //     selectionKey: selectionPK,
@@ -3644,7 +3644,7 @@ goOnline_after_inlined_contracts/stakingPool.algo.ts::StakingPool.getGoOnlineFee
     itxn_field TypeEnum
     itxn_field Fee
     itxn_submit
-    // contracts/stakingPool.algo.ts:917-925
+    // contracts/stakingPool.algo.ts:918-926
     // goOnline(
     //     feePayment: gtxn.PaymentTxn,
     //     votePK: bytes<32>,
@@ -3658,24 +3658,24 @@ goOnline_after_inlined_contracts/stakingPool.algo.ts::StakingPool.getGoOnlineFee
     return
 
 goOnline_after_if_else@3:
-    // contracts/stakingPool.algo.ts:1021
+    // contracts/stakingPool.algo.ts:1022
     // return 0
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:927
+    // contracts/stakingPool.algo.ts:928
     // const extraFee = this.getGoOnlineFee()
     b goOnline_after_inlined_contracts/stakingPool.algo.ts::StakingPool.getGoOnlineFee@4
 
 
 // contracts/stakingPool.algo.ts::StakingPool.goOffline[routing]() -> void:
 goOffline:
-    // contracts/stakingPool.algo.ts:948
+    // contracts/stakingPool.algo.ts:949
     // if (Txn.sender !== Application(this.creatingValidatorContractAppId.value).address) {
     txn Sender
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:66
+    // contracts/stakingPool.algo.ts:67
     // creatingValidatorContractAppId = GlobalState<uint64>({ key: 'creatorApp' })
     bytec_1 // "creatorApp"
-    // contracts/stakingPool.algo.ts:948
+    // contracts/stakingPool.algo.ts:949
     // if (Txn.sender !== Application(this.creatingValidatorContractAppId.value).address) {
     app_global_get_ex
     assert // check GlobalState exists
@@ -3683,13 +3683,13 @@ goOffline:
     assert // application exists
     !=
     bz goOffline_after_if_else@3
-    // contracts/stakingPool.algo.ts:949
+    // contracts/stakingPool.algo.ts:950
     // assert(this.isOwnerOrManagerCaller(), 'can only be called by owner or manager of validator')
     callsub isOwnerOrManagerCaller
     assert // can only be called by owner or manager of validator
 
 goOffline_after_if_else@3:
-    // contracts/stakingPool.algo.ts:952
+    // contracts/stakingPool.algo.ts:953
     // itxn.keyRegistration({}).submit()
     itxn_begin
     pushint 2 // 2
@@ -3697,7 +3697,7 @@ goOffline_after_if_else@3:
     intc_0 // 0
     itxn_field Fee
     itxn_submit
-    // contracts/stakingPool.algo.ts:945
+    // contracts/stakingPool.algo.ts:946
     // goOffline(): void {
     intc_1 // 1
     return
@@ -3705,17 +3705,17 @@ goOffline_after_if_else@3:
 
 // contracts/stakingPool.algo.ts::StakingPool.linkToNFD[routing]() -> void:
 linkToNFD:
-    // contracts/stakingPool.algo.ts:958
+    // contracts/stakingPool.algo.ts:959
     // linkToNFD(nfdAppId: uint64, nfdName: string): void {
     txna ApplicationArgs 1
     btoi
     txna ApplicationArgs 2
     extract 2 0
-    // contracts/stakingPool.algo.ts:959
+    // contracts/stakingPool.algo.ts:960
     // assert(this.isOwnerOrManagerCaller(), 'can only be called by owner or manager of validator')
     callsub isOwnerOrManagerCaller
     assert // can only be called by owner or manager of validator
-    // contracts/stakingPool.algo.ts:961-970
+    // contracts/stakingPool.algo.ts:962-971
     // itxn.applicationCall({
     //     appId: Application(nfdRegistryAppId),
     //     appArgs: [
@@ -3727,20 +3727,20 @@ linkToNFD:
     //     apps: [Application(nfdAppId)],
     // }).submit()
     itxn_begin
-    // contracts/stakingPool.algo.ts:962
+    // contracts/stakingPool.algo.ts:963
     // appId: Application(nfdRegistryAppId),
     intc 10 // TMPL_NFD_REGISTRY_APP_ID
     swap
-    // contracts/stakingPool.algo.ts:966
+    // contracts/stakingPool.algo.ts:967
     // op.itob(nfdAppId),
     dig 2
     itob
-    // contracts/stakingPool.algo.ts:967
+    // contracts/stakingPool.algo.ts:968
     // encodeArc4(Global.currentApplicationAddress),
     global CurrentApplicationAddress
     uncover 4
     itxn_field Applications
-    // contracts/stakingPool.algo.ts:964
+    // contracts/stakingPool.algo.ts:965
     // Bytes('verify_nfd_addr'),
     pushbytes "verify_nfd_addr"
     itxn_field ApplicationArgs
@@ -3750,7 +3750,7 @@ linkToNFD:
     itxn_field ApplicationArgs
     itxn_field ApplicationArgs
     itxn_field ApplicationID
-    // contracts/stakingPool.algo.ts:961-970
+    // contracts/stakingPool.algo.ts:962-971
     // itxn.applicationCall({
     //     appId: Application(nfdRegistryAppId),
     //     appArgs: [
@@ -3766,7 +3766,7 @@ linkToNFD:
     intc_0 // 0
     itxn_field Fee
     itxn_submit
-    // contracts/stakingPool.algo.ts:958
+    // contracts/stakingPool.algo.ts:959
     // linkToNFD(nfdAppId: uint64, nfdName: string): void {
     intc_1 // 1
     return
@@ -3774,16 +3774,16 @@ linkToNFD:
 
 // contracts/stakingPool.algo.ts::StakingPool.proxiedSetTokenPayoutRatio[routing]() -> void:
 proxiedSetTokenPayoutRatio:
-    // contracts/stakingPool.algo.ts:979
+    // contracts/stakingPool.algo.ts:980
     // proxiedSetTokenPayoutRatio(poolKey: ValidatorPoolKey): PoolTokenPayoutRatio {
     txna ApplicationArgs 1
-    // contracts/stakingPool.algo.ts:980
+    // contracts/stakingPool.algo.ts:981
     // assert(this.validatorId.value === poolKey.id, 'caller must be part of same validator set!')
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:69
+    // contracts/stakingPool.algo.ts:70
     // validatorId = GlobalState<uint64>({ key: 'validatorId' })
     bytec_2 // "validatorId"
-    // contracts/stakingPool.algo.ts:980
+    // contracts/stakingPool.algo.ts:981
     // assert(this.validatorId.value === poolKey.id, 'caller must be part of same validator set!')
     app_global_get_ex
     assert // check GlobalState exists
@@ -3795,20 +3795,20 @@ proxiedSetTokenPayoutRatio:
     dig 2
     ==
     assert // caller must be part of same validator set!
-    // contracts/stakingPool.algo.ts:981
+    // contracts/stakingPool.algo.ts:982
     // assert(this.poolId.value === 1, 'callee must be pool 1')
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:72
+    // contracts/stakingPool.algo.ts:73
     // poolId = GlobalState<uint64>({ key: 'poolId' })
     bytec_3 // "poolId"
-    // contracts/stakingPool.algo.ts:981
+    // contracts/stakingPool.algo.ts:982
     // assert(this.poolId.value === 1, 'callee must be pool 1')
     app_global_get_ex
     assert // check GlobalState exists
     intc_1 // 1
     ==
     assert // callee must be pool 1
-    // contracts/stakingPool.algo.ts:982
+    // contracts/stakingPool.algo.ts:983
     // assert(poolKey.poolId !== 1, 'caller must NOT be pool 1')
     dig 2
     extract 8 8
@@ -3818,23 +3818,23 @@ proxiedSetTokenPayoutRatio:
     intc_1 // 1
     !=
     assert // caller must NOT be pool 1
-    // contracts/stakingPool.algo.ts:984-987
+    // contracts/stakingPool.algo.ts:985-988
     // const callerPoolAppID = abiCall<typeof ValidatorRegistry.prototype.getPoolAppId>({
     //     appId: this.creatingValidatorContractAppId.value,
     //     args: [poolKey.id, poolKey.poolId],
     // }).returnValue
     itxn_begin
-    // contracts/stakingPool.algo.ts:985
+    // contracts/stakingPool.algo.ts:986
     // appId: this.creatingValidatorContractAppId.value,
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:66
+    // contracts/stakingPool.algo.ts:67
     // creatingValidatorContractAppId = GlobalState<uint64>({ key: 'creatorApp' })
     bytec_1 // "creatorApp"
-    // contracts/stakingPool.algo.ts:985
+    // contracts/stakingPool.algo.ts:986
     // appId: this.creatingValidatorContractAppId.value,
     app_global_get_ex
     assert // check GlobalState exists
-    // contracts/stakingPool.algo.ts:984-987
+    // contracts/stakingPool.algo.ts:985-988
     // const callerPoolAppID = abiCall<typeof ValidatorRegistry.prototype.getPoolAppId>({
     //     appId: this.creatingValidatorContractAppId.value,
     //     args: [poolKey.id, poolKey.poolId],
@@ -3861,7 +3861,7 @@ proxiedSetTokenPayoutRatio:
     ==
     assert // Bytes has valid prefix
     btoi
-    // contracts/stakingPool.algo.ts:988
+    // contracts/stakingPool.algo.ts:989
     // assert(callerPoolAppID === poolKey.poolAppId)
     uncover 3
     intc_3 // 16
@@ -3870,7 +3870,7 @@ proxiedSetTokenPayoutRatio:
     dig 1
     ==
     assert
-    // contracts/stakingPool.algo.ts:989
+    // contracts/stakingPool.algo.ts:990
     // assert(Txn.sender === Application(poolKey.poolAppId).address)
     txn Sender
     swap
@@ -3878,17 +3878,17 @@ proxiedSetTokenPayoutRatio:
     assert // application exists
     ==
     assert
-    // contracts/stakingPool.algo.ts:991-994
+    // contracts/stakingPool.algo.ts:992-995
     // return abiCall<typeof ValidatorRegistry.prototype.setTokenPayoutRatio>({
     //     appId: this.creatingValidatorContractAppId.value,
     //     args: [this.validatorId.value],
     // }).returnValue
     itxn_begin
-    // contracts/stakingPool.algo.ts:993
+    // contracts/stakingPool.algo.ts:994
     // args: [this.validatorId.value],
     swap
     itob
-    // contracts/stakingPool.algo.ts:991-994
+    // contracts/stakingPool.algo.ts:992-995
     // return abiCall<typeof ValidatorRegistry.prototype.setTokenPayoutRatio>({
     //     appId: this.creatingValidatorContractAppId.value,
     //     args: [this.validatorId.value],
@@ -3910,7 +3910,7 @@ proxiedSetTokenPayoutRatio:
     bytec 4 // 0x151f7c75
     ==
     assert // Bytes has valid prefix
-    // contracts/stakingPool.algo.ts:979
+    // contracts/stakingPool.algo.ts:980
     // proxiedSetTokenPayoutRatio(poolKey: ValidatorPoolKey): PoolTokenPayoutRatio {
     bytec 4 // 0x151f7c75
     swap
@@ -3922,37 +3922,37 @@ proxiedSetTokenPayoutRatio:
 
 // contracts/stakingPool.algo.ts::StakingPool.isOwnerOrManagerCaller() -> uint64:
 isOwnerOrManagerCaller:
-    // contracts/stakingPool.algo.ts:997
+    // contracts/stakingPool.algo.ts:998
     // private isOwnerOrManagerCaller(): boolean {
     proto 0 1
-    // contracts/stakingPool.algo.ts:998-1001
+    // contracts/stakingPool.algo.ts:999-1002
     // const OwnerAndManager = abiCall<typeof ValidatorRegistry.prototype.getValidatorOwnerAndManager>({
     //     appId: this.creatingValidatorContractAppId.value,
     //     args: [this.validatorId.value],
     // }).returnValue
     itxn_begin
-    // contracts/stakingPool.algo.ts:999
+    // contracts/stakingPool.algo.ts:1000
     // appId: this.creatingValidatorContractAppId.value,
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:66
+    // contracts/stakingPool.algo.ts:67
     // creatingValidatorContractAppId = GlobalState<uint64>({ key: 'creatorApp' })
     bytec_1 // "creatorApp"
-    // contracts/stakingPool.algo.ts:999
+    // contracts/stakingPool.algo.ts:1000
     // appId: this.creatingValidatorContractAppId.value,
     app_global_get_ex
     assert // check GlobalState exists
-    // contracts/stakingPool.algo.ts:1000
+    // contracts/stakingPool.algo.ts:1001
     // args: [this.validatorId.value],
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:69
+    // contracts/stakingPool.algo.ts:70
     // validatorId = GlobalState<uint64>({ key: 'validatorId' })
     bytec_2 // "validatorId"
-    // contracts/stakingPool.algo.ts:1000
+    // contracts/stakingPool.algo.ts:1001
     // args: [this.validatorId.value],
     app_global_get_ex
     assert // check GlobalState exists
     itob
-    // contracts/stakingPool.algo.ts:998-1001
+    // contracts/stakingPool.algo.ts:999-1002
     // const OwnerAndManager = abiCall<typeof ValidatorRegistry.prototype.getValidatorOwnerAndManager>({
     //     appId: this.creatingValidatorContractAppId.value,
     //     args: [this.validatorId.value],
@@ -3972,8 +3972,8 @@ isOwnerOrManagerCaller:
     bytec 4 // 0x151f7c75
     ==
     assert // Bytes has valid prefix
-    // contracts/stakingPool.algo.ts:1002
-    // return Txn.sender === OwnerAndManager[0].native || Txn.sender === OwnerAndManager[1].native
+    // contracts/stakingPool.algo.ts:1003
+    // return Txn.sender === OwnerAndManager[0] || Txn.sender === OwnerAndManager[1]
     txn Sender
     swap
     extract 4 32
@@ -3989,8 +3989,8 @@ isOwnerOrManagerCaller_bool_true@3:
     intc_1 // 1
 
 isOwnerOrManagerCaller_bool_merge@5:
-    // contracts/stakingPool.algo.ts:1002
-    // return Txn.sender === OwnerAndManager[0].native || Txn.sender === OwnerAndManager[1].native
+    // contracts/stakingPool.algo.ts:1003
+    // return Txn.sender === OwnerAndManager[0] || Txn.sender === OwnerAndManager[1]
     swap
     retsub
 
@@ -4001,31 +4001,31 @@ isOwnerOrManagerCaller_bool_false@4:
 
 // contracts/stakingPool.algo.ts::StakingPool.checkIfBinClosed() -> void:
 checkIfBinClosed:
-    // contracts/stakingPool.algo.ts:1031
+    // contracts/stakingPool.algo.ts:1032
     // private checkIfBinClosed() {
     proto 0 0
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:1032
+    // contracts/stakingPool.algo.ts:1033
     // const currentBinSize = this.roundsPerDay.value
     dupn 5
-    // contracts/stakingPool.algo.ts:96
+    // contracts/stakingPool.algo.ts:97
     // roundsPerDay = GlobalState<uint64>({ key: 'roundsPerDay' })
     bytec 6 // "roundsPerDay"
-    // contracts/stakingPool.algo.ts:1032
+    // contracts/stakingPool.algo.ts:1033
     // const currentBinSize = this.roundsPerDay.value
     app_global_get_ex
     swap
     dup
     uncover 2
     assert // check GlobalState exists
-    // contracts/stakingPool.algo.ts:1033
+    // contracts/stakingPool.algo.ts:1034
     // if (Global.round >= this.binRoundStart.value + currentBinSize) {
     global Round
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:98
+    // contracts/stakingPool.algo.ts:99
     // binRoundStart = GlobalState<uint64>({ key: 'binRoundStart' })
     bytec 9 // "binRoundStart"
-    // contracts/stakingPool.algo.ts:1033
+    // contracts/stakingPool.algo.ts:1034
     // if (Global.round >= this.binRoundStart.value + currentBinSize) {
     app_global_get_ex
     assert // check GlobalState exists
@@ -4033,12 +4033,12 @@ checkIfBinClosed:
     +
     >=
     bz checkIfBinClosed_after_if_else@9
-    // contracts/stakingPool.algo.ts:1034
+    // contracts/stakingPool.algo.ts:1035
     // ensureBudget(300)
     intc 6 // 300
     intc_0 // 0
     callsub ensure_budget
-    // contracts/stakingPool.algo.ts:1035
+    // contracts/stakingPool.algo.ts:1036
     // const approxRoundsPerYear = BigUint(currentBinSize * 365)
     frame_dig 5
     dup
@@ -4046,13 +4046,13 @@ checkIfBinClosed:
     *
     itob
     frame_bury 1
-    // contracts/stakingPool.algo.ts:1036
+    // contracts/stakingPool.algo.ts:1037
     // const avgStake = BigUint(this.stakeAccumulator.value.asBigUint() / BigUint(currentBinSize))
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:103
+    // contracts/stakingPool.algo.ts:104
     // stakeAccumulator = GlobalState<Uint128>({ key: 'stakeAccumulator' })
     bytec 7 // "stakeAccumulator"
-    // contracts/stakingPool.algo.ts:1036
+    // contracts/stakingPool.algo.ts:1037
     // const avgStake = BigUint(this.stakeAccumulator.value.asBigUint() / BigUint(currentBinSize))
     app_global_get_ex
     assert // check GlobalState exists
@@ -4063,18 +4063,18 @@ checkIfBinClosed:
     b/
     dup
     frame_bury 3
-    // contracts/stakingPool.algo.ts:1037
+    // contracts/stakingPool.algo.ts:1038
     // if (avgStake !== 0n) {
     pushbytes 0x
     b!=
     bz checkIfBinClosed_after_if_else@8
-    // contracts/stakingPool.algo.ts:1043
+    // contracts/stakingPool.algo.ts:1044
     // (((BigUint(this.rewardAccumulator.value) * 1000000n) / avgStake) *
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:107
+    // contracts/stakingPool.algo.ts:108
     // rewardAccumulator = GlobalState<uint64>({ key: 'rewardAccumulator' })
     bytec 11 // "rewardAccumulator"
-    // contracts/stakingPool.algo.ts:1043
+    // contracts/stakingPool.algo.ts:1044
     // (((BigUint(this.rewardAccumulator.value) * 1000000n) / avgStake) *
     app_global_get_ex
     assert // check GlobalState exists
@@ -4085,53 +4085,53 @@ checkIfBinClosed:
     dup
     cover 2
     b/
-    // contracts/stakingPool.algo.ts:1044
+    // contracts/stakingPool.algo.ts:1045
     // (approxRoundsPerYear / BigUint(currentBinSize))) /
     frame_dig 1
     frame_dig 4
     b/
-    // contracts/stakingPool.algo.ts:1043-1044
+    // contracts/stakingPool.algo.ts:1044-1045
     // (((BigUint(this.rewardAccumulator.value) * 1000000n) / avgStake) *
     //     (approxRoundsPerYear / BigUint(currentBinSize))) /
     b*
-    // contracts/stakingPool.algo.ts:1045
+    // contracts/stakingPool.algo.ts:1046
     // 100n,
     bytec 14 // 0x64
-    // contracts/stakingPool.algo.ts:1043-1045
+    // contracts/stakingPool.algo.ts:1044-1046
     // (((BigUint(this.rewardAccumulator.value) * 1000000n) / avgStake) *
     //     (approxRoundsPerYear / BigUint(currentBinSize))) /
     //     100n,
     b/
     frame_bury 2
-    // contracts/stakingPool.algo.ts:1048
+    // contracts/stakingPool.algo.ts:1049
     // let alpha = BigUint(10) // .1
     pushbytes 0x0a
     frame_bury 0
-    // contracts/stakingPool.algo.ts:1050
+    // contracts/stakingPool.algo.ts:1051
     // if (avgStake > 300000000000n) {
     pushbytes 0x45d964b800
     b>
     bz checkIfBinClosed_after_if_else@4
-    // contracts/stakingPool.algo.ts:1051
+    // contracts/stakingPool.algo.ts:1052
     // alpha = BigUint(90) // .9
     pushbytes 0x5a
     frame_bury 0
 
 checkIfBinClosed_after_if_else@4:
-    // contracts/stakingPool.algo.ts:1055
+    // contracts/stakingPool.algo.ts:1056
     // if (this.weightedMovingAverage.value.asBigUint() === 0n) {
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:110
+    // contracts/stakingPool.algo.ts:111
     // weightedMovingAverage = GlobalState<Uint128>({ key: 'ewma' })
     bytec 12 // "ewma"
-    // contracts/stakingPool.algo.ts:1055
+    // contracts/stakingPool.algo.ts:1056
     // if (this.weightedMovingAverage.value.asBigUint() === 0n) {
     app_global_get_ex
     assert // check GlobalState exists
     pushbytes 0x
     b==
     bz checkIfBinClosed_else_body@6
-    // contracts/stakingPool.algo.ts:1056
+    // contracts/stakingPool.algo.ts:1057
     // this.weightedMovingAverage.value = new Uint128(apr)
     frame_dig 2
     dup
@@ -4142,40 +4142,40 @@ checkIfBinClosed_after_if_else@4:
     intc_3 // 16
     bzero
     b|
-    // contracts/stakingPool.algo.ts:110
+    // contracts/stakingPool.algo.ts:111
     // weightedMovingAverage = GlobalState<Uint128>({ key: 'ewma' })
     bytec 12 // "ewma"
-    // contracts/stakingPool.algo.ts:1056
+    // contracts/stakingPool.algo.ts:1057
     // this.weightedMovingAverage.value = new Uint128(apr)
     swap
     app_global_put
 
 checkIfBinClosed_after_if_else@8:
-    // contracts/stakingPool.algo.ts:1066
+    // contracts/stakingPool.algo.ts:1067
     // this.setRoundsPerDay()
     callsub setRoundsPerDay
-    // contracts/stakingPool.algo.ts:1068
+    // contracts/stakingPool.algo.ts:1069
     // BigUint(this.totalAlgoStaked.value) * BigUint(this.roundsPerDay.value),
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:78
+    // contracts/stakingPool.algo.ts:79
     // totalAlgoStaked = GlobalState<uint64>({ key: 'staked' })
     bytec 5 // "staked"
-    // contracts/stakingPool.algo.ts:1068
+    // contracts/stakingPool.algo.ts:1069
     // BigUint(this.totalAlgoStaked.value) * BigUint(this.roundsPerDay.value),
     app_global_get_ex
     assert // check GlobalState exists
     itob
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:96
+    // contracts/stakingPool.algo.ts:97
     // roundsPerDay = GlobalState<uint64>({ key: 'roundsPerDay' })
     bytec 6 // "roundsPerDay"
-    // contracts/stakingPool.algo.ts:1068
+    // contracts/stakingPool.algo.ts:1069
     // BigUint(this.totalAlgoStaked.value) * BigUint(this.roundsPerDay.value),
     app_global_get_ex
     assert // check GlobalState exists
     itob
     b*
-    // contracts/stakingPool.algo.ts:1067-1069
+    // contracts/stakingPool.algo.ts:1068-1070
     // this.stakeAccumulator.value = new Uint128(
     //     BigUint(this.totalAlgoStaked.value) * BigUint(this.roundsPerDay.value),
     // )
@@ -4187,40 +4187,40 @@ checkIfBinClosed_after_if_else@8:
     intc_3 // 16
     bzero
     b|
-    // contracts/stakingPool.algo.ts:103
+    // contracts/stakingPool.algo.ts:104
     // stakeAccumulator = GlobalState<Uint128>({ key: 'stakeAccumulator' })
     bytec 7 // "stakeAccumulator"
-    // contracts/stakingPool.algo.ts:1067-1069
+    // contracts/stakingPool.algo.ts:1068-1070
     // this.stakeAccumulator.value = new Uint128(
     //     BigUint(this.totalAlgoStaked.value) * BigUint(this.roundsPerDay.value),
     // )
     swap
     app_global_put
-    // contracts/stakingPool.algo.ts:107
+    // contracts/stakingPool.algo.ts:108
     // rewardAccumulator = GlobalState<uint64>({ key: 'rewardAccumulator' })
     bytec 11 // "rewardAccumulator"
-    // contracts/stakingPool.algo.ts:1070
+    // contracts/stakingPool.algo.ts:1071
     // this.rewardAccumulator.value = 0
     intc_0 // 0
     app_global_put
-    // contracts/stakingPool.algo.ts:1071
+    // contracts/stakingPool.algo.ts:1072
     // this.binRoundStart.value = Global.round - (Global.round % this.roundsPerDay.value)
     global Round
     dup
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:96
+    // contracts/stakingPool.algo.ts:97
     // roundsPerDay = GlobalState<uint64>({ key: 'roundsPerDay' })
     bytec 6 // "roundsPerDay"
-    // contracts/stakingPool.algo.ts:1071
+    // contracts/stakingPool.algo.ts:1072
     // this.binRoundStart.value = Global.round - (Global.round % this.roundsPerDay.value)
     app_global_get_ex
     assert // check GlobalState exists
     %
     -
-    // contracts/stakingPool.algo.ts:98
+    // contracts/stakingPool.algo.ts:99
     // binRoundStart = GlobalState<uint64>({ key: 'binRoundStart' })
     bytec 9 // "binRoundStart"
-    // contracts/stakingPool.algo.ts:1071
+    // contracts/stakingPool.algo.ts:1072
     // this.binRoundStart.value = Global.round - (Global.round % this.roundsPerDay.value)
     swap
     app_global_put
@@ -4229,13 +4229,13 @@ checkIfBinClosed_after_if_else@9:
     retsub
 
 checkIfBinClosed_else_body@6:
-    // contracts/stakingPool.algo.ts:1059
+    // contracts/stakingPool.algo.ts:1060
     // (this.weightedMovingAverage.value.asBigUint() * (BigUint(100) - alpha)) / BigUint(100) +
     intc_0 // 0
-    // contracts/stakingPool.algo.ts:110
+    // contracts/stakingPool.algo.ts:111
     // weightedMovingAverage = GlobalState<Uint128>({ key: 'ewma' })
     bytec 12 // "ewma"
-    // contracts/stakingPool.algo.ts:1059
+    // contracts/stakingPool.algo.ts:1060
     // (this.weightedMovingAverage.value.asBigUint() * (BigUint(100) - alpha)) / BigUint(100) +
     app_global_get_ex
     assert // check GlobalState exists
@@ -4247,18 +4247,18 @@ checkIfBinClosed_else_body@6:
     b*
     bytec 14 // 0x64
     b/
-    // contracts/stakingPool.algo.ts:1060
+    // contracts/stakingPool.algo.ts:1061
     // (apr * alpha) / BigUint(100),
     frame_dig 2
     uncover 2
     b*
     bytec 14 // 0x64
     b/
-    // contracts/stakingPool.algo.ts:1059-1060
+    // contracts/stakingPool.algo.ts:1060-1061
     // (this.weightedMovingAverage.value.asBigUint() * (BigUint(100) - alpha)) / BigUint(100) +
     //     (apr * alpha) / BigUint(100),
     b+
-    // contracts/stakingPool.algo.ts:1058-1061
+    // contracts/stakingPool.algo.ts:1059-1062
     // this.weightedMovingAverage.value = new Uint128(
     //     (this.weightedMovingAverage.value.asBigUint() * (BigUint(100) - alpha)) / BigUint(100) +
     //         (apr * alpha) / BigUint(100),
@@ -4271,10 +4271,10 @@ checkIfBinClosed_else_body@6:
     intc_3 // 16
     bzero
     b|
-    // contracts/stakingPool.algo.ts:110
+    // contracts/stakingPool.algo.ts:111
     // weightedMovingAverage = GlobalState<Uint128>({ key: 'ewma' })
     bytec 12 // "ewma"
-    // contracts/stakingPool.algo.ts:1058-1061
+    // contracts/stakingPool.algo.ts:1059-1062
     // this.weightedMovingAverage.value = new Uint128(
     //     (this.weightedMovingAverage.value.asBigUint() * (BigUint(100) - alpha)) / BigUint(100) +
     //         (apr * alpha) / BigUint(100),
@@ -4286,29 +4286,29 @@ checkIfBinClosed_else_body@6:
 
 // contracts/stakingPool.algo.ts::StakingPool.setRoundsPerDay() -> void:
 setRoundsPerDay:
-    // contracts/stakingPool.algo.ts:1075
+    // contracts/stakingPool.algo.ts:1076
     // private setRoundsPerDay() {
     proto 0 0
     pushbytes ""
-    // contracts/stakingPool.algo.ts:1080
+    // contracts/stakingPool.algo.ts:1081
     // if (Txn.firstValid < 12) {
     txn FirstValid
     pushint 12 // 12
     <
     bz setRoundsPerDay_after_if_else@2
-    // contracts/stakingPool.algo.ts:96
+    // contracts/stakingPool.algo.ts:97
     // roundsPerDay = GlobalState<uint64>({ key: 'roundsPerDay' })
     bytec 6 // "roundsPerDay"
-    // contracts/stakingPool.algo.ts:1082
+    // contracts/stakingPool.algo.ts:1083
     // this.roundsPerDay.value = APPROX_AVG_ROUNDS_PER_DAY
     intc 9 // 30857
     app_global_put
-    // contracts/stakingPool.algo.ts:1083
+    // contracts/stakingPool.algo.ts:1084
     // return
     retsub
 
 setRoundsPerDay_after_if_else@2:
-    // contracts/stakingPool.algo.ts:1087
+    // contracts/stakingPool.algo.ts:1088
     // op.Block.blkTimestamp(Txn.firstValid - 1) - op.Block.blkTimestamp(Txn.firstValid - 11)
     txn FirstValid
     intc_1 // 1
@@ -4321,30 +4321,30 @@ setRoundsPerDay_after_if_else@2:
     -
     dup
     frame_bury 0
-    // contracts/stakingPool.algo.ts:1088
+    // contracts/stakingPool.algo.ts:1089
     // if (avgBlockTimeTenths === 0) {
     bnz setRoundsPerDay_after_if_else@4
-    // contracts/stakingPool.algo.ts:96
+    // contracts/stakingPool.algo.ts:97
     // roundsPerDay = GlobalState<uint64>({ key: 'roundsPerDay' })
     bytec 6 // "roundsPerDay"
-    // contracts/stakingPool.algo.ts:1090
+    // contracts/stakingPool.algo.ts:1091
     // this.roundsPerDay.value = APPROX_AVG_ROUNDS_PER_DAY
     intc 9 // 30857
     app_global_put
-    // contracts/stakingPool.algo.ts:1091
+    // contracts/stakingPool.algo.ts:1092
     // return
     retsub
 
 setRoundsPerDay_after_if_else@4:
-    // contracts/stakingPool.algo.ts:1096
+    // contracts/stakingPool.algo.ts:1097
     // this.roundsPerDay.value = (24 * 60 * 60 * 10) / avgBlockTimeTenths
     pushint 864000 // 864000
     frame_dig 0
     /
-    // contracts/stakingPool.algo.ts:96
+    // contracts/stakingPool.algo.ts:97
     // roundsPerDay = GlobalState<uint64>({ key: 'roundsPerDay' })
     bytec 6 // "roundsPerDay"
-    // contracts/stakingPool.algo.ts:1096
+    // contracts/stakingPool.algo.ts:1097
     // this.roundsPerDay.value = (24 * 60 * 60 * 10) / avgBlockTimeTenths
     swap
     app_global_put

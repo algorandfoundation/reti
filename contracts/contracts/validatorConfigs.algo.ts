@@ -1,6 +1,6 @@
-import { FixedArray, uint64 } from '@algorandfoundation/algorand-typescript'
+import { FixedArray, uint64, Account } from '@algorandfoundation/algorand-typescript'
 import { MAX_NODES, MAX_POOLS_PER_NODE } from './constants.algo'
-import { Address, Uint16, Uint32, Uint8 } from '@algorandfoundation/algorand-typescript/arc4'
+import { Uint16, Uint32, Uint8 } from '@algorandfoundation/algorand-typescript/arc4'
 
 export type ValidatorIdType = uint64
 
@@ -45,11 +45,11 @@ export type ValidatorPoolKey = {
  */
 export type ValidatorConfig = {
     id: ValidatorIdType // id of this validator (sequentially assigned)
-    owner: Address // account that controls config - presumably cold-wallet
+    owner: Account // account that controls config - presumably cold-wallet
 
     // [CHANGEABLE] account that triggers/pays for payouts and keyreg transactions - needs to be hotwallet as node has to sign
     // for the transactions
-    manager: Address
+    manager: Account
 
     // [CHANGEABLE] Optional NFD AppID which the validator uses to describe their validator pool
     // NFD must be currently OWNED by address that adds the validator
@@ -65,7 +65,7 @@ export type ValidatorConfig = {
     // 3) GATING_TYPE_CREATED_BY_NFD_ADDRESSES: asset in nfd linked addresses (value is nfd appid)
     // 4) GATING_TYPE_SEGMENT_OF_NFD: segment of a particular NFD (value is root appid)
     entryGatingType: Uint8
-    entryGatingAddress: Address // for GATING_TYPE_ASSETS_CREATED_BY
+    entryGatingAddress: Account // for GATING_TYPE_ASSETS_CREATED_BY
     entryGatingAssets: FixedArray<uint64, 4> // all checked for GATING_TYPE_ASSET_ID, only first used for GATING_TYPE_CREATED_BY_NFD_ADDRESSES, and GATING_TYPE_SEGMENT_OF_NFD
 
     // [CHANGEABLE] gatingAssetMinBalance specifies a minimum token base units amount needed of an asset owned by the specified
@@ -86,7 +86,7 @@ export type ValidatorConfig = {
     epochRoundLength: Uint32 // Number of rounds per epoch - ie: 30,857 for approx 24hrs w/ 2.8s round times
     percentToValidator: Uint32 // Payout percentage expressed w/ four decimals - ie: 50000 = 5% -> .0005 -
 
-    validatorCommissionAddress: Address // [CHANGEABLE] account that receives the validation commission each epoch payout (can be ZeroAddress)
+    validatorCommissionAddress: Account // [CHANGEABLE] account that receives the validation commission each epoch payout (can be ZeroAddress)
     minEntryStake: uint64 // minimum stake required to enter pool - but must withdraw all if they want to go below this amount as well(!)
     maxAlgoPerPool: uint64 // maximum stake allowed per pool - if validator wants to restrict it.  0 means to use 'current' limits.
     poolsPerNode: Uint8 // Number of pools to allow per node (max of 3 is recommended)
