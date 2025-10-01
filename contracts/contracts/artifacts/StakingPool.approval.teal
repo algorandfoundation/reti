@@ -1845,8 +1845,9 @@ claimTokens_after_if_else@13:
 // contracts/stakingPool.algo.ts::StakingPool.getStakerInfo[routing]() -> void:
 getStakerInfo:
     pushbytes ""
-    // contracts/stakingPool.algo.ts:480
-    // @abimethod({ readonly: true })
+    // contracts/stakingPool.algo.ts:480-481
+    // @readonly
+    // getStakerInfo(staker: Account): StakedInfo {
     txna ApplicationArgs 1
     // contracts/stakingPool.algo.ts:482
     // for (let i: uint64 = 0; i < this.stakers.value.length; i += 1) {
@@ -1896,8 +1897,9 @@ getStakerInfo_while_top@2:
     dig 3
     intc_2 // 64
     box_extract
-    // contracts/stakingPool.algo.ts:480
-    // @abimethod({ readonly: true })
+    // contracts/stakingPool.algo.ts:480-481
+    // @readonly
+    // getStakerInfo(staker: Account): StakedInfo {
     bytec 4 // 0x151f7c75
     swap
     concat

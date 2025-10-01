@@ -32,7 +32,7 @@ import {
     MIN_ALGO_STAKE_PER_POOL,
 } from './constants.algo'
 import { PoolTokenPayoutRatio, ValidatorPoolKey } from './validatorConfigs.algo'
-import { abiCall, abimethod, Address, sizeOf, encodeArc4, Uint128 } from '@algorandfoundation/algorand-typescript/arc4'
+import { abiCall, sizeOf, encodeArc4, Uint128, readonly } from '@algorandfoundation/algorand-typescript/arc4'
 import { wideRatio } from './utils.algo'
 import type { ValidatorRegistry } from './validatorRegistry.algo'
 // The data stored 'per-staker' in box storage of each pool
@@ -477,7 +477,7 @@ export class StakingPool extends Contract {
      * @returns {StakedInfo} - The staked information for the given staker.
      * @throws {Error} - If the staker's account is not found.
      */
-    @abimethod({ readonly: true })
+    @readonly
     getStakerInfo(staker: Account): StakedInfo {
         for (let i: uint64 = 0; i < this.stakers.value.length; i += 1) {
             ensureBudget(200)

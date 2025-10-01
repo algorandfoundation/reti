@@ -69,6 +69,7 @@ import {
     compileArc4,
     encodeArc4,
     methodSelector,
+    readonly,
     sizeOf,
     Uint16,
     Uint8,
@@ -148,7 +149,7 @@ export class ValidatorRegistry extends Contract {
      *  addStakerMbr: uint64 - mbr staker needs to add to first staking payment (stays w/ validator)
      * ]
      */
-    @abimethod({ readonly: true })
+    @readonly
     getMbrAmounts(): MbrAmounts {
         const stakingPool = compileArc4(StakingPool)
         // Cost for creator of validator contract itself is (but not really our problem - it's a bootstrap issue only)
@@ -182,7 +183,7 @@ export class ValidatorRegistry extends Contract {
     /**
      * Returns the protocol constraints so that UIs can limit what users specify for validator configuration parameters.
      */
-    @abimethod({ readonly: true })
+    @readonly
     getProtocolConstraints(): Constraints {
         return {
             epochPayoutRoundsMin: MIN_EPOCH_LENGTH,
@@ -202,22 +203,22 @@ export class ValidatorRegistry extends Contract {
     /**
      * Returns the current number of validators
      */
-    @abimethod({ readonly: true })
+    @readonly
     getNumValidators(): uint64 {
         return this.numValidators.value
     }
 
-    @abimethod({ readonly: true })
+    @readonly
     getValidatorConfig(validatorId: ValidatorIdType): ValidatorConfig {
         return this.validatorList(validatorId).value.config
     }
 
-    @abimethod({ readonly: true })
+    @readonly
     getValidatorState(validatorId: ValidatorIdType): ValidatorCurState {
         return this.validatorList(validatorId).value.state
     }
 
-    @abimethod({ readonly: true })
+    @readonly
     getValidatorOwnerAndManager(validatorId: ValidatorIdType): [Account, Account] {
         return [
             this.validatorList(validatorId).value.config.owner,
@@ -231,7 +232,7 @@ export class ValidatorRegistry extends Contract {
      * @return {PoolInfo[]} - array of pools
      * Not callable from other contracts because >1K return but can be called w/ simulate which bumps log returns
      */
-    @abimethod({ readonly: true })
+    @readonly
     getPools(validatorId: ValidatorIdType): PoolInfo[] {
         const retData: PoolInfo[] = []
         const poolSet = clone(this.validatorList(validatorId).value.pools)
@@ -250,7 +251,7 @@ export class ValidatorRegistry extends Contract {
      * want to get staker list for an account.  The staking pool also uses it to get the app id of staking pool 1
      * (which contains reward tokens if being used) so that the amount available can be determined.
      */
-    @abimethod({ readonly: true })
+    @readonly
     getPoolAppId(validatorId: uint64, poolId: uint64): uint64 {
         assert(
             poolId !== 0 && poolId <= this.validatorList(validatorId).value.pools.length,
@@ -259,7 +260,7 @@ export class ValidatorRegistry extends Contract {
         return this.validatorList(validatorId).value.pools[poolId - 1].poolAppId
     }
 
-    @abimethod({ readonly: true })
+    @readonly
     getPoolInfo(poolKey: ValidatorPoolKey): PoolInfo {
         return this.validatorList(poolKey.id).value.pools[poolKey.poolId - 1]
     }
@@ -271,7 +272,7 @@ export class ValidatorRegistry extends Contract {
      *
      * @param {ValidatorIdType} validatorId - The id of the validator.
      */
-    @abimethod({ readonly: true })
+    @readonly
     getCurMaxStakePerPool(validatorId: ValidatorIdType): uint64 {
         const numPools = this.validatorList(validatorId).value.state.numPools.asUint64()
         const hardMaxDividedBetweenPools: uint64 = this.maxAllowedStake() / numPools
@@ -289,7 +290,7 @@ export class ValidatorRegistry extends Contract {
      * Helper callers can call w/ simulate to determine if 'AddStaker' MBR should be included w/ staking amount
      * @param staker
      */
-    @abimethod({ readonly: true })
+    @readonly
     doesStakerNeedToPayMBR(staker: Account): boolean {
         return !this.stakerPoolSet(staker).exists
     }
@@ -300,7 +301,7 @@ export class ValidatorRegistry extends Contract {
      * @param {Address} staker - The account to retrieve staked pools for.
      * @return {ValidatorPoolKey[]} - The array of staked pools for the account.
      */
-    @abimethod({ readonly: true })
+    @readonly
     getStakedPoolsForAccount(staker: Account): ValidatorPoolKey[] {
         if (!this.stakerPoolSet(staker).exists) {
             return []
@@ -322,19 +323,19 @@ export class ValidatorRegistry extends Contract {
      * @param {ValidatorIdType} validatorId - The id of the validator.
      * @return {PoolTokenPayoutRatio} - The token payout ratio for the validator.
      */
-    @abimethod({ readonly: true })
+    @readonly
     getTokenPayoutRatio(validatorId: ValidatorIdType): PoolTokenPayoutRatio {
         return this.validatorList(validatorId).value.tokenPayoutRatio
     }
 
-    @abimethod({ readonly: true })
+    @readonly
     getNodePoolAssignments(validatorId: uint64): NodePoolAssignmentConfig {
         assert(this.validatorList(validatorId).exists, "the specified validator id doesn't exist")
 
         return this.validatorList(validatorId).value.nodePoolAssignments
     }
 
-    @abimethod({ readonly: true })
+    @readonly
     getNFDRegistryID(): uint64 {
         return nfdRegistryAppId
     }
@@ -840,7 +841,7 @@ export class ValidatorRegistry extends Contract {
      * @returns {ValidatorPoolKey, boolean, boolean} - The pool for the staker, true/false on whether the staker is 'new'
      * to this VALIDATOR, and true/false if staker is new to the protocol.
      */
-    @abimethod({ readonly: true })
+    @readonly
     findPoolForStaker(
         validatorId: ValidatorIdType,
         staker: Account,
