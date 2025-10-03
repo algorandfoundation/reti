@@ -1030,8 +1030,7 @@ export class ValidatorRegistry extends Contract {
             // We already verified the nfd id and name were correct at creation time - so we don't need to verify
             // the nfd is real anymore, just that its still owned by the validator.
             // const nfdOwner = Application(validatorConfig.nfdForInfo).globalState('i.owner.a') as Address
-            const nfdOwner = new Address(op.AppGlobal.getExBytes(validatorConfig.nfdForInfo, Bytes('i.owner.a'))[0])
-                .native
+            const nfdOwner = Account(op.AppGlobal.getExBytes(validatorConfig.nfdForInfo, Bytes('i.owner.a'))[0])
 
             // If they no longer own the nfd - remove it (!) from the validator config
             if (validatorConfig.owner !== nfdOwner && validatorConfig.manager !== nfdOwner) {

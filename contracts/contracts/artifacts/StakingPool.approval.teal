@@ -243,10 +243,10 @@ createApplication_after_if_else@4:
     >=
     assert // staking pool must have minimum entry of 1 algo
     // contracts/stakingPool.algo.ts:66
-    // creatingValidatorContractAppId = GlobalState<uint64>({ key: 'creatorApp' })
+    // creatingValidatorContractAppId = GlobalState<Application>({ key: 'creatorApp' })
     bytec_1 // "creatorApp"
     // contracts/stakingPool.algo.ts:136
-    // this.creatingValidatorContractAppId.value = creatingContractId.id
+    // this.creatingValidatorContractAppId.value = creatingContractId
     dig 5
     app_global_put
     // contracts/stakingPool.algo.ts:69
@@ -396,7 +396,7 @@ initStorage:
     // appId: this.creatingValidatorContractAppId.value,
     intc_0 // 0
     // contracts/stakingPool.algo.ts:66
-    // creatingValidatorContractAppId = GlobalState<uint64>({ key: 'creatorApp' })
+    // creatingValidatorContractAppId = GlobalState<Application>({ key: 'creatorApp' })
     bytec_1 // "creatorApp"
     // contracts/stakingPool.algo.ts:176
     // appId: this.creatingValidatorContractAppId.value,
@@ -568,14 +568,14 @@ addStake:
     bury 1
     assert // staking pool must be initialized first
     // contracts/stakingPool.algo.ts:216
-    // Txn.sender === Application(this.creatingValidatorContractAppId.value).address,
+    // Txn.sender === this.creatingValidatorContractAppId.value.address,
     txn Sender
     intc_0 // 0
     // contracts/stakingPool.algo.ts:66
-    // creatingValidatorContractAppId = GlobalState<uint64>({ key: 'creatorApp' })
+    // creatingValidatorContractAppId = GlobalState<Application>({ key: 'creatorApp' })
     bytec_1 // "creatorApp"
     // contracts/stakingPool.algo.ts:216
-    // Txn.sender === Application(this.creatingValidatorContractAppId.value).address,
+    // Txn.sender === this.creatingValidatorContractAppId.value.address,
     app_global_get_ex
     assert // check GlobalState exists
     app_params_get AppAddress
@@ -583,7 +583,7 @@ addStake:
     ==
     // contracts/stakingPool.algo.ts:215-218
     // assert(
-    //     Txn.sender === Application(this.creatingValidatorContractAppId.value).address,
+    //     Txn.sender === this.creatingValidatorContractAppId.value.address,
     //     'stake can only be added via the validator contract',
     // )
     assert // stake can only be added via the validator contract
@@ -597,27 +597,27 @@ addStake:
     callsub checkIfBinClosed
     // contracts/stakingPool.algo.ts:226-230
     // assertMatch(stakedAmountPayment, {
-    //     sender: Application(this.creatingValidatorContractAppId.value).address,
+    //     sender: this.creatingValidatorContractAppId.value.address,
     //     receiver: Global.currentApplicationAddress,
     //     amount: stakedAmountPayment.amount,
     // })
     dup
     gtxns Sender
     // contracts/stakingPool.algo.ts:227
-    // sender: Application(this.creatingValidatorContractAppId.value).address,
+    // sender: this.creatingValidatorContractAppId.value.address,
     intc_0 // 0
     // contracts/stakingPool.algo.ts:66
-    // creatingValidatorContractAppId = GlobalState<uint64>({ key: 'creatorApp' })
+    // creatingValidatorContractAppId = GlobalState<Application>({ key: 'creatorApp' })
     bytec_1 // "creatorApp"
     // contracts/stakingPool.algo.ts:227
-    // sender: Application(this.creatingValidatorContractAppId.value).address,
+    // sender: this.creatingValidatorContractAppId.value.address,
     app_global_get_ex
     assert // check GlobalState exists
     app_params_get AppAddress
     assert // application exists
     // contracts/stakingPool.algo.ts:226-230
     // assertMatch(stakedAmountPayment, {
-    //     sender: Application(this.creatingValidatorContractAppId.value).address,
+    //     sender: this.creatingValidatorContractAppId.value.address,
     //     receiver: Global.currentApplicationAddress,
     //     amount: stakedAmountPayment.amount,
     // })
@@ -629,7 +629,7 @@ addStake:
     global CurrentApplicationAddress
     // contracts/stakingPool.algo.ts:226-230
     // assertMatch(stakedAmountPayment, {
-    //     sender: Application(this.creatingValidatorContractAppId.value).address,
+    //     sender: this.creatingValidatorContractAppId.value.address,
     //     receiver: Global.currentApplicationAddress,
     //     amount: stakedAmountPayment.amount,
     // })
@@ -1133,7 +1133,7 @@ removeStake_after_if_else@8:
     // appId: this.creatingValidatorContractAppId.value,
     intc_0 // 0
     // contracts/stakingPool.algo.ts:66
-    // creatingValidatorContractAppId = GlobalState<uint64>({ key: 'creatorApp' })
+    // creatingValidatorContractAppId = GlobalState<Application>({ key: 'creatorApp' })
     bytec_1 // "creatorApp"
     // contracts/stakingPool.algo.ts:327
     // appId: this.creatingValidatorContractAppId.value,
@@ -1400,7 +1400,7 @@ removeStake_after_if_else@24:
     // appId: this.creatingValidatorContractAppId.value,
     intc_0 // 0
     // contracts/stakingPool.algo.ts:66
-    // creatingValidatorContractAppId = GlobalState<uint64>({ key: 'creatorApp' })
+    // creatingValidatorContractAppId = GlobalState<Application>({ key: 'creatorApp' })
     bytec_1 // "creatorApp"
     // contracts/stakingPool.algo.ts:384
     // appId: this.creatingValidatorContractAppId.value,
@@ -1614,7 +1614,7 @@ claimTokens_while_top@2:
     // appId: this.creatingValidatorContractAppId.value,
     intc_0 // 0
     // contracts/stakingPool.algo.ts:66
-    // creatingValidatorContractAppId = GlobalState<uint64>({ key: 'creatorApp' })
+    // creatingValidatorContractAppId = GlobalState<Application>({ key: 'creatorApp' })
     bytec_1 // "creatorApp"
     // contracts/stakingPool.algo.ts:425
     // appId: this.creatingValidatorContractAppId.value,
@@ -1716,7 +1716,7 @@ claimTokens_after_if_else@11:
     // appId: this.creatingValidatorContractAppId.value,
     intc_0 // 0
     // contracts/stakingPool.algo.ts:66
-    // creatingValidatorContractAppId = GlobalState<uint64>({ key: 'creatorApp' })
+    // creatingValidatorContractAppId = GlobalState<Application>({ key: 'creatorApp' })
     bytec_1 // "creatorApp"
     // contracts/stakingPool.algo.ts:453
     // appId: this.creatingValidatorContractAppId.value,
@@ -1925,14 +1925,14 @@ payTokenReward:
     txna ApplicationArgs 3
     btoi
     // contracts/stakingPool.algo.ts:503
-    // Txn.sender === Application(this.creatingValidatorContractAppId.value).address,
+    // Txn.sender === this.creatingValidatorContractAppId.value.address,
     txn Sender
     intc_0 // 0
     // contracts/stakingPool.algo.ts:66
-    // creatingValidatorContractAppId = GlobalState<uint64>({ key: 'creatorApp' })
+    // creatingValidatorContractAppId = GlobalState<Application>({ key: 'creatorApp' })
     bytec_1 // "creatorApp"
     // contracts/stakingPool.algo.ts:503
-    // Txn.sender === Application(this.creatingValidatorContractAppId.value).address,
+    // Txn.sender === this.creatingValidatorContractAppId.value.address,
     app_global_get_ex
     assert // check GlobalState exists
     app_params_get AppAddress
@@ -1940,7 +1940,7 @@ payTokenReward:
     ==
     // contracts/stakingPool.algo.ts:502-505
     // assert(
-    //     Txn.sender === Application(this.creatingValidatorContractAppId.value).address,
+    //     Txn.sender === this.creatingValidatorContractAppId.value.address,
     //     'this can only be called via the validator contract',
     // )
     assert // this can only be called via the validator contract
@@ -2022,7 +2022,7 @@ epochBalanceUpdate:
     // appId: this.creatingValidatorContractAppId.value,
     intc_0 // 0
     // contracts/stakingPool.algo.ts:66
-    // creatingValidatorContractAppId = GlobalState<uint64>({ key: 'creatorApp' })
+    // creatingValidatorContractAppId = GlobalState<Application>({ key: 'creatorApp' })
     bytec_1 // "creatorApp"
     // contracts/stakingPool.algo.ts:542
     // appId: this.creatingValidatorContractAppId.value,
@@ -2167,7 +2167,7 @@ epochBalanceUpdate:
     // appId: this.creatingValidatorContractAppId.value,
     intc_0 // 0
     // contracts/stakingPool.algo.ts:66
-    // creatingValidatorContractAppId = GlobalState<uint64>({ key: 'creatorApp' })
+    // creatingValidatorContractAppId = GlobalState<Application>({ key: 'creatorApp' })
     bytec_1 // "creatorApp"
     // contracts/stakingPool.algo.ts:579
     // appId: this.creatingValidatorContractAppId.value,
@@ -2244,7 +2244,7 @@ epochBalanceUpdate_after_if_else@6:
     // appId: this.creatingValidatorContractAppId.value,
     intc_0 // 0
     // contracts/stakingPool.algo.ts:66
-    // creatingValidatorContractAppId = GlobalState<uint64>({ key: 'creatorApp' })
+    // creatingValidatorContractAppId = GlobalState<Application>({ key: 'creatorApp' })
     bytec_1 // "creatorApp"
     // contracts/stakingPool.algo.ts:590
     // appId: this.creatingValidatorContractAppId.value,
@@ -2295,7 +2295,7 @@ epochBalanceUpdate_after_if_else@12:
     // appId: this.creatingValidatorContractAppId.value,
     intc_0 // 0
     // contracts/stakingPool.algo.ts:66
-    // creatingValidatorContractAppId = GlobalState<uint64>({ key: 'creatorApp' })
+    // creatingValidatorContractAppId = GlobalState<Application>({ key: 'creatorApp' })
     bytec_1 // "creatorApp"
     // contracts/stakingPool.algo.ts:611
     // appId: this.creatingValidatorContractAppId.value,
@@ -3250,7 +3250,7 @@ epochBalanceUpdate_after_if_else@69:
     // appId: this.creatingValidatorContractAppId.value,
     intc_0 // 0
     // contracts/stakingPool.algo.ts:66
-    // creatingValidatorContractAppId = GlobalState<uint64>({ key: 'creatorApp' })
+    // creatingValidatorContractAppId = GlobalState<Application>({ key: 'creatorApp' })
     bytec_1 // "creatorApp"
     // contracts/stakingPool.algo.ts:893
     // appId: this.creatingValidatorContractAppId.value,
@@ -3669,14 +3669,14 @@ goOnline_after_if_else@3:
 // contracts/stakingPool.algo.ts::StakingPool.goOffline[routing]() -> void:
 goOffline:
     // contracts/stakingPool.algo.ts:948
-    // if (Txn.sender !== Application(this.creatingValidatorContractAppId.value).address) {
+    // if (Txn.sender !== this.creatingValidatorContractAppId.value.address) {
     txn Sender
     intc_0 // 0
     // contracts/stakingPool.algo.ts:66
-    // creatingValidatorContractAppId = GlobalState<uint64>({ key: 'creatorApp' })
+    // creatingValidatorContractAppId = GlobalState<Application>({ key: 'creatorApp' })
     bytec_1 // "creatorApp"
     // contracts/stakingPool.algo.ts:948
-    // if (Txn.sender !== Application(this.creatingValidatorContractAppId.value).address) {
+    // if (Txn.sender !== this.creatingValidatorContractAppId.value.address) {
     app_global_get_ex
     assert // check GlobalState exists
     app_params_get AppAddress
@@ -3828,7 +3828,7 @@ proxiedSetTokenPayoutRatio:
     // appId: this.creatingValidatorContractAppId.value,
     intc_0 // 0
     // contracts/stakingPool.algo.ts:66
-    // creatingValidatorContractAppId = GlobalState<uint64>({ key: 'creatorApp' })
+    // creatingValidatorContractAppId = GlobalState<Application>({ key: 'creatorApp' })
     bytec_1 // "creatorApp"
     // contracts/stakingPool.algo.ts:985
     // appId: this.creatingValidatorContractAppId.value,
@@ -3935,7 +3935,7 @@ isOwnerOrManagerCaller:
     // appId: this.creatingValidatorContractAppId.value,
     intc_0 // 0
     // contracts/stakingPool.algo.ts:66
-    // creatingValidatorContractAppId = GlobalState<uint64>({ key: 'creatorApp' })
+    // creatingValidatorContractAppId = GlobalState<Application>({ key: 'creatorApp' })
     bytec_1 // "creatorApp"
     // contracts/stakingPool.algo.ts:999
     // appId: this.creatingValidatorContractAppId.value,

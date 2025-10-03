@@ -63,7 +63,7 @@ export class StakingPool extends Contract {
     // copies of this contract could be created but only the 'official' validator contract would be considered valid
     // and official.  Calls from these pools back to the validator contract are also validated, ensuring the pool
     // calling the validator is one of the pools it created.
-    creatingValidatorContractAppId = GlobalState<uint64>({ key: 'creatorApp' })
+    creatingValidatorContractAppId = GlobalState<Application>({ key: 'creatorApp' })
 
     // The 'id' of the validator our pool belongs to
     validatorId = GlobalState<uint64>({ key: 'validatorId' })
@@ -133,7 +133,7 @@ export class StakingPool extends Contract {
             assert(poolId !== 0)
         }
         assert(minEntryStake >= MIN_ALGO_STAKE_PER_POOL, 'staking pool must have minimum entry of 1 algo')
-        this.creatingValidatorContractAppId.value = creatingContractId.id
+        this.creatingValidatorContractAppId.value = creatingContractId
         this.validatorId.value = validatorId
         this.poolId.value = poolId
         this.numStakers.value = 0
@@ -213,7 +213,7 @@ export class StakingPool extends Contract {
 
         // The contract account calling us has to be our creating validator contract
         assert(
-            Txn.sender === Application(this.creatingValidatorContractAppId.value).address,
+            Txn.sender === this.creatingValidatorContractAppId.value.address,
             'stake can only be added via the validator contract',
         )
         assert(staker !== Global.zeroAddress)
@@ -224,7 +224,7 @@ export class StakingPool extends Contract {
         // Verify the payment of stake also came from the validator - as it receives the stake from the staker, holds
         // any MBR (if needed) and then sends the stake on to us in the stakedAmountPayment transaction.
         assertMatch(stakedAmountPayment, {
-            sender: Application(this.creatingValidatorContractAppId.value).address,
+            sender: this.creatingValidatorContractAppId.value.address,
             receiver: Global.currentApplicationAddress,
             amount: stakedAmountPayment.amount,
         })
@@ -500,7 +500,7 @@ export class StakingPool extends Contract {
     payTokenReward(staker: Account, rewardToken: uint64, amountToSend: uint64): void {
         // account calling us has to be our creating validator contract
         assert(
-            Txn.sender === Application(this.creatingValidatorContractAppId.value).address,
+            Txn.sender === this.creatingValidatorContractAppId.value.address,
             'this can only be called via the validator contract',
         )
         assert(this.poolId.value === 1, 'must be pool 1 in order to be called to pay out token rewards')
@@ -945,7 +945,7 @@ export class StakingPool extends Contract {
     goOffline(): void {
         // we can be called by validator contract if we're being moved (which in turn only is allowed to be called
         // by validator owner or manager), but if not - must be owner or manager
-        if (Txn.sender !== Application(this.creatingValidatorContractAppId.value).address) {
+        if (Txn.sender !== this.creatingValidatorContractAppId.value.address) {
             assert(this.isOwnerOrManagerCaller(), 'can only be called by owner or manager of validator')
         }
 
