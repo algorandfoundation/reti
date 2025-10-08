@@ -62,6 +62,7 @@ import {
     ensureBudget,
     Asset,
     contract,
+    err,
 } from '@algorandfoundation/algorand-typescript'
 import {
     abiCall,
@@ -504,7 +505,7 @@ export class ValidatorRegistry extends Contract {
 
         let numPools: uint64 = this.validatorList(validatorId).value.state.numPools.asUint64()
         if ((numPools as uint64) >= MAX_POOLS) {
-            assert(false, 'already at max pool size')
+            err('already at max pool size')
         }
         numPools += 1
 
@@ -608,7 +609,7 @@ export class ValidatorRegistry extends Contract {
         const isNewStakerToValidator = findRet[1]
         const isNewStakerToProtocol = findRet[2]
         if (poolKey.poolId === 0) {
-            assert(false, 'No pool available with free stake.  Validator needs to add another pool')
+            err('No pool available with free stake.  Validator needs to add another pool')
         }
 
         // Update StakerPoolList for this found pool (new or existing)
@@ -938,7 +939,7 @@ export class ValidatorRegistry extends Contract {
                 }
             }
         }
-        assert(false, "couldn't find pool app id in nodes to move")
+        err("couldn't find pool app id in nodes to move")
     }
 
     /**
@@ -1154,7 +1155,7 @@ export class ValidatorRegistry extends Contract {
             }
         }
         if (firstEmpty === 0) {
-            assert(false, 'No empty slot available in the staker pool set')
+            err('No empty slot available in the staker pool set')
         }
         this.stakerPoolSet(staker).value[firstEmpty - 1] = clone(poolKey)
     }
@@ -1194,7 +1195,7 @@ export class ValidatorRegistry extends Contract {
             }
         }
         if (!found) {
-            assert(false, 'No matching slot found when told to remove a pool from the stakers set')
+            err('No matching slot found when told to remove a pool from the stakers set')
         }
         // Are they completely out of the staking pool ?
         return [inSameValidatorPoolCount === 0, inAnyPoolCount === 0]
@@ -1213,7 +1214,7 @@ export class ValidatorRegistry extends Contract {
                 return
             }
         }
-        assert(false, 'no available space in specified node for this pool')
+        err('no available space in specified node for this pool')
     }
 
     /**

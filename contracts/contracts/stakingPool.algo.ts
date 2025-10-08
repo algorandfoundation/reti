@@ -21,6 +21,7 @@ import {
     log,
     contract,
     Account,
+    err,
 } from '@algorandfoundation/algorand-typescript'
 import {
     ALGORAND_ACCOUNT_MIN_BALANCE,
@@ -263,7 +264,7 @@ export class StakingPool extends Contract {
 
         if (firstEmpty === 0) {
             // nothing was found - pool is full and this staker can't fit
-            assert(false, 'Staking pool full')
+            err('Staking pool full')
         }
         // This is a new staker to the pool, so first ensure they're adding required minimum, then
         // initialize slot and add to the stakers.
@@ -314,7 +315,7 @@ export class StakingPool extends Contract {
                     amountToUnstake = cmpStaker.balance
                 }
                 if (cmpStaker.balance < amountToUnstake) {
-                    assert(false, 'Insufficient balance')
+                    err('Insufficient balance')
                 }
                 cmpStaker.balance -= amountToUnstake
                 this.totalAlgoStaked.value -= amountToUnstake
@@ -397,7 +398,7 @@ export class StakingPool extends Contract {
                 return
             }
         }
-        assert(false, 'account not found')
+        err('account not found')
     }
 
     /**
@@ -466,7 +467,7 @@ export class StakingPool extends Contract {
                 return
             }
         }
-        assert(false, 'account not found')
+        err('account not found')
     }
 
     /**
@@ -484,7 +485,7 @@ export class StakingPool extends Contract {
                 return this.stakers.value[i]
             }
         }
-        assert(false, 'account not found')
+        err('account not found')
     }
 
     /**
