@@ -1,6 +1,6 @@
 {
   "name": "reti-ui",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@9.15.9",
