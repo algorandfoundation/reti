@@ -14,7 +14,7 @@ import { XGovRegistryClient } from '@algorandfoundation/xgov-clients/registry'
 const algodConfig = getAlgodConfigFromViteEnvironment()
 
 export const algorandClient = AlgorandClient.fromConfig({ algodConfig })
-  .setDefaultValidityWindow(200)
+  .setDefaultValidityWindow(1000)
   .setSuggestedParamsCacheTimeout(1000 * 60 * 5) // 5 minutes
 
 const RETI_APP_ID = BigInt(getRetiAppIdFromViteEnvironment())
