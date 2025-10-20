@@ -1,0 +1,2531 @@
+#pragma version 11
+intcblock 0 1 6 64 32 16 128 200 5 1000000 300 1000 4 2100000 8 100000 400 30857 2 40 48 0
+bytecblock 0x 0x63726561746f72417070 0x7374616b657273 0x76616c696461746f724964 0x706f6f6c4964 0x0a8101 0x7374616b6564 0x726f756e6473506572446179 0x7374616b65416363756d756c61746f72 0xffffffffffffffffffffffffffffffff 0x0000000000000000 0x62696e526f756e645374617274 0x726577617264416363756d756c61746f72 0x6e756d5374616b657273 0x65776d61 0x00000000000000000000000000000000 0x00000000000000000000000000000064 0x6c6173745061796f7574 0x75aff61d 0x6d696e456e7472795374616b65 0x65706f63684e756d626572 0x151f7c75 0xa2dc51b5 0x572767d1 0x4df8d86e 0x0c2245e1 0x00
+txn ApplicationID
+!
+intc_2 // 6
+*
+txn OnCompletion
++
+switch label1 label2 label2 label2 label2 label2 label3 label2 label2 label2 label2 label2
+label2:
+err
+label100:
+txna ApplicationArgs 4
+btoi
+txna ApplicationArgs 3
+btoi
+txna ApplicationArgs 2
+btoi
+txna ApplicationArgs 1
+btoi
+callsub label4
+intc_1 // 1
+return
+label4:
+proto 4 0
+frame_dig -1
+intc_0 // 0
+==
+bz label5
+frame_dig -2
+intc_0 // 0
+==
+assert
+frame_dig -3
+intc_0 // 0
+==
+assert
+b label6
+label5:
+frame_dig -2
+intc_0 // 0
+!=
+assert
+frame_dig -3
+intc_0 // 0
+!=
+assert
+label6:
+frame_dig -4
+pushint 1000000
+>=
+assert
+bytec_1 // "creatorApp"
+frame_dig -1
+app_global_put
+bytec_3 // "validatorId"
+frame_dig -2
+app_global_put
+bytec 4 // "poolId"
+frame_dig -3
+app_global_put
+bytec 13 // "numStakers"
+intc_0 // 0
+app_global_put
+bytec 6 // "staked"
+intc_0 // 0
+app_global_put
+bytec 19 // "minEntryStake"
+frame_dig -4
+app_global_put
+bytec 17 // "lastPayout"
+global Round
+app_global_put
+bytec 20 // "epochNumber"
+intc_0 // 0
+app_global_put
+callsub label7
+bytec 11 // "binRoundStart"
+global Round
+global Round
+bytec 7 // "roundsPerDay"
+app_global_get
+%
+-
+app_global_put
+bytec 8 // "stakeAccumulator"
+bytec 15 // 0x00000000000000000000000000000000
+app_global_put
+bytec 12 // "rewardAccumulator"
+intc_0 // 0
+app_global_put
+bytec 14 // "ewma"
+bytec 15 // 0x00000000000000000000000000000000
+app_global_put
+retsub
+label101:
+callsub label8
+intc_1 // 1
+return
+label8:
+proto 0 0
+retsub
+label13:
+proto 1 1
+pushint 2500
+frame_dig -1
+intc 16 // 400
+*
++
+retsub
+label102:
+txn GroupIndex
+intc_1 // 1
+-
+dup
+gtxns TypeEnum
+intc_1 // 1
+==
+assert
+callsub label9
+intc_1 // 1
+return
+label9:
+proto 1 0
+bytec_0 // ""
+dupn 3
+bytec_2 // "stakers"
+box_len
+swap
+pop
+!
+assert
+itxn_begin
+intc_2 // 6
+itxn_field TypeEnum
+bytec 18 // 0x75aff61d
+itxn_field ApplicationArgs
+bytec_1 // "creatorApp"
+app_global_get
+itxn_field ApplicationID
+bytec_3 // "validatorId"
+app_global_get
+itob
+itxn_field ApplicationArgs
+intc_0 // 0
+itxn_field Fee
+itxn_submit
+itxn NumLogs
+intc_1 // 1
+-
+itxnas Logs
+extract 4 0
+frame_bury 0
+frame_dig 0
+extract 153 8
+btoi
+intc_0 // 0
+!=
+frame_bury 1
+frame_dig 1
+dup
+bz label10
+bytec 4 // "poolId"
+app_global_get
+intc_1 // 1
+==
+&&
+label10:
+bz label11
+intc 15 // 100000
+b label12
+label11:
+intc_0 // 0
+label12:
+frame_bury 2
+intc 15 // 100000
+frame_dig 2
++
+pushint 12807
+callsub label13
++
+frame_bury 3
+frame_dig -1
+gtxns Receiver
+global CurrentApplicationAddress
+==
+assert
+frame_dig -1
+gtxns Amount
+frame_dig 3
+==
+assert
+bytec_2 // "stakers"
+pushint 12800
+box_create
+pop
+frame_dig 1
+dup
+bz label14
+bytec 4 // "poolId"
+app_global_get
+intc_1 // 1
+==
+&&
+label14:
+bz label15
+itxn_begin
+intc 12 // 4
+itxn_field TypeEnum
+frame_dig 0
+extract 153 8
+btoi
+itxn_field XferAsset
+global CurrentApplicationAddress
+itxn_field AssetReceiver
+intc_0 // 0
+itxn_field AssetAmount
+intc_0 // 0
+itxn_field Fee
+itxn_submit
+label15:
+retsub
+label103:
+bytec 21 // 0x151f7c75
+txna ApplicationArgs 1
+dup
+len
+intc 4 // 32
+==
+assert
+txn GroupIndex
+intc_1 // 1
+-
+dup
+gtxns TypeEnum
+intc_1 // 1
+==
+assert
+callsub label16
+itob
+concat
+log
+intc_1 // 1
+return
+label16:
+proto 2 1
+bytec_0 // ""
+dupn 4
+bytec_2 // "stakers"
+box_len
+swap
+pop
+assert
+txn Sender
+bytec_1 // "creatorApp"
+app_global_get
+app_params_get AppAddress
+pop
+==
+assert
+frame_dig -2
+global ZeroAddress
+!=
+assert
+callsub label17
+frame_dig -1
+gtxns Sender
+bytec_1 // "creatorApp"
+app_global_get
+app_params_get AppAddress
+pop
+==
+assert
+frame_dig -1
+gtxns Receiver
+global CurrentApplicationAddress
+==
+assert
+frame_dig -1
+gtxns Amount
+frame_dig -1
+gtxns Amount
+==
+assert
+global Round
+pushint 320
++
+frame_bury 0
+intc_0 // 0
+frame_bury 1
+bytec 6 // "staked"
+app_global_get
+frame_dig -1
+gtxns Amount
++
+bytec 6 // "staked"
+swap
+app_global_put
+bytec 11 // "binRoundStart"
+app_global_get
+bytec 7 // "roundsPerDay"
+app_global_get
++
+global Round
+-
+frame_bury 2
+bytec 8 // "stakeAccumulator"
+dup
+app_global_get
+frame_dig -1
+gtxns Amount
+itob
+frame_dig 2
+itob
+b*
+b+
+dup
+bitlen
+intc 6 // 128
+<=
+assert
+bytec 9 // 0xffffffffffffffffffffffffffffffff
+b&
+dup
+len
+dup
+intc 5 // 16
+-
+swap
+substring3
+app_global_put
+intc_0 // 0
+frame_bury 3
+label24:
+frame_dig 3
+intc 7 // 200
+<
+bz label18
+global OpcodeBudget
+intc 10 // 300
+<
+bz label19
+itxn_begin
+intc_2 // 6
+itxn_field TypeEnum
+intc_0 // 0
+itxn_field Fee
+bytec 5 // 0x0a8101
+dup
+itxn_field ApprovalProgram
+itxn_field ClearStateProgram
+intc 8 // 5
+itxn_field OnCompletion
+itxn_submit
+label19:
+frame_dig 3
+intc_3 // 64
+*
+intc_3 // 64
+bytec_2 // "stakers"
+cover 2
+box_extract
+frame_bury 4
+frame_dig 4
+extract 0 32
+frame_dig -2
+==
+bz label20
+frame_dig 4
+intc 4 // 32
+frame_dig 4
+extract 32 8
+btoi
+frame_dig -1
+gtxns Amount
++
+itob
+replace3
+frame_bury 4
+frame_dig 4
+pushint 56
+frame_dig 0
+itob
+replace3
+frame_bury 4
+frame_dig 3
+intc_3 // 64
+*
+frame_dig 4
+bytec_2 // "stakers"
+cover 2
+box_replace
+frame_dig 0
+b label21
+label20:
+frame_dig 1
+intc_0 // 0
+==
+dup
+bz label22
+frame_dig 4
+extract 0 32
+global ZeroAddress
+==
+&&
+label22:
+bz label23
+frame_dig 3
+intc_1 // 1
++
+frame_bury 1
+label23:
+frame_dig 3
+intc_1 // 1
++
+frame_bury 3
+b label24
+label18:
+frame_dig 1
+intc_0 // 0
+==
+bz label25
+err
+label25:
+frame_dig -1
+gtxns Amount
+bytec 19 // "minEntryStake"
+app_global_get
+>=
+assert
+frame_dig 1
+intc_1 // 1
+-
+intc_3 // 64
+*
+intc_0 // 0
++
+intc 4 // 32
+bytec_2 // "stakers"
+cover 2
+box_extract
+global ZeroAddress
+==
+assert
+frame_dig 1
+intc_1 // 1
+-
+intc_3 // 64
+*
+frame_dig -2
+frame_dig -1
+gtxns Amount
+itob
+concat
+bytec 10 // 0x0000000000000000
+concat
+bytec 10 // 0x0000000000000000
+concat
+frame_dig 0
+itob
+concat
+bytec_2 // "stakers"
+cover 2
+box_replace
+bytec 13 // "numStakers"
+app_global_get
+intc_1 // 1
++
+bytec 13 // "numStakers"
+swap
+app_global_put
+frame_dig 0
+label21:
+frame_bury 0
+popn 4
+retsub
+label104:
+txna ApplicationArgs 2
+btoi
+txna ApplicationArgs 1
+dup
+len
+intc 4 // 32
+==
+assert
+callsub label26
+intc_1 // 1
+return
+label26:
+proto 2 0
+bytec_0 // ""
+dupn 6
+frame_dig -1
+txn Sender
+!=
+bz label27
+callsub label28
+assert
+label27:
+callsub label17
+intc_0 // 0
+frame_bury 0
+label38:
+frame_dig 0
+intc 7 // 200
+<
+bz label29
+global OpcodeBudget
+intc 10 // 300
+<
+bz label30
+itxn_begin
+intc_2 // 6
+itxn_field TypeEnum
+intc_0 // 0
+itxn_field Fee
+bytec 5 // 0x0a8101
+dup
+itxn_field ApprovalProgram
+itxn_field ClearStateProgram
+intc 8 // 5
+itxn_field OnCompletion
+itxn_submit
+label30:
+frame_dig 0
+intc_3 // 64
+*
+intc_3 // 64
+bytec_2 // "stakers"
+cover 2
+box_extract
+frame_bury 1
+frame_dig 1
+extract 0 32
+frame_dig -1
+==
+bz label31
+frame_dig -2
+intc_0 // 0
+==
+bz label32
+frame_dig 1
+extract 32 8
+btoi
+frame_bury -2
+label32:
+frame_dig 1
+extract 32 8
+btoi
+frame_dig -2
+<
+bz label33
+err
+label33:
+frame_dig 1
+intc 4 // 32
+frame_dig 1
+extract 32 8
+btoi
+frame_dig -2
+-
+itob
+replace3
+frame_bury 1
+bytec 6 // "staked"
+app_global_get
+frame_dig -2
+-
+bytec 6 // "staked"
+swap
+app_global_put
+intc_0 // 0
+frame_bury 2
+frame_dig 1
+extract 48 8
+btoi
+intc_0 // 0
+>
+bz label34
+bytec 4 // "poolId"
+app_global_get
+intc_1 // 1
+==
+bz label35
+itxn_begin
+intc_2 // 6
+itxn_field TypeEnum
+bytec 18 // 0x75aff61d
+itxn_field ApplicationArgs
+bytec_1 // "creatorApp"
+app_global_get
+itxn_field ApplicationID
+bytec_3 // "validatorId"
+app_global_get
+itob
+itxn_field ApplicationArgs
+intc_0 // 0
+itxn_field Fee
+itxn_submit
+itxn NumLogs
+intc_1 // 1
+-
+itxnas Logs
+extract 4 0
+frame_bury 3
+itxn_begin
+intc 12 // 4
+itxn_field TypeEnum
+frame_dig 3
+extract 153 8
+btoi
+itxn_field XferAsset
+frame_dig -1
+itxn_field AssetReceiver
+frame_dig 1
+extract 48 8
+btoi
+itxn_field AssetAmount
+intc_0 // 0
+itxn_field Fee
+itxn_submit
+frame_dig 1
+extract 48 8
+btoi
+frame_bury 2
+frame_dig 1
+bytec 10 // 0x0000000000000000
+replace2 48
+frame_bury 1
+b label34
+label35:
+frame_dig 1
+extract 48 8
+btoi
+frame_bury 2
+frame_dig 1
+bytec 10 // 0x0000000000000000
+replace2 48
+frame_bury 1
+label34:
+frame_dig 1
+extract 32 8
+btoi
+intc_0 // 0
+==
+dup
+bnz label36
+frame_dig 1
+extract 32 8
+btoi
+bytec 19 // "minEntryStake"
+app_global_get
+>=
+||
+label36:
+assert
+itxn_begin
+intc_1 // 1
+itxn_field TypeEnum
+frame_dig -2
+itxn_field Amount
+frame_dig -1
+itxn_field Receiver
+pushbytes 0x756e7374616b6564 // "unstaked"
+itxn_field Note
+intc_0 // 0
+itxn_field Fee
+itxn_submit
+intc_0 // 0
+frame_bury 4
+frame_dig 1
+extract 32 8
+btoi
+intc_0 // 0
+==
+bz label37
+bytec 13 // "numStakers"
+app_global_get
+intc_1 // 1
+-
+bytec 13 // "numStakers"
+swap
+app_global_put
+frame_dig 1
+intc_0 // 0
+global ZeroAddress
+replace3
+frame_bury 1
+frame_dig 1
+bytec 10 // 0x0000000000000000
+replace2 40
+frame_bury 1
+frame_dig 1
+bytec 10 // 0x0000000000000000
+replace2 48
+frame_bury 1
+intc_1 // 1
+frame_bury 4
+label37:
+frame_dig 0
+intc_3 // 64
+*
+frame_dig 1
+bytec_2 // "stakers"
+cover 2
+box_replace
+bytec 11 // "binRoundStart"
+app_global_get
+bytec 7 // "roundsPerDay"
+app_global_get
++
+global Round
+-
+frame_bury 5
+frame_dig -2
+itob
+frame_dig 5
+itob
+b*
+dup
+bitlen
+intc 6 // 128
+<=
+assert
+bytec 9 // 0xffffffffffffffffffffffffffffffff
+b&
+dup
+len
+dup
+intc 5 // 16
+-
+swap
+substring3
+frame_bury 6
+bytec 8 // "stakeAccumulator"
+dup
+app_global_get
+frame_dig 6
+b-
+dup
+bitlen
+intc 6 // 128
+<=
+assert
+bytec 9 // 0xffffffffffffffffffffffffffffffff
+b&
+dup
+len
+dup
+intc 5 // 16
+-
+swap
+substring3
+app_global_put
+itxn_begin
+intc_2 // 6
+itxn_field TypeEnum
+bytec 22 // 0xa2dc51b5
+itxn_field ApplicationArgs
+bytec_1 // "creatorApp"
+app_global_get
+itxn_field ApplicationID
+bytec_3 // "validatorId"
+app_global_get
+itob
+bytec 4 // "poolId"
+app_global_get
+itob
+concat
+txna Applications 0
+itob
+concat
+itxn_field ApplicationArgs
+frame_dig -1
+itxn_field ApplicationArgs
+frame_dig -2
+itob
+itxn_field ApplicationArgs
+frame_dig 2
+itob
+itxn_field ApplicationArgs
+frame_dig 4
+bytec 26 // 0x00
+intc_0 // 0
+uncover 2
+setbit
+itxn_field ApplicationArgs
+intc_0 // 0
+itxn_field Fee
+itxn_submit
+retsub
+label31:
+frame_dig 0
+intc_1 // 1
++
+frame_bury 0
+b label38
+label29:
+err
+retsub
+label105:
+callsub label39
+intc_1 // 1
+return
+label39:
+proto 0 0
+bytec_0 // ""
+dupn 4
+txn Sender
+frame_bury 0
+intc_0 // 0
+frame_bury 1
+label46:
+frame_dig 1
+intc 7 // 200
+<
+bz label40
+global OpcodeBudget
+intc 10 // 300
+<
+bz label41
+itxn_begin
+intc_2 // 6
+itxn_field TypeEnum
+intc_0 // 0
+itxn_field Fee
+bytec 5 // 0x0a8101
+dup
+itxn_field ApprovalProgram
+itxn_field ClearStateProgram
+intc 8 // 5
+itxn_field OnCompletion
+itxn_submit
+label41:
+frame_dig 1
+intc_3 // 64
+*
+intc_3 // 64
+bytec_2 // "stakers"
+cover 2
+box_extract
+frame_bury 2
+frame_dig 2
+extract 0 32
+frame_dig 0
+==
+bz label42
+frame_dig 2
+extract 48 8
+btoi
+intc_0 // 0
+==
+bz label43
+retsub
+label43:
+intc_0 // 0
+frame_bury 3
+bytec 4 // "poolId"
+app_global_get
+intc_1 // 1
+==
+bz label44
+itxn_begin
+intc_2 // 6
+itxn_field TypeEnum
+bytec 18 // 0x75aff61d
+itxn_field ApplicationArgs
+bytec_1 // "creatorApp"
+app_global_get
+itxn_field ApplicationID
+bytec_3 // "validatorId"
+app_global_get
+itob
+itxn_field ApplicationArgs
+intc_0 // 0
+itxn_field Fee
+itxn_submit
+itxn NumLogs
+intc_1 // 1
+-
+itxnas Logs
+extract 4 0
+frame_bury 4
+itxn_begin
+intc 12 // 4
+itxn_field TypeEnum
+frame_dig 4
+extract 153 8
+btoi
+itxn_field XferAsset
+frame_dig 0
+itxn_field AssetReceiver
+frame_dig 2
+extract 48 8
+btoi
+itxn_field AssetAmount
+intc_0 // 0
+itxn_field Fee
+itxn_submit
+frame_dig 2
+extract 48 8
+btoi
+frame_bury 3
+frame_dig 2
+bytec 10 // 0x0000000000000000
+replace2 48
+frame_bury 2
+b label45
+label44:
+frame_dig 2
+extract 48 8
+btoi
+frame_bury 3
+frame_dig 2
+bytec 10 // 0x0000000000000000
+replace2 48
+frame_bury 2
+label45:
+frame_dig 1
+intc_3 // 64
+*
+frame_dig 2
+bytec_2 // "stakers"
+cover 2
+box_replace
+itxn_begin
+intc_2 // 6
+itxn_field TypeEnum
+bytec 22 // 0xa2dc51b5
+itxn_field ApplicationArgs
+bytec_1 // "creatorApp"
+app_global_get
+itxn_field ApplicationID
+bytec_3 // "validatorId"
+app_global_get
+itob
+bytec 4 // "poolId"
+app_global_get
+itob
+concat
+txna Applications 0
+itob
+concat
+itxn_field ApplicationArgs
+frame_dig 0
+itxn_field ApplicationArgs
+bytec 10 // 0x0000000000000000
+itxn_field ApplicationArgs
+frame_dig 3
+itob
+itxn_field ApplicationArgs
+intc_0 // 0
+bytec 26 // 0x00
+intc_0 // 0
+uncover 2
+setbit
+itxn_field ApplicationArgs
+intc_0 // 0
+itxn_field Fee
+itxn_submit
+retsub
+label42:
+frame_dig 1
+intc_1 // 1
++
+frame_bury 1
+b label46
+label40:
+err
+retsub
+label106:
+bytec 21 // 0x151f7c75
+txna ApplicationArgs 1
+dup
+len
+intc 4 // 32
+==
+assert
+callsub label47
+concat
+log
+intc_1 // 1
+return
+label47:
+proto 1 1
+bytec_0 // ""
+intc_0 // 0
+frame_bury 0
+label52:
+frame_dig 0
+intc 7 // 200
+<
+bz label48
+global OpcodeBudget
+intc 7 // 200
+<
+bz label49
+itxn_begin
+intc_2 // 6
+itxn_field TypeEnum
+intc_0 // 0
+itxn_field Fee
+bytec 5 // 0x0a8101
+dup
+itxn_field ApprovalProgram
+itxn_field ClearStateProgram
+intc 8 // 5
+itxn_field OnCompletion
+itxn_submit
+label49:
+frame_dig 0
+intc_3 // 64
+*
+intc_0 // 0
++
+intc 4 // 32
+bytec_2 // "stakers"
+cover 2
+box_extract
+frame_dig -1
+==
+bz label50
+frame_dig 0
+intc_3 // 64
+*
+intc_3 // 64
+bytec_2 // "stakers"
+cover 2
+box_extract
+b label51
+label50:
+frame_dig 0
+intc_1 // 1
++
+frame_bury 0
+b label52
+label48:
+err
+label51:
+frame_bury 0
+retsub
+label107:
+txna ApplicationArgs 3
+btoi
+txna ApplicationArgs 2
+btoi
+txna ApplicationArgs 1
+dup
+len
+intc 4 // 32
+==
+assert
+callsub label53
+intc_1 // 1
+return
+label53:
+proto 3 0
+txn Sender
+bytec_1 // "creatorApp"
+app_global_get
+app_params_get AppAddress
+pop
+==
+assert
+bytec 4 // "poolId"
+app_global_get
+intc_1 // 1
+==
+assert
+frame_dig -2
+intc_0 // 0
+!=
+assert
+itxn_begin
+intc 12 // 4
+itxn_field TypeEnum
+frame_dig -2
+itxn_field XferAsset
+frame_dig -1
+itxn_field AssetReceiver
+frame_dig -3
+itxn_field AssetAmount
+intc_0 // 0
+itxn_field Fee
+itxn_submit
+retsub
+label108:
+txna ApplicationArgs 1
+extract 2 0
+callsub label54
+intc_1 // 1
+return
+label54:
+proto 1 0
+callsub label28
+assert
+pushbytes 0x616c676f64566572 // "algodVer"
+frame_dig -1
+app_global_put
+retsub
+label109:
+callsub label55
+intc_1 // 1
+return
+label55:
+proto 0 0
+bytec_0 // ""
+dupn 39
+itxn_begin
+intc_2 // 6
+itxn_field TypeEnum
+bytec 18 // 0x75aff61d
+itxn_field ApplicationArgs
+bytec_1 // "creatorApp"
+app_global_get
+itxn_field ApplicationID
+bytec_3 // "validatorId"
+app_global_get
+itob
+itxn_field ApplicationArgs
+intc_0 // 0
+itxn_field Fee
+itxn_submit
+itxn NumLogs
+intc_1 // 1
+-
+itxnas Logs
+extract 4 0
+frame_bury 0
+frame_dig 0
+extract 169 4
+btoi
+frame_bury 1
+global Round
+frame_bury 2
+frame_dig 2
+frame_dig 2
+frame_dig 1
+%
+-
+frame_bury 3
+bytec 17 // "lastPayout"
+app_global_get
+bytec 17 // "lastPayout"
+app_global_get
+frame_dig 1
+%
+-
+frame_bury 4
+frame_dig 4
+frame_dig 3
+!=
+assert
+callsub label17
+bytec 17 // "lastPayout"
+frame_dig 2
+app_global_put
+bytec 20 // "epochNumber"
+app_global_get
+intc_1 // 1
++
+bytec 20 // "epochNumber"
+swap
+app_global_put
+frame_dig 0
+extract 153 8
+btoi
+intc_0 // 0
+!=
+frame_bury 5
+txna Applications 0
+frame_bury 6
+global CurrentApplicationAddress
+frame_bury 7
+frame_dig 5
+bz label56
+bytec 4 // "poolId"
+app_global_get
+intc_1 // 1
+!=
+bz label57
+itxn_begin
+intc_2 // 6
+itxn_field TypeEnum
+bytec 23 // 0x572767d1
+itxn_field ApplicationArgs
+bytec_1 // "creatorApp"
+app_global_get
+itxn_field ApplicationID
+bytec_3 // "validatorId"
+app_global_get
+itob
+itxn_field ApplicationArgs
+pushbytes 0x0000000000000001 // 0x0000000000000001
+itxn_field ApplicationArgs
+intc_0 // 0
+itxn_field Fee
+itxn_submit
+itxn NumLogs
+intc_1 // 1
+-
+itxnas Logs
+extract 4 0
+btoi
+frame_bury 6
+frame_dig 6
+app_params_get AppAddress
+pop
+frame_bury 7
+label57:
+bytec 4 // "poolId"
+app_global_get
+intc_1 // 1
+==
+bz label58
+itxn_begin
+intc_2 // 6
+itxn_field TypeEnum
+bytec 24 // 0x4df8d86e
+itxn_field ApplicationArgs
+bytec_1 // "creatorApp"
+app_global_get
+itxn_field ApplicationID
+bytec_3 // "validatorId"
+app_global_get
+itob
+itxn_field ApplicationArgs
+intc_0 // 0
+itxn_field Fee
+itxn_submit
+itxn NumLogs
+intc_1 // 1
+-
+itxnas Logs
+extract 4 0
+frame_bury 8
+b label56
+label58:
+itxn_begin
+intc_2 // 6
+itxn_field TypeEnum
+bytec 25 // 0x0c2245e1
+itxn_field ApplicationArgs
+frame_dig 6
+itxn_field ApplicationID
+bytec_3 // "validatorId"
+app_global_get
+itob
+bytec 4 // "poolId"
+app_global_get
+itob
+concat
+txna Applications 0
+itob
+concat
+itxn_field ApplicationArgs
+intc_0 // 0
+itxn_field Fee
+itxn_submit
+itxn NumLogs
+intc_1 // 1
+-
+itxnas Logs
+extract 4 0
+frame_bury 8
+label56:
+itxn_begin
+intc_2 // 6
+itxn_field TypeEnum
+pushbytes 0x1f2f0109 // 0x1f2f0109
+itxn_field ApplicationArgs
+bytec_1 // "creatorApp"
+app_global_get
+itxn_field ApplicationID
+bytec_3 // "validatorId"
+app_global_get
+itob
+itxn_field ApplicationArgs
+intc_0 // 0
+itxn_field Fee
+itxn_submit
+itxn NumLogs
+intc_1 // 1
+-
+itxnas Logs
+extract 4 0
+frame_bury 9
+frame_dig 9
+extract 18 8
+btoi
+frame_bury 10
+global CurrentApplicationAddress
+acct_params_get AcctBalance
+pop
+bytec 6 // "staked"
+app_global_get
+-
+global CurrentApplicationAddress
+acct_params_get AcctMinBalance
+pop
+-
+frame_bury 11
+intc_0 // 0
+frame_bury 12
+callsub label59
+frame_bury 13
+frame_dig 9
+extract 10 8
+btoi
+frame_dig 13
+>
+bz label60
+intc_1 // 1
+frame_bury 12
+label60:
+intc_0 // 0
+frame_bury 14
+intc_0 // 0
+frame_bury 15
+intc_0 // 0
+frame_bury 16
+intc_0 // 0
+frame_bury 17
+frame_dig 5
+bz label61
+frame_dig 7
+frame_dig 0
+extract 153 8
+btoi
+asset_holding_get AssetBalance
+pop
+frame_dig 10
+-
+frame_bury 18
+frame_dig 18
+frame_dig 0
+extract 161 8
+btoi
+>=
+bz label61
+frame_dig 8
+intc_0 // 0
+bytec 4 // "poolId"
+app_global_get
+intc_1 // 1
+-
+intc 14 // 8
+*
++
+intc 14 // 8
+extract3
+btoi
+frame_bury 19
+frame_dig 0
+extract 161 8
+btoi
+frame_dig 19
+mulw
+intc_0 // 0
+intc 9 // 1000000
+divmodw
+pop
+pop
+swap
+!
+assert
+frame_bury 14
+label61:
+frame_dig 14
+intc_0 // 0
+==
+bz label62
+frame_dig 11
+intc 9 // 1000000
+<
+bz label62
+pushbytes 0x21746f6b656e2626216e6f616c676f20746f20706179 // "!token&&!noalgo to pay"
+log
+retsub
+label62:
+frame_dig 12
+bz label63
+frame_dig 11
+frame_dig 0
+extract 173 4
+btoi
+mulw
+intc_0 // 0
+intc 9 // 1000000
+divmodw
+pop
+pop
+swap
+!
+assert
+frame_bury 20
+frame_dig 11
+frame_dig 13
+mulw
+intc_0 // 0
+frame_dig 9
+extract 10 8
+btoi
+divmodw
+pop
+pop
+swap
+!
+assert
+frame_bury 21
+frame_dig 21
+frame_dig 11
+frame_dig 20
+-
+>
+bz label64
+frame_dig 11
+frame_dig 20
+-
+frame_bury 21
+label64:
+frame_dig 11
+frame_dig 21
+-
+frame_bury 17
+itxn_begin
+intc_1 // 1
+itxn_field TypeEnum
+frame_dig 17
+itxn_field Amount
+txn FirstValid
+intc_1 // 1
+-
+block BlkFeeSink
+itxn_field Receiver
+pushbytes 0x706f6f6c207361747572617465642c2065786365737320746f206665652073696e6b // "pool saturated, excess to fee sink"
+itxn_field Note
+intc_0 // 0
+itxn_field Fee
+itxn_submit
+frame_dig 21
+frame_bury 11
+b label65
+label63:
+frame_dig 0
+extract 173 4
+btoi
+intc_0 // 0
+!=
+bz label65
+frame_dig 11
+frame_dig 0
+extract 173 4
+btoi
+mulw
+intc_0 // 0
+intc 9 // 1000000
+divmodw
+pop
+pop
+swap
+!
+assert
+frame_bury 16
+frame_dig 11
+frame_dig 16
+-
+frame_bury 11
+frame_dig 16
+intc_0 // 0
+>
+bz label65
+intc_0 // 0
+frame_bury 22
+frame_dig 0
+extract 40 32
+frame_dig 0
+extract 177 32
+!=
+dup
+bz label66
+frame_dig 0
+extract 40 32
+acct_params_get AcctBalance
+pop
+frame_dig 0
+extract 40 32
+acct_params_get AcctMinBalance
+pop
+-
+intc 13 // 2100000
+<
+&&
+label66:
+bz label67
+frame_dig 16
+intc 13 // 2100000
+<
+bz label68
+frame_dig 16
+b label69
+label68:
+intc 13 // 2100000
+label69:
+frame_bury 22
+itxn_begin
+intc_1 // 1
+itxn_field TypeEnum
+frame_dig 22
+itxn_field Amount
+frame_dig 0
+extract 40 32
+itxn_field Receiver
+pushbytes 0x76616c696461746f722072657761726420746f206d616e6167657220666f722066756e64696e672065706f63682075706461746573 // "validator reward to manager for funding epoch updates"
+itxn_field Note
+intc_0 // 0
+itxn_field Fee
+itxn_submit
+label67:
+frame_dig 16
+frame_dig 22
+-
+intc_0 // 0
+>
+bz label65
+itxn_begin
+intc_1 // 1
+itxn_field TypeEnum
+frame_dig 16
+frame_dig 22
+-
+itxn_field Amount
+frame_dig 0
+extract 177 32
+itxn_field Receiver
+pushbytes 0x76616c696461746f7220726577617264 // "validator reward"
+itxn_field Note
+intc_0 // 0
+itxn_field Fee
+itxn_submit
+label65:
+intc_0 // 0
+frame_bury 23
+frame_dig 11
+intc_0 // 0
+!=
+dup
+bnz label70
+frame_dig 14
+intc_0 // 0
+!=
+||
+label70:
+bz label71
+intc_0 // 0
+frame_bury 24
+frame_dig 11
+frame_bury 25
+frame_dig 14
+frame_bury 26
+intc_0 // 0
+frame_bury 27
+label77:
+frame_dig 27
+intc 7 // 200
+<
+bz label72
+global OpcodeBudget
+intc 16 // 400
+<
+bz label73
+itxn_begin
+intc_2 // 6
+itxn_field TypeEnum
+intc_0 // 0
+itxn_field Fee
+bytec 5 // 0x0a8101
+dup
+itxn_field ApprovalProgram
+itxn_field ClearStateProgram
+intc 8 // 5
+itxn_field OnCompletion
+itxn_submit
+label73:
+frame_dig 27
+intc_3 // 64
+*
+intc_3 // 64
+bytec_2 // "stakers"
+cover 2
+box_extract
+frame_bury 28
+frame_dig 28
+extract 0 32
+global ZeroAddress
+!=
+bz label74
+frame_dig 28
+extract 56 8
+btoi
+frame_dig 3
+>=
+bz label75
+frame_dig 24
+frame_dig 28
+extract 32 8
+btoi
++
+frame_bury 24
+b label74
+label75:
+frame_dig 3
+frame_dig 28
+extract 56 8
+btoi
+-
+frame_bury 29
+frame_dig 29
+frame_dig 1
+<
+bz label74
+frame_dig 24
+frame_dig 28
+extract 32 8
+btoi
++
+frame_bury 24
+frame_dig 29
+intc 11 // 1000
+*
+frame_dig 1
+/
+frame_bury 30
+frame_dig 14
+intc_0 // 0
+>
+bz label76
+frame_dig 28
+extract 32 8
+btoi
+frame_dig 26
+mulw
+frame_dig 30
+uncover 2
+dig 1
+*
+cover 2
+mulw
+cover 2
++
+swap
+bytec 6 // "staked"
+app_global_get
+intc 11 // 1000
+mulw
+divmodw
+pop
+pop
+swap
+!
+assert
+frame_bury 31
+frame_dig 14
+frame_dig 31
+-
+frame_bury 14
+frame_dig 28
+intc 20 // 48
+frame_dig 28
+extract 48 8
+btoi
+frame_dig 31
++
+itob
+replace3
+frame_bury 28
+frame_dig 15
+frame_dig 31
++
+frame_bury 15
+label76:
+frame_dig 28
+extract 32 8
+btoi
+frame_dig 25
+mulw
+frame_dig 30
+uncover 2
+dig 1
+*
+cover 2
+mulw
+cover 2
++
+swap
+bytec 6 // "staked"
+app_global_get
+intc 11 // 1000
+mulw
+divmodw
+pop
+pop
+swap
+!
+assert
+frame_bury 32
+frame_dig 11
+frame_dig 32
+-
+frame_bury 11
+frame_dig 28
+intc 4 // 32
+frame_dig 28
+extract 32 8
+btoi
+frame_dig 32
++
+itob
+replace3
+frame_bury 28
+frame_dig 28
+intc 19 // 40
+frame_dig 28
+extract 40 8
+btoi
+frame_dig 32
++
+itob
+replace3
+frame_bury 28
+frame_dig 23
+frame_dig 32
++
+frame_bury 23
+frame_dig 27
+intc_3 // 64
+*
+frame_dig 28
+bytec_2 // "stakers"
+cover 2
+box_replace
+label74:
+frame_dig 27
+intc_1 // 1
++
+frame_bury 27
+b label77
+label72:
+bytec 6 // "staked"
+app_global_get
+frame_dig 24
+-
+frame_bury 33
+frame_dig 33
+intc_0 // 0
+>
+bz label71
+intc_0 // 0
+frame_bury 34
+label83:
+frame_dig 34
+intc 7 // 200
+<
+bz label71
+global OpcodeBudget
+intc 7 // 200
+<
+bz label78
+itxn_begin
+intc_2 // 6
+itxn_field TypeEnum
+intc_0 // 0
+itxn_field Fee
+bytec 5 // 0x0a8101
+dup
+itxn_field ApprovalProgram
+itxn_field ClearStateProgram
+intc 8 // 5
+itxn_field OnCompletion
+itxn_submit
+label78:
+frame_dig 34
+intc_3 // 64
+*
+intc_3 // 64
+bytec_2 // "stakers"
+cover 2
+box_extract
+frame_bury 35
+frame_dig 35
+extract 0 32
+global ZeroAddress
+!=
+dup
+bz label79
+frame_dig 35
+extract 56 8
+btoi
+frame_dig 3
+<
+&&
+label79:
+bz label80
+frame_dig 3
+frame_dig 35
+extract 56 8
+btoi
+-
+frame_bury 36
+frame_dig 36
+frame_dig 1
+>=
+bz label80
+frame_dig 14
+intc_0 // 0
+>
+bz label81
+frame_dig 35
+extract 32 8
+btoi
+frame_dig 14
+mulw
+intc_0 // 0
+frame_dig 33
+divmodw
+pop
+pop
+swap
+!
+assert
+frame_bury 37
+frame_dig 35
+intc 20 // 48
+frame_dig 35
+extract 48 8
+btoi
+frame_dig 37
++
+itob
+replace3
+frame_bury 35
+frame_dig 15
+frame_dig 37
++
+frame_bury 15
+label81:
+frame_dig 11
+intc_0 // 0
+>
+bz label82
+frame_dig 35
+extract 32 8
+btoi
+frame_dig 11
+mulw
+intc_0 // 0
+frame_dig 33
+divmodw
+pop
+pop
+swap
+!
+assert
+frame_bury 38
+frame_dig 35
+intc 4 // 32
+frame_dig 35
+extract 32 8
+btoi
+frame_dig 38
++
+itob
+replace3
+frame_bury 35
+frame_dig 35
+intc 19 // 40
+frame_dig 35
+extract 40 8
+btoi
+frame_dig 38
++
+itob
+replace3
+frame_bury 35
+frame_dig 23
+frame_dig 38
++
+frame_bury 23
+label82:
+frame_dig 34
+intc_3 // 64
+*
+frame_dig 35
+bytec_2 // "stakers"
+cover 2
+box_replace
+label80:
+frame_dig 34
+intc_1 // 1
++
+frame_bury 34
+b label83
+label71:
+bytec 11 // "binRoundStart"
+app_global_get
+bytec 7 // "roundsPerDay"
+app_global_get
++
+global Round
+-
+frame_bury 39
+bytec 6 // "staked"
+app_global_get
+frame_dig 23
++
+bytec 6 // "staked"
+swap
+app_global_put
+bytec 8 // "stakeAccumulator"
+dup
+app_global_get
+frame_dig 23
+itob
+frame_dig 39
+itob
+b*
+b+
+dup
+bitlen
+intc 6 // 128
+<=
+assert
+bytec 9 // 0xffffffffffffffffffffffffffffffff
+b&
+dup
+len
+dup
+intc 5 // 16
+-
+swap
+substring3
+app_global_put
+bytec 12 // "rewardAccumulator"
+dup
+app_global_get
+frame_dig 23
++
+app_global_put
+itxn_begin
+intc_2 // 6
+itxn_field TypeEnum
+pushbytes 0x418fcefc // 0x418fcefc
+itxn_field ApplicationArgs
+bytec_1 // "creatorApp"
+app_global_get
+itxn_field ApplicationID
+bytec_3 // "validatorId"
+app_global_get
+itob
+bytec 4 // "poolId"
+app_global_get
+itob
+concat
+txna Applications 0
+itob
+concat
+itxn_field ApplicationArgs
+frame_dig 23
+itob
+itxn_field ApplicationArgs
+frame_dig 15
+itob
+itxn_field ApplicationArgs
+frame_dig 16
+itob
+itxn_field ApplicationArgs
+frame_dig 17
+itob
+itxn_field ApplicationArgs
+intc_0 // 0
+itxn_field Fee
+itxn_submit
+retsub
+label110:
+txna ApplicationArgs 6
+btoi
+txna ApplicationArgs 5
+btoi
+txna ApplicationArgs 4
+btoi
+txna ApplicationArgs 3
+extract 2 0
+txna ApplicationArgs 2
+extract 2 0
+txna ApplicationArgs 1
+extract 2 0
+txn GroupIndex
+intc_1 // 1
+-
+dup
+gtxns TypeEnum
+intc_1 // 1
+==
+assert
+callsub label84
+intc_1 // 1
+return
+label84:
+proto 7 0
+bytec_0 // ""
+callsub label28
+assert
+callsub label85
+frame_bury 0
+frame_dig -1
+gtxns Receiver
+global CurrentApplicationAddress
+==
+assert
+frame_dig -1
+gtxns Amount
+frame_dig 0
+==
+assert
+itxn_begin
+intc 18 // 2
+itxn_field TypeEnum
+frame_dig -2
+itxn_field VotePK
+frame_dig -3
+itxn_field SelectionPK
+frame_dig -4
+itxn_field StateProofPK
+frame_dig -5
+itxn_field VoteFirst
+frame_dig -6
+itxn_field VoteLast
+frame_dig -7
+itxn_field VoteKeyDilution
+frame_dig 0
+itxn_field Fee
+itxn_submit
+retsub
+label111:
+callsub label86
+intc_1 // 1
+return
+label86:
+proto 0 0
+txn Sender
+bytec_1 // "creatorApp"
+app_global_get
+app_params_get AppAddress
+pop
+!=
+bz label87
+callsub label28
+assert
+label87:
+itxn_begin
+intc 18 // 2
+itxn_field TypeEnum
+intc_0 // 0
+itxn_field Fee
+itxn_submit
+retsub
+label112:
+txna ApplicationArgs 2
+extract 2 0
+txna ApplicationArgs 1
+btoi
+callsub label88
+intc_1 // 1
+return
+label88:
+proto 2 0
+callsub label28
+assert
+itxn_begin
+intc_2 // 6
+itxn_field TypeEnum
+intc 21 // 0
+itxn_field ApplicationID
+pushbytes 0x7665726966795f6e66645f61646472 // "verify_nfd_addr"
+itxn_field ApplicationArgs
+frame_dig -2
+itxn_field ApplicationArgs
+frame_dig -1
+itob
+itxn_field ApplicationArgs
+global CurrentApplicationAddress
+itxn_field ApplicationArgs
+frame_dig -1
+itxn_field Applications
+intc_0 // 0
+itxn_field Fee
+itxn_submit
+retsub
+label113:
+bytec 21 // 0x151f7c75
+txna ApplicationArgs 1
+dup
+len
+pushint 24
+==
+assert
+callsub label89
+concat
+log
+intc_1 // 1
+return
+label89:
+proto 1 1
+bytec_0 // ""
+bytec_3 // "validatorId"
+app_global_get
+frame_dig -1
+extract 0 8
+btoi
+==
+assert
+bytec 4 // "poolId"
+app_global_get
+intc_1 // 1
+==
+assert
+frame_dig -1
+extract 8 8
+btoi
+intc_1 // 1
+!=
+assert
+itxn_begin
+intc_2 // 6
+itxn_field TypeEnum
+bytec 23 // 0x572767d1
+itxn_field ApplicationArgs
+bytec_1 // "creatorApp"
+app_global_get
+itxn_field ApplicationID
+frame_dig -1
+extract 0 8
+btoi
+itob
+itxn_field ApplicationArgs
+frame_dig -1
+extract 8 8
+btoi
+itob
+itxn_field ApplicationArgs
+intc_0 // 0
+itxn_field Fee
+itxn_submit
+itxn NumLogs
+intc_1 // 1
+-
+itxnas Logs
+extract 4 0
+btoi
+frame_bury 0
+frame_dig 0
+frame_dig -1
+extract 16 8
+btoi
+==
+assert
+txn Sender
+frame_dig -1
+extract 16 8
+btoi
+app_params_get AppAddress
+pop
+==
+assert
+itxn_begin
+intc_2 // 6
+itxn_field TypeEnum
+bytec 24 // 0x4df8d86e
+itxn_field ApplicationArgs
+bytec_1 // "creatorApp"
+app_global_get
+itxn_field ApplicationID
+bytec_3 // "validatorId"
+app_global_get
+itob
+itxn_field ApplicationArgs
+intc_0 // 0
+itxn_field Fee
+itxn_submit
+itxn NumLogs
+intc_1 // 1
+-
+itxnas Logs
+extract 4 0
+frame_bury 0
+retsub
+label28:
+proto 0 1
+bytec_0 // ""
+itxn_begin
+intc_2 // 6
+itxn_field TypeEnum
+pushbytes 0x2fa22c4b // 0x2fa22c4b
+itxn_field ApplicationArgs
+bytec_1 // "creatorApp"
+app_global_get
+itxn_field ApplicationID
+bytec_3 // "validatorId"
+app_global_get
+itob
+itxn_field ApplicationArgs
+intc_0 // 0
+itxn_field Fee
+itxn_submit
+itxn NumLogs
+intc_1 // 1
+-
+itxnas Logs
+extract 4 0
+frame_bury 0
+txn Sender
+frame_dig 0
+extract 0 32
+==
+dup
+bnz label90
+txn Sender
+frame_dig 0
+extract 32 32
+==
+||
+label90:
+frame_bury 0
+retsub
+label59:
+proto 0 1
+bytec_0 // ""
+callsub label91
+frame_bury 0
+frame_dig 0
+pushint 100
+mulw
+intc_0 // 0
+intc 11 // 1000
+divmodw
+pop
+pop
+swap
+!
+assert
+frame_bury 0
+retsub
+label85:
+proto 0 1
+global CurrentApplicationAddress
+acct_params_get AcctIncentiveEligible
+pop
+!
+bz label92
+global PayoutsGoOnlineFee
+retsub
+label92:
+intc_0 // 0
+retsub
+label91:
+proto 0 1
+online_stake
+retsub
+label17:
+proto 0 0
+bytec_0 // ""
+dupn 4
+bytec 7 // "roundsPerDay"
+app_global_get
+itob
+frame_bury 0
+global Round
+bytec 11 // "binRoundStart"
+app_global_get
+frame_dig 0
+dup
+bitlen
+intc_3 // 64
+<=
+assert
+pushbytes 0xffffffffffffffff // 0xffffffffffffffff
+b&
+dup
+len
+dup
+intc 14 // 8
+-
+swap
+substring3
+btoi
++
+>=
+bz label93
+global OpcodeBudget
+intc 10 // 300
+<
+bz label94
+itxn_begin
+intc_2 // 6
+itxn_field TypeEnum
+intc_0 // 0
+itxn_field Fee
+bytec 5 // 0x0a8101
+dup
+itxn_field ApprovalProgram
+itxn_field ClearStateProgram
+intc 8 // 5
+itxn_field OnCompletion
+itxn_submit
+label94:
+frame_dig 0
+pushbytes 0x0000000000000000000000000000016d // 0x0000000000000000000000000000016d
+b*
+dup
+bitlen
+intc 6 // 128
+<=
+assert
+bytec 9 // 0xffffffffffffffffffffffffffffffff
+b&
+dup
+len
+dup
+intc 5 // 16
+-
+swap
+substring3
+frame_bury 1
+bytec 8 // "stakeAccumulator"
+app_global_get
+frame_dig 0
+b/
+dup
+bitlen
+intc 6 // 128
+<=
+assert
+bytec 9 // 0xffffffffffffffffffffffffffffffff
+b&
+dup
+len
+dup
+intc 5 // 16
+-
+swap
+substring3
+frame_bury 2
+frame_dig 2
+bytec 15 // 0x00000000000000000000000000000000
+b!=
+bz label95
+bytec 12 // "rewardAccumulator"
+app_global_get
+itob
+pushbytes 0x000000000000000000000000000f4240 // 0x000000000000000000000000000f4240
+b*
+frame_dig 2
+b/
+frame_dig 1
+frame_dig 0
+b/
+b*
+bytec 16 // 0x00000000000000000000000000000064
+b/
+dup
+bitlen
+intc 6 // 128
+<=
+assert
+bytec 9 // 0xffffffffffffffffffffffffffffffff
+b&
+dup
+len
+dup
+intc 5 // 16
+-
+swap
+substring3
+frame_bury 3
+pushbytes 0x0000000000000000000000000000000a // 0x0000000000000000000000000000000a
+frame_bury 4
+frame_dig 2
+pushbytes 0x000000000000000000000045d964b800 // 0x000000000000000000000045d964b800
+b>
+bz label96
+pushbytes 0x0000000000000000000000000000005a // 0x0000000000000000000000000000005a
+frame_bury 4
+label96:
+bytec 14 // "ewma"
+app_global_get
+bytec 15 // 0x00000000000000000000000000000000
+b==
+bz label97
+bytec 14 // "ewma"
+frame_dig 3
+app_global_put
+b label95
+label97:
+bytec 14 // "ewma"
+dup
+app_global_get
+bytec 16 // 0x00000000000000000000000000000064
+frame_dig 4
+b-
+b*
+bytec 16 // 0x00000000000000000000000000000064
+b/
+frame_dig 3
+frame_dig 4
+b*
+bytec 16 // 0x00000000000000000000000000000064
+b/
+b+
+dup
+bitlen
+intc 6 // 128
+<=
+assert
+bytec 9 // 0xffffffffffffffffffffffffffffffff
+b&
+dup
+len
+dup
+intc 5 // 16
+-
+swap
+substring3
+app_global_put
+label95:
+callsub label7
+bytec 8 // "stakeAccumulator"
+bytec 6 // "staked"
+app_global_get
+itob
+bytec 7 // "roundsPerDay"
+app_global_get
+itob
+b*
+dup
+bitlen
+intc 6 // 128
+<=
+assert
+bytec 9 // 0xffffffffffffffffffffffffffffffff
+b&
+dup
+len
+dup
+intc 5 // 16
+-
+swap
+substring3
+app_global_put
+bytec 12 // "rewardAccumulator"
+intc_0 // 0
+app_global_put
+bytec 11 // "binRoundStart"
+global Round
+global Round
+bytec 7 // "roundsPerDay"
+app_global_get
+%
+-
+app_global_put
+label93:
+retsub
+label7:
+proto 0 0
+bytec_0 // ""
+txn FirstValid
+pushint 12
+<
+bz label98
+bytec 7 // "roundsPerDay"
+intc 17 // 30857
+app_global_put
+retsub
+label98:
+txn FirstValid
+intc_1 // 1
+-
+block BlkTimestamp
+txn FirstValid
+pushint 11
+-
+block BlkTimestamp
+-
+frame_bury 0
+frame_dig 0
+intc_0 // 0
+==
+bz label99
+bytec 7 // "roundsPerDay"
+intc 17 // 30857
+app_global_put
+retsub
+label99:
+bytec 7 // "roundsPerDay"
+pushint 864000
+frame_dig 0
+/
+app_global_put
+retsub
+label3:
+pushbytes 0x59e90aa6 // 0x59e90aa6
+txna ApplicationArgs 0
+match label100
+err
+label1:
+pushbytes 0x3172ca9d // 0x3172ca9d
+pushbytes 0x47cfcc04 // 0x47cfcc04
+pushbytes 0xf9c70cbd // 0xf9c70cbd
+pushbytes 0x421b5abe // 0x421b5abe
+pushbytes 0xf5892d56 // 0xf5892d56
+pushbytes 0x5cfbb057 // 0x5cfbb057
+pushbytes 0x63f3f28b // 0x63f3f28b
+pushbytes 0x86a3725c // 0x86a3725c
+pushbytes 0xefc2608d // 0xefc2608d
+pushbytes 0x400e14fb // 0x400e14fb
+pushbytes 0x51ef3b21 // 0x51ef3b21
+pushbytes 0xa24e2717 // 0xa24e2717
+bytec 25 // 0x0c2245e1
+txna ApplicationArgs 0
+match label101 label102 label103 label104 label105 label106 label107 label108 label109 label110 label111 label112 label113
+err

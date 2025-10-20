@@ -1,0 +1,5 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`StakingPoolClient > bytecode is smaller or equal to TEALScript > StakingPool-bytecode-size 1`] = `4197`;
+
+exports[`ValidatorRegistryClient > bytecode is smaller or equal to TEALScript > ValidatorRegistry-bytecode-size 1`] = `5145`;
