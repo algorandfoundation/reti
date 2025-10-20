@@ -1,9 +1,9 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`StakingPoolClient > bytecode is smaller or equal to TEALScript > StakingPool-bytecode-size 1`] = `4197`;
+exports[`StakingPoolClient > bytecode is smaller or equal to TEALScript > StakingPool-bytecode-size 1`] = `4328`;
 
-exports[`StakingPoolClient > bytecode is smaller or equal to TEALScript > StakingPool-bytecode-size-percentage 1`] = `"91.78"`;
+exports[`StakingPoolClient > bytecode is smaller or equal to TEALScript > StakingPool-bytecode-size-percentage 1`] = `"94.64"`;
 
-exports[`ValidatorRegistryClient > bytecode is smaller or equal to TEALScript > ValidatorRegistry-bytecode-size 1`] = `5145`;
+exports[`ValidatorRegistryClient > bytecode is smaller or equal to TEALScript > ValidatorRegistry-bytecode-size 1`] = `5468`;
 
-exports[`ValidatorRegistryClient > bytecode is smaller or equal to TEALScript > ValidatorRegistry-bytecode-size-percentage 1`] = `"81.32"`;
+exports[`ValidatorRegistryClient > bytecode is smaller or equal to TEALScript > ValidatorRegistry-bytecode-size-percentage 1`] = `"86.42"`;

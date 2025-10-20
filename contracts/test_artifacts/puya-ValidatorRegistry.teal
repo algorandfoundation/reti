@@ -3,7 +3,7 @@
 
 // @algorandfoundation/algorand-typescript/arc4/index.d.ts::Contract.approvalProgram() -> uint64:
 main:
-    intcblock 0 1 18 8 268 432 200 700 900 192 1000000 226 4096 278 252 74100 TMPL_NFD_REGISTRY_APP_ID
+    intcblock 0 1 8 24 268 432 200 700 900 192 1000000 226 4096 278 252 74100 TMPL_NFD_REGISTRY_APP_ID
     bytecblock "v" 0x151f7c75 "" "staked" "numStakers" "poolTemplateApprovalBytes" "sps" 0x00 "numV" "i.owner.a" "init" 0x0002 0x0000 0x068101 0x00000000000000000000000000000001 0x000100000000000003e8 0x63f3f28b 0x12f4bd4b
     // contracts/validatorRegistry.algo.ts:90
     // export class ValidatorRegistry extends Contract {
@@ -111,7 +111,7 @@ wideRatio:
     // for (const factor of numeratorFactors) {
     frame_dig -2
     intc_0 // 0
-    extract_uint16
+    extract_uint16 // on error: invalid array length header
     intc_0 // 0
 
 wideRatio_for_header@1:
@@ -126,9 +126,9 @@ wideRatio_for_header@1:
     frame_dig 5
     dup
     cover 2
-    intc_3 // 8
+    intc_2 // 8
     *
-    intc_3 // 8
+    intc_2 // 8
     extract3 // on error: index access is out of bounds
     // contracts/utils.algo.ts:7
     // numerator = new Uint128(BigUint(factor) * numerator.asBigUint())
@@ -157,7 +157,7 @@ wideRatio_after_for@4:
     // for (const factor of denominatorFactors) {
     frame_dig -1
     intc_0 // 0
-    extract_uint16
+    extract_uint16 // on error: invalid array length header
     frame_bury 1
     intc_0 // 0
     frame_bury 2
@@ -174,9 +174,9 @@ wideRatio_for_header@5:
     frame_dig 2
     dup
     cover 2
-    intc_3 // 8
+    intc_2 // 8
     *
-    intc_3 // 8
+    intc_2 // 8
     extract3 // on error: index access is out of bounds
     // contracts/utils.algo.ts:12
     // denominator = new Uint128(BigUint(factor) * denominator.asBigUint())
@@ -206,10 +206,10 @@ wideRatio_after_for@8:
     // return new Uint64(ratio).asUint64()
     dup
     len
-    intc_3 // 8
+    intc_2 // 8
     <=
     assert // overflow
-    intc_3 // 8
+    intc_2 // 8
     bzero
     b|
     btoi
@@ -262,6 +262,11 @@ initStakingContract:
     // contracts/validatorRegistry.algo.ts:124
     // initStakingContract(approvalProgramSize: uint64): void {
     txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     btoi
     // contracts/validatorRegistry.algo.ts:94
     // stakingPoolApprovalProgram = Box<bytes>({ key: 'poolTemplateApprovalBytes' })
@@ -282,8 +287,22 @@ loadStakingContractData:
     // contracts/validatorRegistry.algo.ts:129
     // loadStakingContractData(offset: uint64, data: bytes): void {
     txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     btoi
     txna ApplicationArgs 2
+    dup
+    intc_0 // 0
+    extract_uint16 // on error: invalid array length header
+    pushint 2 // 2
+    +
+    dig 1
+    len
+    ==
+    assert // invalid number of bytes for arc4.dynamic_array<arc4.uint8>
     extract 2 0
     // contracts/validatorRegistry.algo.ts:130
     // assert(!this.stakingPoolInitialized.value)
@@ -360,7 +379,7 @@ getProtocolConstraints:
     concat
     // contracts/validatorRegistry.algo.ts:197
     // maxNodes: MAX_NODES,
-    intc_3 // 8
+    intc_2 // 8
     // contracts/validatorRegistry.algo.ts:188-200
     // return {
     //     epochPayoutRoundsMin: MIN_EPOCH_LENGTH,
@@ -456,6 +475,11 @@ getValidatorConfig:
     // @readonly
     // getValidatorConfig(validatorId: ValidatorIdType): ValidatorConfig {
     txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     btoi
     // contracts/validatorRegistry.algo.ts:213
     // return this.validatorList(validatorId).value.config
@@ -487,6 +511,11 @@ getValidatorState:
     // @readonly
     // getValidatorState(validatorId: ValidatorIdType): ValidatorCurState {
     txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     btoi
     // contracts/validatorRegistry.algo.ts:218
     // return this.validatorList(validatorId).value.state
@@ -518,6 +547,11 @@ getValidatorOwnerAndManager:
     // @readonly
     // getValidatorOwnerAndManager(validatorId: ValidatorIdType): [Account, Account] {
     txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     btoi
     // contracts/validatorRegistry.algo.ts:224
     // this.validatorList(validatorId).value.config.owner,
@@ -562,6 +596,11 @@ getPools:
     // @readonly
     // getPools(validatorId: ValidatorIdType): PoolInfo[] {
     txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     btoi
     // contracts/validatorRegistry.algo.ts:237
     // const retData: PoolInfo[] = []
@@ -587,7 +626,7 @@ getPools_while_top@2:
     // contracts/validatorRegistry.algo.ts:239
     // for (let i: uint64 = 0; i < poolSet.length; i += 1) {
     dup
-    pushint 24 // 24
+    intc_3 // 24
     <
     bz getPools_block@7
     // contracts/validatorRegistry.algo.ts:240
@@ -597,9 +636,9 @@ getPools_while_top@2:
     intc 5 // 432
     extract3
     dig 1
-    intc_2 // 18
+    pushint 18 // 18
     *
-    intc_2 // 18
+    pushint 18 // 18
     extract3 // on error: index access is out of bounds
     dup
     bury 5
@@ -647,8 +686,18 @@ getPoolAppId:
     // @readonly
     // getPoolAppId(validatorId: uint64, poolId: uint64): uint64 {
     txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     btoi
     txna ApplicationArgs 2
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     btoi
     dup
     // contracts/validatorRegistry.algo.ts:257
@@ -667,7 +716,7 @@ getPoolAppId:
     bury 1
     assert // Box must have value
     dup
-    pushint 24 // 24
+    intc_3 // 24
     <=
     bz getPoolAppId_bool_false@4
     intc_1 // 1
@@ -700,9 +749,9 @@ getPoolAppId_bool_merge@5:
     intc 5 // 432
     extract3
     swap
-    intc_2 // 18
+    pushint 18 // 18
     *
-    intc_2 // 18
+    pushint 18 // 18
     extract3 // on error: index access is out of bounds
     extract 0 8
     // contracts/validatorRegistry.algo.ts:254-255
@@ -726,6 +775,11 @@ getPoolInfo:
     // @readonly
     // getPoolInfo(poolKey: ValidatorPoolKey): PoolInfo {
     txna ApplicationArgs 1
+    dup
+    len
+    intc_3 // 24
+    ==
+    assert // invalid number of bytes for contracts/validatorConfigs.algo.ts::ValidatorPoolKey
     // contracts/validatorRegistry.algo.ts:265
     // return this.validatorList(poolKey.id).value.pools[poolKey.poolId - 1]
     dup
@@ -740,7 +794,7 @@ getPoolInfo:
     box_get
     assert // Box must have value
     swap
-    intc_3 // 8
+    intc_2 // 8
     extract_uint64
     intc_1 // 1
     -
@@ -749,9 +803,9 @@ getPoolInfo:
     intc 5 // 432
     extract3
     swap
-    intc_2 // 18
+    pushint 18 // 18
     *
-    intc_2 // 18
+    pushint 18 // 18
     extract3 // on error: index access is out of bounds
     // contracts/validatorRegistry.algo.ts:263-264
     // @readonly
@@ -770,6 +824,11 @@ getCurMaxStakePerPool:
     // @readonly
     // getCurMaxStakePerPool(validatorId: ValidatorIdType): uint64 {
     txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     btoi
     callsub contracts/validatorRegistry.algo.ts::ValidatorRegistry.getCurMaxStakePerPool
     itob
@@ -783,15 +842,19 @@ getCurMaxStakePerPool:
 
 // contracts/validatorRegistry.algo.ts::ValidatorRegistry.doesStakerNeedToPayMBR[routing]() -> void:
 doesStakerNeedToPayMBR:
-    // contracts/validatorRegistry.algo.ts:112
-    // stakerPoolSet = BoxMap<Account, FixedArray<ValidatorPoolKey, typeof MAX_POOLS_PER_STAKER>>({ keyPrefix: 'sps' })
-    bytec 6 // "sps"
     // contracts/validatorRegistry.algo.ts:293-294
     // @readonly
     // doesStakerNeedToPayMBR(staker: Account): boolean {
     txna ApplicationArgs 1
+    dup
+    len
+    pushint 32 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
     // contracts/validatorRegistry.algo.ts:112
     // stakerPoolSet = BoxMap<Account, FixedArray<ValidatorPoolKey, typeof MAX_POOLS_PER_STAKER>>({ keyPrefix: 'sps' })
+    bytec 6 // "sps"
+    swap
     concat
     // contracts/validatorRegistry.algo.ts:295
     // return !this.stakerPoolSet(staker).exists
@@ -818,15 +881,19 @@ getStakedPoolsForAccount:
     intc_0 // 0
     dupn 2
     bytec_2 // ""
-    // contracts/validatorRegistry.algo.ts:112
-    // stakerPoolSet = BoxMap<Account, FixedArray<ValidatorPoolKey, typeof MAX_POOLS_PER_STAKER>>({ keyPrefix: 'sps' })
-    bytec 6 // "sps"
     // contracts/validatorRegistry.algo.ts:304-305
     // @readonly
     // getStakedPoolsForAccount(staker: Account): ValidatorPoolKey[] {
     txna ApplicationArgs 1
+    dup
+    len
+    pushint 32 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
     // contracts/validatorRegistry.algo.ts:112
     // stakerPoolSet = BoxMap<Account, FixedArray<ValidatorPoolKey, typeof MAX_POOLS_PER_STAKER>>({ keyPrefix: 'sps' })
+    bytec 6 // "sps"
+    swap
     concat
     dup
     // contracts/validatorRegistry.algo.ts:306
@@ -876,11 +943,11 @@ getStakedPoolsForAccount_while_top@4:
     // contracts/validatorRegistry.algo.ts:312
     // if (poolSet[i].id !== 0) {
     dig 1
-    pushint 24 // 24
+    intc_3 // 24
     *
     dig 4
     swap
-    pushint 24 // 24
+    intc_3 // 24
     extract3 // on error: index access is out of bounds
     dup
     bury 6
@@ -926,6 +993,11 @@ getTokenPayoutRatio:
     // @readonly
     // getTokenPayoutRatio(validatorId: ValidatorIdType): PoolTokenPayoutRatio {
     txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     btoi
     // contracts/validatorRegistry.algo.ts:328
     // return this.validatorList(validatorId).value.tokenPayoutRatio
@@ -959,6 +1031,11 @@ getNodePoolAssignments:
     // @readonly
     // getNodePoolAssignments(validatorId: uint64): NodePoolAssignmentConfig {
     txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     btoi
     // contracts/validatorRegistry.algo.ts:333
     // assert(this.validatorList(validatorId).exists, "the specified validator id doesn't exist")
@@ -1024,10 +1101,25 @@ addValidator:
     intc_1 // pay
     ==
     assert // transaction type is pay
+    txna ApplicationArgs 1
+    dup
+    intc_0 // 0
+    extract_uint16 // on error: invalid array length header
+    pushint 2 // 2
+    +
+    swap
+    len
+    ==
+    assert // invalid number of bytes for arc4.dynamic_array<arc4.uint8>
     txna ApplicationArgs 2
     dupn 2
+    len
+    pushint 242 // 242
+    ==
+    assert // invalid number of bytes for contracts/validatorConfigs.algo.ts::ValidatorConfig
     // contracts/validatorRegistry.algo.ts:1046
     // assert(config.owner !== Global.zeroAddress)
+    dup
     extract 8 32
     dup
     cover 2
@@ -1339,8 +1431,18 @@ changeValidatorManager:
     // contracts/validatorRegistry.algo.ts:401
     // changeValidatorManager(validatorId: ValidatorIdType, manager: Account): void {
     txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     btoi
     txna ApplicationArgs 2
+    dup
+    len
+    pushint 32 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
     // contracts/validatorRegistry.algo.ts:402
     // this.callerMustBeOwner(validatorId)
     dig 1
@@ -1376,9 +1478,24 @@ changeValidatorSunsetInfo:
     // contracts/validatorRegistry.algo.ts:415
     // changeValidatorSunsetInfo(validatorId: ValidatorIdType, sunsettingOn: uint64, sunsettingTo: ValidatorIdType): void {
     txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     btoi
     txna ApplicationArgs 2
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     txna ApplicationArgs 3
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     // contracts/validatorRegistry.algo.ts:416
     // this.callerMustBeOwner(validatorId)
     dig 2
@@ -1414,10 +1531,30 @@ changeValidatorNFD:
     // contracts/validatorRegistry.algo.ts:430
     // changeValidatorNFD(validatorId: ValidatorIdType, nfdAppID: uint64, nfdName: string): void {
     txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     btoi
     txna ApplicationArgs 2
     dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    dup
     btoi
+    txna ApplicationArgs 3
+    dup
+    intc_0 // 0
+    extract_uint16 // on error: invalid array length header
+    pushint 2 // 2
+    +
+    swap
+    len
+    ==
+    assert // invalid number of bytes for arc4.dynamic_array<arc4.uint8>
     // contracts/validatorRegistry.algo.ts:431
     // this.callerMustBeOwner(validatorId)
     dig 2
@@ -1461,8 +1598,18 @@ changeValidatorCommissionAddress:
     // contracts/validatorRegistry.algo.ts:446
     // changeValidatorCommissionAddress(validatorId: ValidatorIdType, commissionAddress: Account): void {
     txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     btoi
     txna ApplicationArgs 2
+    dup
+    len
+    pushint 32 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
     // contracts/validatorRegistry.algo.ts:447
     // this.callerMustBeOwner(validatorId)
     dig 1
@@ -1505,21 +1652,52 @@ changeValidatorRewardInfo:
     //     RewardPerPayout: uint64,
     // ): void {
     txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     btoi
     dup
     txna ApplicationArgs 2
     dup
-    uncover 2
+    cover 2
+    dup
+    len
+    intc_1 // 1
+    ==
+    assert // invalid number of bytes for arc4.uint8
     txna ApplicationArgs 3
-    cover 2
+    dup
+    cover 3
+    len
+    pushint 32 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
     txna ApplicationArgs 4
-    cover 2
+    dup
+    cover 3
+    len
+    pushint 32 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<uint64, 4>
     txna ApplicationArgs 5
-    cover 2
+    dup
+    cover 3
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     txna ApplicationArgs 6
-    cover 2
+    dup
+    cover 3
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     // contracts/validatorRegistry.algo.ts:464
     // this.callerMustBeOwner(validatorId)
+    swap
     callsub callerMustBeOwner
     // contracts/validatorRegistry.algo.ts:467
     // EntryGatingType.asUint64() >= GATING_TYPE_NONE && EntryGatingType.asUint64() < GATING_TYPE_CONST_MAX,
@@ -1619,8 +1797,18 @@ addPool:
     ==
     assert // transaction type is pay
     txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     btoi
     txna ApplicationArgs 2
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     btoi
     // contracts/validatorRegistry.algo.ts:499
     // this.callerMustBeOwnerOrManager(validatorId)
@@ -1665,7 +1853,7 @@ addPool:
     // contracts/validatorRegistry.algo.ts:507
     // if ((numPools as uint64) >= MAX_POOLS) {
     dup
-    pushint 24 // 24
+    intc_3 // 24
     >=
     !
     assert // already at max pool size
@@ -1812,11 +2000,11 @@ addPool:
     dig 1
     itob
     dig 1
-    pushint 24 // 24
+    intc_3 // 24
     <
     assert // index out of bounds
     swap
-    intc_2 // 18
+    pushint 18 // 18
     *
     intc 4 // 268
     +
@@ -1884,9 +2072,19 @@ addStake:
     ==
     assert // transaction type is pay
     txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     btoi
     dup
     txna ApplicationArgs 2
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     btoi
     swap
     // contracts/validatorRegistry.algo.ts:563
@@ -2100,7 +2298,7 @@ addStake_for_header@36:
     extract 0 242
     extract 113 32
     dig 13
-    intc_3 // 8
+    intc_2 // 8
     *
     extract_uint64
     // contracts/validatorRegistry.algo.ts:1260
@@ -2284,7 +2482,7 @@ addStake_after_if_else@5:
     bury 16
     // contracts/validatorRegistry.algo.ts:611
     // if (poolKey.poolId === 0) {
-    intc_3 // 8
+    intc_2 // 8
     extract_uint64
     dup
     bury 7
@@ -2326,11 +2524,11 @@ addStake_while_top@7:
     // contracts/validatorRegistry.algo.ts:1146
     // poolSet[i].id === poolKey.id &&
     dig 16
-    pushint 24 // 24
+    intc_3 // 24
     *
     dig 24
     swap
-    pushint 24 // 24
+    intc_3 // 24
     extract3 // on error: index access is out of bounds
     dup
     bury 28
@@ -2352,7 +2550,7 @@ addStake_while_top@7:
     // contracts/validatorRegistry.algo.ts:1146-1147
     // poolSet[i].id === poolKey.id &&
     // poolSet[i].poolId === poolKey.poolId &&
-    intc_3 // 8
+    intc_2 // 8
     // contracts/validatorRegistry.algo.ts:1147
     // poolSet[i].poolId === poolKey.poolId &&
     extract_uint64
@@ -2425,11 +2623,11 @@ addStake_after_inlined_contracts/validatorRegistry.algo.ts::ValidatorRegistry.up
     intc 5 // 432
     extract3
     dig 1
-    intc_2 // 18
+    pushint 18 // 18
     *
     swap
     dig 1
-    intc_2 // 18
+    pushint 18 // 18
     extract3 // on error: index access is out of bounds
     intc_0 // 0
     extract_uint64
@@ -2537,7 +2735,7 @@ addStake_after_inlined_contracts/validatorRegistry.algo.ts::ValidatorRegistry.up
     assert // overflow
     extract 6 2
     uncover 3
-    pushint 24 // 24
+    intc_3 // 24
     <
     assert // index out of bounds
     dig 2
@@ -2698,7 +2896,7 @@ addStake_after_while@16:
     // this.stakerPoolSet(staker).value[firstEmpty - 1] = clone(poolKey)
     intc_1 // 1
     -
-    pushint 24 // 24
+    intc_3 // 24
     *
     dig 26
     swap
@@ -2751,6 +2949,11 @@ setTokenPayoutRatio:
     // contracts/validatorRegistry.algo.ts:652
     // setTokenPayoutRatio(validatorId: ValidatorIdType): PoolTokenPayoutRatio {
     txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     btoi
     // contracts/validatorRegistry.algo.ts:654
     // const pool1AppID = this.validatorList(validatorId).value.pools[0].poolAppId
@@ -2931,9 +3134,9 @@ setTokenPayoutRatio_while_top@10:
     dig 5
     dup
     cover 2
-    intc_2 // 18
+    pushint 18 // 18
     *
-    intc_2 // 18
+    pushint 18 // 18
     extract3 // on error: index access is out of bounds
     extract 10 8
     bytec 11 // 0x0002
@@ -2958,11 +3161,11 @@ setTokenPayoutRatio_while_top@10:
     // this.validatorList(validatorId).value.tokenPayoutRatio.poolPctOfWhole[i] = ourPoolPctOfWhole
     itob
     dig 1
-    pushint 24 // 24
+    intc_3 // 24
     <
     assert // index out of bounds
     dig 1
-    intc_3 // 8
+    intc_2 // 8
     *
     intc 7 // 700
     +
@@ -3003,19 +3206,44 @@ stakeUpdatedViaRewards:
     //     saturatedBurnToFeeSink: uint64,
     // ): void {
     txna ApplicationArgs 1
+    dup
+    len
+    intc_3 // 24
+    ==
+    assert // invalid number of bytes for contracts/validatorConfigs.algo.ts::ValidatorPoolKey
     txna ApplicationArgs 2
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     btoi
     dup
     uncover 2
     txna ApplicationArgs 3
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     btoi
     dup
     cover 3
     cover 3
     txna ApplicationArgs 4
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     btoi
     cover 3
     txna ApplicationArgs 5
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     btoi
     cover 3
     // contracts/validatorRegistry.algo.ts:714
@@ -3042,7 +3270,7 @@ stakeUpdatedViaRewards:
     box_get
     assert // Box must have value
     uncover 2
-    intc_3 // 8
+    intc_2 // 8
     extract_uint64
     dup
     cover 5
@@ -3053,11 +3281,11 @@ stakeUpdatedViaRewards:
     intc 5 // 432
     extract3
     dig 1
-    intc_2 // 18
+    pushint 18 // 18
     *
     swap
     dig 1
-    intc_2 // 18
+    pushint 18 // 18
     extract3 // on error: index access is out of bounds
     pushint 10 // 10
     extract_uint64
@@ -3065,7 +3293,7 @@ stakeUpdatedViaRewards:
     +
     itob
     uncover 2
-    pushint 24 // 24
+    intc_3 // 24
     <
     assert // index out of bounds
     swap
@@ -3096,7 +3324,7 @@ stakeUpdatedViaRewards:
     box_get
     pop
     extract 242 26
-    intc_2 // 18
+    pushint 18 // 18
     extract_uint64
     uncover 3
     +
@@ -3239,18 +3467,44 @@ stakeRemoved:
     //     rewardRemoved: uint64,
     //     stakerRemoved: boolean,
     // ): void {
-    txna ApplicationArgs 2
     txna ApplicationArgs 1
+    dup
+    len
+    intc_3 // 24
+    ==
+    assert // invalid number of bytes for contracts/validatorConfigs.algo.ts::ValidatorPoolKey
+    txna ApplicationArgs 2
+    dup
+    cover 2
+    len
+    pushint 32 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
     txna ApplicationArgs 3
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     btoi
     dup
     cover 2
     txna ApplicationArgs 4
     dup
     cover 3
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     btoi
     cover 2
     txna ApplicationArgs 5
+    dup
+    len
+    intc_1 // 1
+    ==
+    assert // invalid number of bytes for arc4.bool
     intc_0 // 0
     getbit
     cover 2
@@ -3296,7 +3550,7 @@ stakeRemoved_bool_merge@5:
     box_get
     assert // Box must have value
     uncover 2
-    intc_3 // 8
+    intc_2 // 8
     extract_uint64
     dup
     bury 10
@@ -3307,13 +3561,13 @@ stakeRemoved_bool_merge@5:
     intc 5 // 432
     extract3
     dig 1
-    intc_2 // 18
+    pushint 18 // 18
     *
     dup
     bury 21
     swap
     dig 1
-    intc_2 // 18
+    pushint 18 // 18
     extract3 // on error: index access is out of bounds
     pushint 10 // 10
     extract_uint64
@@ -3323,7 +3577,7 @@ stakeRemoved_bool_merge@5:
     -
     itob
     uncover 2
-    pushint 24 // 24
+    intc_3 // 24
     <
     assert // index out of bounds
     swap
@@ -3392,7 +3646,7 @@ stakeRemoved_bool_merge@5:
     // contracts/validatorRegistry.algo.ts:772
     // this.validatorList(poolKey.id).value.state.rewardTokenHeldBack >= rewardRemoved,
     extract 242 26
-    intc_2 // 18
+    pushint 18 // 18
     extract_uint64
     dup
     dig 5
@@ -3519,9 +3773,9 @@ stakeRemoved_after_if_else@11:
     dig 18
     dup
     cover 2
-    intc_2 // 18
+    pushint 18 // 18
     extract3 // on error: index access is out of bounds
-    intc_3 // 8
+    intc_2 // 8
     extract_uint16
     // contracts/validatorRegistry.algo.ts:813
     // this.validatorList(poolKey.id).value.pools[poolKey.poolId - 1].totalStakers = new Uint16(totalStakers - 1)
@@ -3601,13 +3855,13 @@ stakeRemoved_while_top@19:
     // contracts/validatorRegistry.algo.ts:1179
     // if (poolSet[i].id === 0) {
     dig 13
-    pushint 24 // 24
+    intc_3 // 24
     *
     dup
     bury 17
     dig 18
     swap
-    pushint 24 // 24
+    intc_3 // 24
     extract3 // on error: index access is out of bounds
     dup
     bury 24
@@ -3640,10 +3894,10 @@ stakeRemoved_while_top@19:
     // contracts/validatorRegistry.algo.ts:1186
     // poolSet[i].poolId === poolKey.poolId &&
     dig 22
-    intc_3 // 8
+    intc_2 // 8
     extract_uint64
     dig 1
-    intc_3 // 8
+    intc_2 // 8
     extract_uint64
     ==
     // contracts/validatorRegistry.algo.ts:1185-1186
@@ -3855,9 +4109,24 @@ findPoolForStaker:
     //     amountToStake: uint64,
     // ): [ValidatorPoolKey, boolean, boolean] {
     txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     btoi
     txna ApplicationArgs 2
+    dup
+    len
+    pushint 32 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
     txna ApplicationArgs 3
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     btoi
     callsub contracts/validatorRegistry.algo.ts::ValidatorRegistry.findPoolForStaker
     bytec_1 // 0x151f7c75
@@ -3875,21 +4144,37 @@ movePoolToNode:
     // contracts/validatorRegistry.algo.ts:918
     // movePoolToNode(validatorId: ValidatorIdType, poolAppId: uint64, nodeNum: uint64): void {
     txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     btoi
     dup
     txna ApplicationArgs 2
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     btoi
     swap
     txna ApplicationArgs 3
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     btoi
     dup
-    uncover 2
+    cover 2
     // contracts/validatorRegistry.algo.ts:919
     // this.callerMustBeOwnerOrManager(validatorId)
-    dup
+    dig 1
     callsub callerMustBeOwnerOrManager
     // contracts/validatorRegistry.algo.ts:921
     // const nodePoolAssignments = clone(this.validatorList(validatorId).value.nodePoolAssignments)
+    swap
     itob
     // contracts/validatorRegistry.algo.ts:108
     // validatorList = BoxMap<ValidatorIdType, ValidatorInfo>({ keyPrefix: 'v' })
@@ -3908,7 +4193,7 @@ movePoolToNode:
     // assert(nodeNum >= 1 && nodeNum <= MAX_NODES, 'node number out of allowable range')
     bz movePoolToNode_bool_false@4
     dig 2
-    intc_3 // 8
+    intc_2 // 8
     <=
     bz movePoolToNode_bool_false@4
     intc_1 // 1
@@ -3926,7 +4211,7 @@ movePoolToNode_while_top@6:
     // contracts/validatorRegistry.algo.ts:924
     // for (let srcNodeIdx: uint64 = 0; srcNodeIdx < MAX_NODES; srcNodeIdx += 1) {
     dig 6
-    intc_3 // 8
+    intc_2 // 8
     <
     assert // couldn't find pool app id in nodes to move
     // contracts/validatorRegistry.algo.ts:925
@@ -3951,15 +4236,15 @@ movePoolToNode_while_top@8:
     extract3
     extract 0 192
     dig 7
-    pushint 24 // 24
+    intc_3 // 24
     *
     dup
     bury 12
-    pushint 24 // 24
+    intc_3 // 24
     extract3 // on error: index access is out of bounds
     extract 0 24
     dig 8
-    intc_3 // 8
+    intc_2 // 8
     *
     dup
     bury 11
@@ -4045,8 +4330,18 @@ emptyTokenRewards:
     // contracts/validatorRegistry.algo.ts:956
     // emptyTokenRewards(validatorId: ValidatorIdType, receiver: Account): uint64 {
     txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     btoi
     txna ApplicationArgs 2
+    dup
+    len
+    pushint 32 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
     // contracts/validatorRegistry.algo.ts:957
     // this.callerMustBeOwner(validatorId)
     dig 1
@@ -4075,7 +4370,7 @@ emptyTokenRewards:
     // const rewardTokenHeldBack = this.validatorList(validatorId).value.state.rewardTokenHeldBack
     dig 2
     extract 242 26
-    intc_2 // 18
+    pushint 18 // 18
     extract_uint64
     // contracts/validatorRegistry.algo.ts:960
     // assert(rewardTokenId !== 0, "this validator doesn't have a reward token defined")
@@ -4284,11 +4579,11 @@ contracts/validatorRegistry.algo.ts::ValidatorRegistry.findPoolForStaker_while_t
     // contracts/validatorRegistry.algo.ts:867
     // if (poolSet[i].id === 0) {
     frame_dig 6
-    pushint 24 // 24
+    intc_3 // 24
     *
     frame_dig 4
     swap
-    pushint 24 // 24
+    intc_3 // 24
     extract3 // on error: index access is out of bounds
     dup
     frame_bury 1
@@ -4325,7 +4620,7 @@ contracts/validatorRegistry.algo.ts::ValidatorRegistry.findPoolForStaker_while_t
     box_get
     assert // Box must have value
     frame_dig 1
-    intc_3 // 8
+    intc_2 // 8
     extract_uint64
     intc_1 // 1
     -
@@ -4334,9 +4629,9 @@ contracts/validatorRegistry.algo.ts::ValidatorRegistry.findPoolForStaker_while_t
     intc 5 // 432
     extract3
     swap
-    intc_2 // 18
+    pushint 18 // 18
     *
-    intc_2 // 18
+    pushint 18 // 18
     extract3 // on error: index access is out of bounds
     pushint 10 // 10
     extract_uint64
@@ -4432,9 +4727,9 @@ contracts/validatorRegistry.algo.ts::ValidatorRegistry.findPoolForStaker_while_t
     intc 5 // 432
     extract3
     frame_dig 7
-    intc_2 // 18
+    pushint 18 // 18
     *
-    intc_2 // 18
+    pushint 18 // 18
     extract3 // on error: index access is out of bounds
     dup
     frame_bury 2
@@ -4624,10 +4919,10 @@ verifyPoolKeyCaller:
     // contracts/validatorRegistry.algo.ts:1004
     // assert(poolKey.poolId <= MAX_POOLS, 'pool id not in valid range')
     frame_dig -1
-    intc_3 // 8
+    intc_2 // 8
     extract_uint64
     dupn 2
-    pushint 24 // 24
+    intc_3 // 24
     <=
     assert // pool id not in valid range
     // contracts/validatorRegistry.algo.ts:1006
@@ -4669,9 +4964,9 @@ verifyPoolKeyCaller_bool_merge@4:
     intc 5 // 432
     extract3
     swap
-    intc_2 // 18
+    pushint 18 // 18
     *
-    intc_2 // 18
+    pushint 18 // 18
     extract3 // on error: index access is out of bounds
     intc_0 // 0
     extract_uint64
@@ -4748,7 +5043,7 @@ addPoolToNode:
     frame_dig -1
     bz addPoolToNode_bool_false@3
     frame_dig -1
-    intc_3 // 8
+    intc_2 // 8
     <=
     bz addPoolToNode_bool_false@3
     intc_1 // 1
@@ -4788,15 +5083,15 @@ addPoolToNode_while_top@5:
     extract3
     extract 0 192
     swap
-    pushint 24 // 24
+    intc_3 // 24
     *
     dup
     frame_bury 0
-    pushint 24 // 24
+    intc_3 // 24
     extract3 // on error: index access is out of bounds
     extract 0 24
     swap
-    intc_3 // 8
+    intc_2 // 8
     *
     dup
     frame_bury 1

@@ -24,8 +24,8 @@ importers:
         specifier: 1.0.0-alpha.87
         version: 1.0.0-alpha.87(tslib@2.8.1)
       '@algorandfoundation/puya-ts':
-        specifier: 1.0.0-alpha.87
-        version: 1.0.0-alpha.87
+        specifier: 1.0.0-alpha.90
+        version: 1.0.0-alpha.90
       '@joe-p/algokit-generate-component':
         specifier: 0.2.1
         version: 0.2.1(chokidar@3.6.0)
@@ -383,8 +383,13 @@ packages:
     peerDependencies:
       tslib: ^2.6.2
 
-  '@algorandfoundation/puya-ts@1.0.0-alpha.87':
-    resolution: {integrity: sha512-la92IL3XUBO/WyL7sxx4MrieEg0Hyci+EANx1BntitVQCUmVXROIobw5N9YZbeoQdBZuwkqW/HRpHB2+ZO4qwA==}
+  '@algorandfoundation/algorand-typescript@1.0.0-alpha.90':
+    resolution: {integrity: sha512-Q7PAbhZtt0uwwWAgfoUEwW5LwdIXUMaUyEPkGCorI9EfiXPDEE7lvdv1GlArVDIkwLwlNYgra1PmWwlYGd8KdQ==}
+    peerDependencies:
+      tslib: ^2.6.2
+
+  '@algorandfoundation/puya-ts@1.0.0-alpha.90':
+    resolution: {integrity: sha512-v5Ai4B/M/V17zCXeo4hzS1BcrxKtiw5JM17MXTFO4Kz679BPod1RnKkOBMFH50n+IXHBRY8FJnmlZWTmUZYVHw==}
     hasBin: true
 
   '@alloc/quick-lru@5.2.0':
@@ -2665,8 +2670,8 @@ packages:
     resolution: {integrity: sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA==}
     engines: {node: '>=10'}
 
-  chalk@5.5.0:
-    resolution: {integrity: sha512-1tm8DTaJhPBG3bIkVeZt1iZM9GfSX2lzOeDVZH9R9ffRHpmHvxZ/QhgQH/aDTkswQVt+YHdXAdS/In/30OjCbg==}
+  chalk@5.6.2:
+    resolution: {integrity: sha512-7NzBL0rN6fMUW+f7A6Io4h40qQlG+xGmtMxfbnH/K7TAtt8JQWVQK+6g0UXKMeVJoyV5EkkNsErQ8pVD3bLHbA==}
     engines: {node: ^12.17.0 || ^14.13 || >=16.0.0}
 
   change-case@5.4.4:
@@ -3851,8 +3856,8 @@ packages:
   lru-cache@10.4.3:
     resolution: {integrity: sha512-JNAzZcXrCt42VGLuYz0zfAzDfAvJWW6AfYlDBQyDV5DClI2m5sAmK+OIO7s59XfsRsWHp02jAJrRadPRGTt6SQ==}
 
-  lru-cache@11.1.0:
-    resolution: {integrity: sha512-QIXZUBJUx+2zHUdQujWejBkcD9+cs94tLn0+YL8UrCh+D5sCXZ4c7LaEH48pNwRY3MLDgqUFyhlCyjJPf1WP0A==}
+  lru-cache@11.2.2:
+    resolution: {integrity: sha512-F9ODfyqML2coTIsQpSkRHnLSZMtkU8Q+mSfcaIyKwy58u+8k5nvAYeiNhsyMARvzNcXJ9QfWVrcPsC9e9rAxtg==}
     engines: {node: 20 || >=22}
 
   lru-cache@5.1.1:
@@ -3946,14 +3951,9 @@ packages:
     resolution: {integrity: sha512-qOOzS1cBTWYF4BH8fVePDBOO9iptMnGUEZwNc/cMWnTV2nVLZ7VoNWEPHkYczZA0pdoA7dl6e7FL659nX9S2aw==}
     engines: {node: '>=16 || 14 >=14.17'}
 
-  minizlib@3.0.2:
-    resolution: {integrity: sha512-oG62iEk+CYt5Xj2YqI5Xi9xWUeZhDI8jjQmC5oThVH5JGCTgIjr7ciJDzC7MBzYd//WvR1OTmP5Q38Q8ShQtVA==}
+  minizlib@3.1.0:
+    resolution: {integrity: sha512-KZxYo1BUkWD2TVFLr0MQoM8vUUigWD3LlD83a/75BqC+4qE0Hb1Vo5v1FgcfaNXvfXzr+5EhQ6ing/CaBijTlw==}
     engines: {node: '>= 18'}
-
-  mkdirp@3.0.1:
-    resolution: {integrity: sha512-+NsyUUAZDmo6YVHzL/stxSu3t9YS1iljliy3BSDrXJ/dkn1KYdmtZODGGjLcc9XLgVVpH4KshHB8XmZgMhaBXg==}
-    engines: {node: '>=10'}
-    hasBin: true
 
   mlly@1.7.2:
     resolution: {integrity: sha512-tN3dvVHYVz4DhSXinXIk7u9syPYaJvio118uomkovAtWBT+RdbP6Lfh/5Lvo519YMmwBafwlh20IPTXIStscpA==}
@@ -4854,8 +4854,8 @@ packages:
     engines: {node: '>=14.0.0'}
     hasBin: true
 
-  tar@7.4.3:
-    resolution: {integrity: sha512-5S7Va8hKfV7W5U6g3aYxXmlPoZVAwUMy9AOKyF2fVuZa2UD3qZjg578OrLRt8PcNN1PleVaL/5/yYATNL0ICUw==}
+  tar@7.5.1:
+    resolution: {integrity: sha512-nlGpxf+hv0v7GkWBK2V9spgactGOp0qvfWRxUMjqHyzrt3SgwE48DIv/FhqPHJYLHpgW1opq3nERbz5Anq7n1g==}
     engines: {node: '>=18'}
 
   test-exclude@7.0.1:
@@ -5004,8 +5004,8 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
-  typescript@5.9.2:
-    resolution: {integrity: sha512-CWBzXQrc/qOkhidw1OzBTQuYRbfyxDXJMVJ1XNwUHGROVmuaeiEm3OslpZ1RV96d7SKKjZKrSJu3+t/xlw3R9A==}
+  typescript@5.9.3:
+    resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
     engines: {node: '>=14.17'}
     hasBin: true
 
@@ -5472,8 +5472,8 @@ packages:
   zod@3.23.8:
     resolution: {integrity: sha512-XBx9AXhXktjUqnepgTiE5flcKIYWi/rme0Eaj+5Y0lftuGBq+jyRu/md4WnuxqgP1ubdpNCsYEYPxrzVHD8d6g==}
 
-  zod@4.0.15:
-    resolution: {integrity: sha512-2IVHb9h4Mt6+UXkyMs0XbfICUh1eUrlJJAOupBHUhLRnKkruawyDddYRCs0Eizt900ntIMk9/4RksYl+FgSpcQ==}
+  zod@4.1.12:
+    resolution: {integrity: sha512-JInaHOamG8pt5+Ey8kGmdcAcg3OL9reK8ltczgHTAwNhMys/6ThXHityHxVV2p3fkw/c+MAvBHFVYHFZDmjMCQ==}
 
 snapshots:
 
@@ -5504,12 +5504,16 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@algorandfoundation/puya-ts@1.0.0-alpha.87':
+  '@algorandfoundation/algorand-typescript@1.0.0-alpha.90(tslib@2.8.1)':
     dependencies:
-      '@algorandfoundation/algorand-typescript': 1.0.0-alpha.87(tslib@2.8.1)
+      tslib: 2.8.1
+
+  '@algorandfoundation/puya-ts@1.0.0-alpha.90':
+    dependencies:
+      '@algorandfoundation/algorand-typescript': 1.0.0-alpha.90(tslib@2.8.1)
       arcsecond: 5.0.0
       argparse: 2.0.1
-      chalk: 5.5.0
+      chalk: 5.6.2
       change-case: 5.4.4
       cross-spawn: 7.0.6
       glob: 11.0.3
@@ -5517,15 +5521,15 @@ snapshots:
       polytype: 0.17.0
       rxjs: 7.8.2
       signal-exit: 4.1.0
-      tar: 7.4.3
+      tar: 7.5.1
       tslib: 2.8.1
-      typescript: 5.9.2
+      typescript: 5.9.3
       upath: 2.0.1
       vscode-languageserver: 9.0.1
       vscode-languageserver-textdocument: 1.0.12
       vscode-uri: 3.1.0
       which: 5.0.0
-      zod: 4.0.15
+      zod: 4.1.12
 
   '@alloc/quick-lru@5.2.0': {}
 
@@ -8056,7 +8060,7 @@ snapshots:
       ansi-styles: 4.3.0
       supports-color: 7.2.0
 
-  chalk@5.5.0: {}
+  chalk@5.6.2: {}
 
   change-case@5.4.4: {}
 
@@ -9351,7 +9355,7 @@ snapshots:
 
   lru-cache@10.4.3: {}
 
-  lru-cache@11.1.0: {}
+  lru-cache@11.2.2: {}
 
   lru-cache@5.1.1:
     dependencies:
@@ -9433,11 +9437,9 @@ snapshots:
 
   minipass@7.1.2: {}
 
-  minizlib@3.0.2:
+  minizlib@3.1.0:
     dependencies:
       minipass: 7.1.2
-
-  mkdirp@3.0.1: {}
 
   mlly@1.7.2:
     dependencies:
@@ -9724,7 +9726,7 @@ snapshots:
 
   path-scurry@2.0.0:
     dependencies:
-      lru-cache: 11.1.0
+      lru-cache: 11.2.2
       minipass: 7.1.2
 
   path-to-regexp@6.3.0: {}
@@ -10173,7 +10175,7 @@ snapshots:
 
   rxjs@7.8.2:
     dependencies:
-      tslib: 2.7.0
+      tslib: 2.8.1
 
   safe-array-concat@1.1.2:
     dependencies:
@@ -10416,13 +10418,12 @@ snapshots:
     transitivePeerDependencies:
       - ts-node
 
-  tar@7.4.3:
+  tar@7.5.1:
     dependencies:
       '@isaacs/fs-minipass': 4.0.1
       chownr: 3.0.0
       minipass: 7.1.2
-      minizlib: 3.0.2
-      mkdirp: 3.0.1
+      minizlib: 3.1.0
       yallist: 5.0.0
 
   test-exclude@7.0.1:
@@ -10576,7 +10577,7 @@ snapshots:
 
   typescript@5.6.3: {}
 
-  typescript@5.9.2: {}
+  typescript@5.9.3: {}
 
   ufo@1.5.4: {}
 
@@ -11056,4 +11057,4 @@ snapshots:
 
   zod@3.23.8: {}
 
-  zod@4.0.15: {}
+  zod@4.1.12: {}

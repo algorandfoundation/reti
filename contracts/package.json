@@ -24,7 +24,7 @@
     "devDependencies": {
         "@algorandfoundation/algokit-client-generator": "4.0.6",
         "@algorandfoundation/algorand-typescript": "1.0.0-alpha.87",
-        "@algorandfoundation/puya-ts": "1.0.0-alpha.87",
+        "@algorandfoundation/puya-ts": "1.0.0-alpha.90",
         "@joe-p/algokit-generate-component": "0.2.1",
         "@typescript-eslint/eslint-plugin": "8.8.1",
         "@typescript-eslint/parser": "8.8.1",

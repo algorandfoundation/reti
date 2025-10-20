@@ -1,5 +1,5 @@
 #pragma version 11
-intcblock 0 1 64 16 200 157 300 2100000 1000000 30857 0
+intcblock 0 1 64 8 200 157 300 2100000 1000000 30857 0
 bytecblock 0x7374616b657273 0x63726561746f72417070 0x76616c696461746f724964 0x706f6f6c4964 0x151f7c75 0x7374616b6564 0x726f756e6473506572446179 0x7374616b65416363756d756c61746f72 0x0002 0x62696e526f756e645374617274 0x6e756d5374616b657273 0x726577617264416363756d756c61746f72 0x65776d61 0x75aff61d 0x64 0x6d696e456e7472795374616b65 0x6c6173745061796f7574 0x65706f63684e756d626572 0x000100000000000f4240 0x0001 0x0c2245e1 0x068101 0x00000000000000000000000000000001 0x00000000000000000000000000000000 0xa2dc51b5 0x572767d1 0x4df8d86e 0x0003
 txn OnCompletion
 !
@@ -73,18 +73,18 @@ extract 2 0
 frame_dig 5
 dup
 cover 2
-pushint 8
+intc_3 // 8
 *
-pushint 8
+intc_3 // 8
 extract3
 frame_dig 3
 b*
 dup
 len
-intc_3 // 16
+pushint 16
 <=
 assert
-intc_3 // 16
+pushint 16
 bzero
 b|
 frame_bury 3
@@ -111,18 +111,18 @@ extract 2 0
 frame_dig 2
 dup
 cover 2
-pushint 8
+intc_3 // 8
 *
-pushint 8
+intc_3 // 8
 extract3
 frame_dig 0
 b*
 dup
 len
-intc_3 // 16
+pushint 16
 <=
 assert
-intc_3 // 16
+pushint 16
 bzero
 b|
 frame_bury 0
@@ -136,10 +136,10 @@ frame_dig 0
 b/
 dup
 len
-pushint 8
+intc_3 // 8
 <=
 assert
-pushint 8
+intc_3 // 8
 bzero
 b|
 btoi
@@ -151,15 +151,35 @@ frame_bury 0
 retsub
 label15:
 txna ApplicationArgs 1
+dup
+len
+intc_3 // 8
+==
+assert
 btoi
 dup
 txna ApplicationArgs 2
+dup
+len
+intc_3 // 8
+==
+assert
 btoi
 swap
 txna ApplicationArgs 3
+dup
+len
+intc_3 // 8
+==
+assert
 btoi
 swap
 txna ApplicationArgs 4
+dup
+len
+intc_3 // 8
+==
+assert
 btoi
 swap
 bnz label25
@@ -340,6 +360,11 @@ assert
 txna ApplicationArgs 1
 dup
 cover 2
+dup
+len
+pushint 32
+==
+assert
 bytec_0 // "stakers"
 box_len
 bury 1
@@ -418,10 +443,10 @@ b*
 b+
 dup
 len
-intc_3 // 16
+pushint 16
 <=
 assert
-intc_3 // 16
+pushint 16
 bzero
 b|
 bytec 7 // "stakeAccumulator"
@@ -559,8 +584,17 @@ intc_0 // 0
 pushbytes 0x // ""
 dupn 5
 txna ApplicationArgs 1
-dup
+dupn 2
+len
+pushint 32
+==
+assert
 txna ApplicationArgs 2
+dup
+len
+intc_3 // 8
+==
+assert
 btoi
 swap
 txn Sender
@@ -785,10 +819,10 @@ swap
 b-
 dup
 len
-intc_3 // 16
+pushint 16
 <=
 assert
-intc_3 // 16
+pushint 16
 bzero
 b|
 bytec 7 // "stakeAccumulator"
@@ -1022,6 +1056,11 @@ b label54
 label7:
 pushbytes 0x // ""
 txna ApplicationArgs 1
+dup
+len
+pushint 32
+==
+assert
 intc_0 // 0
 label56:
 bytec_0 // "stakers"
@@ -1065,9 +1104,24 @@ bury 1
 b label56
 label8:
 txna ApplicationArgs 1
+dup
+len
+pushint 32
+==
+assert
 txna ApplicationArgs 2
+dup
+len
+intc_3 // 8
+==
+assert
 btoi
 txna ApplicationArgs 3
+dup
+len
+intc_3 // 8
+==
+assert
 btoi
 txn Sender
 intc_0 // 0
@@ -1100,6 +1154,15 @@ intc_1 // 1
 return
 label9:
 txna ApplicationArgs 1
+dup
+intc_0 // 0
+extract_uint16
+pushint 2
++
+dig 1
+len
+==
+assert
 extract 2 0
 callsub label39
 assert
@@ -1369,9 +1432,9 @@ intc_1 // 1
 dig 7
 extract 0 192
 swap
-pushint 8
+intc_3 // 8
 *
-pushint 8
+intc_3 // 8
 extract3
 dig 8
 itob
@@ -1838,10 +1901,10 @@ uncover 2
 b+
 dup
 len
-intc_3 // 16
+pushint 16
 <=
 assert
-intc_3 // 16
+pushint 16
 bzero
 b|
 bytec 7 // "stakeAccumulator"
@@ -2040,13 +2103,43 @@ intc_1 // 1
 ==
 assert
 txna ApplicationArgs 1
+dup
+len
+pushint 32
+==
+assert
 txna ApplicationArgs 2
+dup
+len
+pushint 32
+==
+assert
 txna ApplicationArgs 3
+dup
+len
+intc_2 // 64
+==
+assert
 txna ApplicationArgs 4
+dup
+len
+intc_3 // 8
+==
+assert
 btoi
 txna ApplicationArgs 5
+dup
+len
+intc_3 // 8
+==
+assert
 btoi
 txna ApplicationArgs 6
+dup
+len
+intc_3 // 8
+==
+assert
 btoi
 callsub label39
 assert
@@ -2112,14 +2205,27 @@ intc_1 // 1
 return
 label13:
 txna ApplicationArgs 1
+dup
+len
+intc_3 // 8
+==
+assert
 btoi
 txna ApplicationArgs 2
+dup
+intc_0 // 0
+extract_uint16
+pushint 2
++
+dig 1
+len
+==
+assert
 extract 2 0
 callsub label39
 assert
 itxn_begin
 intc 10 // 0
-swap
 dig 2
 itob
 global CurrentApplicationAddress
@@ -2127,7 +2233,7 @@ uncover 4
 itxn_field Applications
 pushbytes 0x7665726966795f6e66645f61646472 // "verify_nfd_addr"
 itxn_field ApplicationArgs
-uncover 2
+uncover 3
 itxn_field ApplicationArgs
 swap
 itxn_field ApplicationArgs
@@ -2142,6 +2248,11 @@ intc_1 // 1
 return
 label14:
 txna ApplicationArgs 1
+dup
+len
+pushint 24
+==
+assert
 intc_0 // 0
 bytec_2 // "validatorId"
 app_global_get_ex
@@ -2164,7 +2275,7 @@ assert
 dig 2
 extract 8 8
 dig 3
-pushint 8
+intc_3 // 8
 extract_uint64
 intc_1 // 1
 !=
@@ -2197,7 +2308,7 @@ bytec 4 // 0x151f7c75
 assert
 btoi
 uncover 3
-intc_3 // 16
+pushint 16
 extract_uint64
 swap
 dig 1
@@ -2358,10 +2469,10 @@ bz label89
 frame_dig 2
 dup
 len
-intc_3 // 16
+pushint 16
 <=
 assert
-intc_3 // 16
+pushint 16
 bzero
 b|
 bytec 12 // "ewma"
@@ -2382,10 +2493,10 @@ itob
 b*
 dup
 len
-intc_3 // 16
+pushint 16
 <=
 assert
-intc_3 // 16
+pushint 16
 bzero
 b|
 bytec 7 // "stakeAccumulator"
@@ -2428,10 +2539,10 @@ b/
 b+
 dup
 len
-intc_3 // 16
+pushint 16
 <=
 assert
-intc_3 // 16
+pushint 16
 bzero
 b|
 bytec 12 // "ewma"

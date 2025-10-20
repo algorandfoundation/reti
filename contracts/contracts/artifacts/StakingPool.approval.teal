@@ -3,7 +3,7 @@
 
 // @algorandfoundation/algorand-typescript/arc4/index.d.ts::Contract.approvalProgram() -> uint64:
 main:
-    intcblock 0 1 64 16 200 157 300 2100000 1000000 30857 TMPL_NFD_REGISTRY_APP_ID
+    intcblock 0 1 64 8 200 157 300 2100000 1000000 30857 TMPL_NFD_REGISTRY_APP_ID
     bytecblock "stakers" "creatorApp" "validatorId" "poolId" 0x151f7c75 "staked" "roundsPerDay" "stakeAccumulator" 0x0002 "binRoundStart" "numStakers" "rewardAccumulator" "ewma" 0x75aff61d 0x64 "minEntryStake" "lastPayout" "epochNumber" 0x000100000000000f4240 0x0001 0x0c2245e1 0x068101 0x00000000000000000000000000000001 0x00000000000000000000000000000000 0xa2dc51b5 0x572767d1 0x4df8d86e 0x0003
     // contracts/stakingPool.algo.ts:62
     // export class StakingPool extends Contract {
@@ -90,7 +90,7 @@ wideRatio:
     // for (const factor of numeratorFactors) {
     frame_dig -2
     intc_0 // 0
-    extract_uint16
+    extract_uint16 // on error: invalid array length header
     intc_0 // 0
 
 wideRatio_for_header@1:
@@ -105,9 +105,9 @@ wideRatio_for_header@1:
     frame_dig 5
     dup
     cover 2
-    pushint 8 // 8
+    intc_3 // 8
     *
-    pushint 8 // 8
+    intc_3 // 8
     extract3 // on error: index access is out of bounds
     // contracts/utils.algo.ts:7
     // numerator = new Uint128(BigUint(factor) * numerator.asBigUint())
@@ -115,10 +115,10 @@ wideRatio_for_header@1:
     b*
     dup
     len
-    intc_3 // 16
+    pushint 16 // 16
     <=
     assert // overflow
-    intc_3 // 16
+    pushint 16 // 16
     bzero
     b|
     frame_bury 3
@@ -136,7 +136,7 @@ wideRatio_after_for@4:
     // for (const factor of denominatorFactors) {
     frame_dig -1
     intc_0 // 0
-    extract_uint16
+    extract_uint16 // on error: invalid array length header
     frame_bury 1
     intc_0 // 0
     frame_bury 2
@@ -153,9 +153,9 @@ wideRatio_for_header@5:
     frame_dig 2
     dup
     cover 2
-    pushint 8 // 8
+    intc_3 // 8
     *
-    pushint 8 // 8
+    intc_3 // 8
     extract3 // on error: index access is out of bounds
     // contracts/utils.algo.ts:12
     // denominator = new Uint128(BigUint(factor) * denominator.asBigUint())
@@ -163,10 +163,10 @@ wideRatio_for_header@5:
     b*
     dup
     len
-    intc_3 // 16
+    pushint 16 // 16
     <=
     assert // overflow
-    intc_3 // 16
+    pushint 16 // 16
     bzero
     b|
     frame_bury 0
@@ -185,10 +185,10 @@ wideRatio_after_for@8:
     // return new Uint64(ratio).asUint64()
     dup
     len
-    pushint 8 // 8
+    intc_3 // 8
     <=
     assert // overflow
-    pushint 8 // 8
+    intc_3 // 8
     bzero
     b|
     btoi
@@ -210,15 +210,35 @@ createApplication:
     //     minEntryStake: uint64,
     // ): void {
     txna ApplicationArgs 1
+    dup
+    len
+    intc_3 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     btoi
     dup
     txna ApplicationArgs 2
+    dup
+    len
+    intc_3 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     btoi
     swap
     txna ApplicationArgs 3
+    dup
+    len
+    intc_3 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     btoi
     swap
     txna ApplicationArgs 4
+    dup
+    len
+    intc_3 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     btoi
     swap
     // contracts/stakingPool.algo.ts:128
@@ -559,6 +579,11 @@ addStake:
     txna ApplicationArgs 1
     dup
     cover 2
+    dup
+    len
+    pushint 32 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
     // contracts/stakingPool.algo.ts:93
     // stakers = Box<FixedArray<StakedInfo, typeof MAX_STAKERS_PER_POOL>>({ key: 'stakers' })
     bytec_0 // "stakers"
@@ -716,10 +741,10 @@ addStake:
     // )
     dup
     len
-    intc_3 // 16
+    pushint 16 // 16
     <=
     assert // overflow
-    intc_3 // 16
+    pushint 16 // 16
     bzero
     b|
     // contracts/stakingPool.algo.ts:104
@@ -964,8 +989,17 @@ removeStake:
     // contracts/stakingPool.algo.ts:297
     // removeStake(staker: Account, amountToUnstake: uint64): void {
     txna ApplicationArgs 1
-    dup
+    dupn 2
+    len
+    pushint 32 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
     txna ApplicationArgs 2
+    dup
+    len
+    intc_3 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     btoi
     swap
     // contracts/stakingPool.algo.ts:300
@@ -1367,10 +1401,10 @@ removeStake_after_if_else@24:
     b-
     dup
     len
-    intc_3 // 16
+    pushint 16 // 16
     <=
     assert // overflow
-    intc_3 // 16
+    pushint 16 // 16
     bzero
     b|
     // contracts/stakingPool.algo.ts:104
@@ -1847,6 +1881,11 @@ getStakerInfo:
     // @readonly
     // getStakerInfo(staker: Account): StakedInfo {
     txna ApplicationArgs 1
+    dup
+    len
+    pushint 32 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
     // contracts/stakingPool.algo.ts:482
     // for (let i: uint64 = 0; i < this.stakers.value.length; i += 1) {
     intc_0 // 0
@@ -1920,9 +1959,24 @@ payTokenReward:
     // contracts/stakingPool.algo.ts:501
     // payTokenReward(staker: Account, rewardToken: uint64, amountToSend: uint64): void {
     txna ApplicationArgs 1
+    dup
+    len
+    pushint 32 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
     txna ApplicationArgs 2
+    dup
+    len
+    intc_3 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     btoi
     txna ApplicationArgs 3
+    dup
+    len
+    intc_3 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     btoi
     // contracts/stakingPool.algo.ts:504
     // Txn.sender === this.creatingValidatorContractAppId.value.address,
@@ -1987,6 +2041,15 @@ updateAlgodVer:
     // contracts/stakingPool.algo.ts:527
     // updateAlgodVer(algodVer: string): void {
     txna ApplicationArgs 1
+    dup
+    intc_0 // 0
+    extract_uint16 // on error: invalid array length header
+    pushint 2 // 2
+    +
+    dig 1
+    len
+    ==
+    assert // invalid number of bytes for arc4.dynamic_array<arc4.uint8>
     extract 2 0
     // contracts/stakingPool.algo.ts:528
     // assert(this.isOwnerOrManagerCaller(), 'can only be called by owner or manager of validator')
@@ -2462,9 +2525,9 @@ epochBalanceUpdate_after_if_else@15:
     dig 7
     extract 0 192
     swap
-    pushint 8 // 8
+    intc_3 // 8
     *
-    pushint 8 // 8
+    intc_3 // 8
     extract3 // on error: index access is out of bounds
     // contracts/stakingPool.algo.ts:661
     // tokenRewardAvail = wideRatio([validatorConfig.rewardPerPayout, ourPoolPctOfWhole], [1_000_000])
@@ -3200,10 +3263,10 @@ epochBalanceUpdate_after_if_else@69:
     // )
     dup
     len
-    intc_3 // 16
+    pushint 16 // 16
     <=
     assert // overflow
-    intc_3 // 16
+    pushint 16 // 16
     bzero
     b|
     // contracts/stakingPool.algo.ts:104
@@ -3581,13 +3644,43 @@ goOnline:
     ==
     assert // transaction type is pay
     txna ApplicationArgs 1
+    dup
+    len
+    pushint 32 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
     txna ApplicationArgs 2
+    dup
+    len
+    pushint 32 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
     txna ApplicationArgs 3
+    dup
+    len
+    intc_2 // 64
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 64>
     txna ApplicationArgs 4
+    dup
+    len
+    intc_3 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     btoi
     txna ApplicationArgs 5
+    dup
+    len
+    intc_3 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     btoi
     txna ApplicationArgs 6
+    dup
+    len
+    intc_3 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     btoi
     // contracts/stakingPool.algo.ts:927
     // assert(this.isOwnerOrManagerCaller(), 'can only be called by owner or manager of validator')
@@ -3708,8 +3801,22 @@ linkToNFD:
     // contracts/stakingPool.algo.ts:959
     // linkToNFD(nfdAppId: uint64, nfdName: string): void {
     txna ApplicationArgs 1
+    dup
+    len
+    intc_3 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
     btoi
     txna ApplicationArgs 2
+    dup
+    intc_0 // 0
+    extract_uint16 // on error: invalid array length header
+    pushint 2 // 2
+    +
+    dig 1
+    len
+    ==
+    assert // invalid number of bytes for arc4.dynamic_array<arc4.uint8>
     extract 2 0
     // contracts/stakingPool.algo.ts:960
     // assert(this.isOwnerOrManagerCaller(), 'can only be called by owner or manager of validator')
@@ -3730,7 +3837,6 @@ linkToNFD:
     // contracts/stakingPool.algo.ts:963
     // appId: Application(nfdRegistryAppId),
     intc 10 // TMPL_NFD_REGISTRY_APP_ID
-    swap
     // contracts/stakingPool.algo.ts:967
     // op.itob(nfdAppId),
     dig 2
@@ -3744,7 +3850,7 @@ linkToNFD:
     // Bytes('verify_nfd_addr'),
     pushbytes "verify_nfd_addr"
     itxn_field ApplicationArgs
-    uncover 2
+    uncover 3
     itxn_field ApplicationArgs
     swap
     itxn_field ApplicationArgs
@@ -3777,6 +3883,11 @@ proxiedSetTokenPayoutRatio:
     // contracts/stakingPool.algo.ts:980
     // proxiedSetTokenPayoutRatio(poolKey: ValidatorPoolKey): PoolTokenPayoutRatio {
     txna ApplicationArgs 1
+    dup
+    len
+    pushint 24 // 24
+    ==
+    assert // invalid number of bytes for contracts/validatorConfigs.algo.ts::ValidatorPoolKey
     // contracts/stakingPool.algo.ts:981
     // assert(this.validatorId.value === poolKey.id, 'caller must be part of same validator set!')
     intc_0 // 0
@@ -3813,7 +3924,7 @@ proxiedSetTokenPayoutRatio:
     dig 2
     extract 8 8
     dig 3
-    pushint 8 // 8
+    intc_3 // 8
     extract_uint64
     intc_1 // 1
     !=
@@ -3864,7 +3975,7 @@ proxiedSetTokenPayoutRatio:
     // contracts/stakingPool.algo.ts:989
     // assert(callerPoolAppID === poolKey.poolAppId)
     uncover 3
-    intc_3 // 16
+    pushint 16 // 16
     extract_uint64
     swap
     dig 1
@@ -4136,10 +4247,10 @@ checkIfBinClosed_after_if_else@4:
     frame_dig 2
     dup
     len
-    intc_3 // 16
+    pushint 16 // 16
     <=
     assert // overflow
-    intc_3 // 16
+    pushint 16 // 16
     bzero
     b|
     // contracts/stakingPool.algo.ts:111
@@ -4181,10 +4292,10 @@ checkIfBinClosed_after_if_else@8:
     // )
     dup
     len
-    intc_3 // 16
+    pushint 16 // 16
     <=
     assert // overflow
-    intc_3 // 16
+    pushint 16 // 16
     bzero
     b|
     // contracts/stakingPool.algo.ts:104
@@ -4265,10 +4376,10 @@ checkIfBinClosed_else_body@6:
     // )
     dup
     len
-    intc_3 // 16
+    pushint 16 // 16
     <=
     assert // overflow
-    intc_3 // 16
+    pushint 16 // 16
     bzero
     b|
     // contracts/stakingPool.algo.ts:111
