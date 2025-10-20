@@ -63,9 +63,11 @@ async function testBytecodeComparison(
     console.debug(`${contractName} - Puya bytecode size:`, puyaSize)
     console.debug(`${contractName} - TealScript bytecode size:`, tealscriptSize)
 
-    // Print percentage
+    const percentage = ((puyaSize / tealscriptSize) * 100).toFixed(2)
+    expect(percentage).toMatchSnapshot(`${contractName}-bytecode-size-percentage`)
+
     console.debug(
-        `${contractName} - Puya bytecode is ${((puyaSize / tealscriptSize) * 100).toFixed(2)}% of TealScript bytecode (NOTE: This does not account for the fact that the Puya wideRatio is not equal to TEALScripts and is less bytecode but more expensive)`,
+        `${contractName} - Puya bytecode is ${percentage}% of TealScript bytecode (NOTE: This does not account for the fact that the Puya wideRatio is not equal to TEALScripts and is less bytecode but more expensive)`,
     )
 
     const disassembledTealscript = (await algorand.client.algod.disassemble(tealScriptResult.approvalProgram).do())

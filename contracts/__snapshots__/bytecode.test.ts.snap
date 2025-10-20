@@ -2,4 +2,8 @@
 
 exports[`StakingPoolClient > bytecode is smaller or equal to TEALScript > StakingPool-bytecode-size 1`] = `4197`;
 
+exports[`StakingPoolClient > bytecode is smaller or equal to TEALScript > StakingPool-bytecode-size-percentage 1`] = `"91.78"`;
+
 exports[`ValidatorRegistryClient > bytecode is smaller or equal to TEALScript > ValidatorRegistry-bytecode-size 1`] = `5145`;
+
+exports[`ValidatorRegistryClient > bytecode is smaller or equal to TEALScript > ValidatorRegistry-bytecode-size-percentage 1`] = `"81.32"`;
