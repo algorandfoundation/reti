@@ -1,3 +1,4 @@
+import { AlgoAmount } from '@algorandfoundation/algokit-utils/types/amount'
 import { keepPreviousData, QueryClient, queryOptions } from '@tanstack/react-query'
 import algosdk from 'algosdk'
 import { AxiosError } from 'axios'
@@ -109,8 +110,13 @@ export const validatorMetricsQueryOptions = (validatorId: number, queryClient: Q
       const poolDataPromises = pools.map((pool) => processPoolData(pool))
       const processedPoolsData = await Promise.all(poolDataPromises)
 
+      // Ignore pools with less than 30k ALGO balance
+      const filteredPoolsData = processedPoolsData.filter(
+        (pool) => pool.balance >= AlgoAmount.Algos(30_000).microAlgos,
+      )
+
       return calculateValidatorPoolMetrics(
-        processedPoolsData,
+        filteredPoolsData,
         state.totalAlgoStaked,
         BigInt(config.epochRoundLength),
         BigInt(params.firstValid),
