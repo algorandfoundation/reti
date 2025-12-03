@@ -1,6 +1,6 @@
 {
   "name": "reti-ui",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@9.15.9",
@@ -30,7 +30,7 @@
     "msw": "2.4.9",
     "playwright": "1.48.0",
     "postcss": "8.4.47",
-    "prettier": "3.3.3",
+    "prettier": "3.7.4",
     "tailwindcss": "3.4.13",
     "ts-node": "10.9.2",
     "typescript": "5.6.3",
@@ -112,8 +112,8 @@
     "playwright:test": "playwright test",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0 --fix",
-    "prettier": "pnpx prettier --check .",
-    "prettier:fix": "pnpx prettier --write .",
+    "prettier": "prettier --check .",
+    "prettier:fix": "prettier --write .",
     "typecheck": "tsc --noEmit",
     "preview": "vite preview"
   },
