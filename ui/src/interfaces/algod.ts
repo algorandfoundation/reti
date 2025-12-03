@@ -1,8 +1,10 @@
 import { AlgoAmount } from '@algorandfoundation/algokit-utils/types/amount'
 import algosdk, { BaseHTTPClientError, BaseHTTPClientResponse } from 'algosdk'
 
-export interface AssetCreatorHolding
-  extends Omit<algosdk.modelsv2.AssetHolding, 'getEncodingSchema' | 'toEncodingData'> {
+export interface AssetCreatorHolding extends Omit<
+  algosdk.modelsv2.AssetHolding,
+  'getEncodingSchema' | 'toEncodingData'
+> {
   creator: string
 }
 

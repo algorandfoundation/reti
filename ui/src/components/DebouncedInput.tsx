@@ -1,8 +1,10 @@
 import * as React from 'react'
 import { Input } from '@/components/ui/input'
 
-export interface DebouncedInputProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
+export interface DebouncedInputProps extends Omit<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  'onChange'
+> {
   value: string | number
   onChange: (value: string | number) => void
   debounce?: number
