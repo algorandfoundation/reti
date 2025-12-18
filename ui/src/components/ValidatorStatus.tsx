@@ -1,5 +1,4 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { validatorMetricsQueryOptions } from '@/api/queries'
+import { validatorSingleMetricsQueryOptions } from '@/api/queries'
 import { PerfIndicator } from '@/components/PerfIndicator'
 import { TrafficLight } from '@/components/TrafficLight'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -7,6 +6,7 @@ import { Indicator } from '@/constants/indicator'
 import { useBlockTime } from '@/hooks/useBlockTime'
 import { Validator } from '@/interfaces/validator'
 import { formatDuration } from '@/utils/dayjs'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 
 interface ValidatorRewardsProps {
   validator: Validator
@@ -14,7 +14,7 @@ interface ValidatorRewardsProps {
 
 export function ValidatorStatus({ validator }: ValidatorRewardsProps) {
   const queryClient = useQueryClient()
-  const metricsQuery = useQuery(validatorMetricsQueryOptions(validator.id, queryClient))
+  const metricsQuery = useQuery(validatorSingleMetricsQueryOptions(validator.id, queryClient))
 
   const blockTime = useBlockTime()
 

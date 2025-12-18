@@ -1,5 +1,3 @@
-import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query'
-import * as React from 'react'
 import {
   nfdLookupQueryOptions,
   stakedInfoQueryOptions,
@@ -9,6 +7,8 @@ import { StakedInfo } from '@/contracts/StakingPoolClient'
 import { LocalPoolInfo } from '@/interfaces/validator'
 import { ExplorerLink } from '@/utils/explorer'
 import { getNfdProfileUrl } from '@/utils/nfd'
+import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query'
+import * as React from 'react'
 
 interface UseChartDataProps {
   selectedPool: string
@@ -24,10 +24,10 @@ export function useStakersChartData({
   const queryClient = useQueryClient()
 
   const poolsInfoQuery = useQuery({
-    ...validatorPoolsQueryOptions(validatorId),
+    ...validatorPoolsQueryOptions([validatorId]),
     enabled: !pauseRefetch,
   })
-  const poolsInfo = poolsInfoQuery.data || []
+  const poolsInfo = poolsInfoQuery.data?.at(0) || []
 
   const allStakedInfo = useQueries({
     queries: poolsInfo.map((pool) => ({

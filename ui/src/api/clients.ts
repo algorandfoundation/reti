@@ -1,4 +1,3 @@
-import algosdk from 'algosdk'
 import { FEE_SINK } from '@/constants/accounts'
 import { StakingPoolClient, StakingPoolFactory } from '@/contracts/StakingPoolClient'
 import { ValidatorRegistryClient } from '@/contracts/ValidatorRegistryClient'
@@ -8,6 +7,7 @@ import {
 } from '@/utils/env'
 import { getAlgodConfigFromViteEnvironment } from '@/utils/network/getAlgoClientConfigs'
 import { AlgorandClient } from '@algorandfoundation/algokit-utils'
+import algosdk from 'algosdk'
 // @ts-expect-error module resolution issue
 import { XGovRegistryClient } from '@algorandfoundation/xgov-clients/registry'
 
@@ -17,7 +17,7 @@ export const algorandClient = AlgorandClient.fromConfig({ algodConfig })
   .setDefaultValidityWindow(900)
   .setSuggestedParamsCacheTimeout(1000 * 60 * 5) // 5 minutes
 
-const RETI_APP_ID = BigInt(getRetiAppIdFromViteEnvironment())
+export const RETI_APP_ID = BigInt(getRetiAppIdFromViteEnvironment())
 const XGOV_REGISTRY_APP_ID = BigInt(getXGovRegistryAppIdFromViteEnvironment())
 
 export function getStakingPoolFactory(): [AlgorandClient, StakingPoolFactory] {

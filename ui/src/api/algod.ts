@@ -1,9 +1,10 @@
-import { AlgoAmount } from '@algorandfoundation/algokit-utils/types/amount'
-import { ClientManager } from '@algorandfoundation/algokit-utils/types/client-manager'
-import algosdk from 'algosdk'
 import { AccountBalance, AlgodHttpError, AssetCreatorHolding, Exclude } from '@/interfaces/algod'
 import { BigMath } from '@/utils/bigint'
 import { getAlgodConfigFromViteEnvironment } from '@/utils/network/getAlgoClientConfigs'
+import { AlgoAmount } from '@algorandfoundation/algokit-utils/types/amount'
+import { ClientManager } from '@algorandfoundation/algokit-utils/types/client-manager'
+import algosdk from 'algosdk'
+import { ghostSDK } from './ghostSdk'
 
 const algodConfig = getAlgodConfigFromViteEnvironment()
 const algodClient = ClientManager.getAlgodClient({
@@ -151,25 +152,7 @@ export async function fetchAssetCreatorHoldings(
  */
 export async function fetchBlockTimes(numRounds: number = 10): Promise<number[]> {
   try {
-    const status = await algodClient.status().do()
-    if (!status) {
-      throw new Error('Failed to fetch node status')
-    }
-
-    const lastRound = Number(status.lastRound)
-
-    const blockTimes: number[] = []
-    for (let round = lastRound - numRounds; round < lastRound; round++) {
-      try {
-        const blockResponse = await algodClient.block(round).do()
-        const block = blockResponse.block
-        blockTimes.push(Number(block.header.timestamp))
-      } catch (error) {
-        throw new Error(`Unable to fetch block for round ${round}: ${error}`)
-      }
-    }
-
-    return blockTimes
+    return (await ghostSDK.getBlockTimestamps(numRounds)).map((b) => Number(b))
   } catch (error) {
     throw new Error(`An error occurred during block time calculation: ${error}`)
   }

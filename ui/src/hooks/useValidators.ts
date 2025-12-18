@@ -1,21 +1,19 @@
-import { useQueries, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
-import algosdk from 'algosdk'
-import * as React from 'react'
 import { createBaseValidator } from '@/api/contracts'
 import {
   assetQueryOptions,
   nfdQueryOptions,
   nodelyPerfMetricsQueryOptions,
   numValidatorsQueryOptions,
-  validatorConfigQueryOptions,
-  validatorMetricsQueryOptions,
+  validatorConfigsQueryOptions,
   validatorNodePoolAssignmentsQueryOptions,
   validatorPoolsQueryOptions,
-  validatorStateQueryOptions,
+  validatorStatesQueryOptions,
 } from '@/api/queries'
 import { GatingType } from '@/constants/gating'
-import { useQueuedQueries } from '@/hooks/useQueuedQueries'
 import { Validator } from '@/interfaces/validator'
+import { useQueries, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
+import algosdk from 'algosdk'
+import * as React from 'react'
 
 /**
  * Fetches all validator data and enrichment data in parallel.
@@ -37,71 +35,71 @@ export function useValidators(): {
 
   // Memoize query options
   const validatorConfigQueries = React.useMemo(
-    () => validatorIds.map((id) => validatorConfigQueryOptions(id)),
+    () => validatorConfigsQueryOptions(validatorIds),
     [validatorIds],
   )
 
   const validatorStateQueries = React.useMemo(
-    () => validatorIds.map((id) => validatorStateQueryOptions(id, 120000, false)),
+    () => validatorStatesQueryOptions(validatorIds, 120000, false),
     [validatorIds],
   )
 
   const validatorPoolsQueries = React.useMemo(
-    () => validatorIds.map((id) => validatorPoolsQueryOptions(id, 120000, false)),
+    () => validatorPoolsQueryOptions(validatorIds, 120000, false),
     [validatorIds],
   )
 
   const validatorNodePoolAssignmentQueries = React.useMemo(
-    () => validatorIds.map((id) => validatorNodePoolAssignmentsQueryOptions(id)),
+    () => validatorNodePoolAssignmentsQueryOptions(validatorIds),
     [validatorIds],
   )
 
-  // Use queued queries for validator data
-  const configQueries = useQueuedQueries(validatorConfigQueries)
-  const stateQueries = useQueuedQueries(validatorStateQueries)
-  const poolsQueries = useQueuedQueries(validatorPoolsQueries)
-  const nodePoolAssignmentQueries = useQueuedQueries(validatorNodePoolAssignmentQueries)
+  // plan: use queued queries to rate limit
+  // metrics query should have enabled based on config+state+node data being available
+
+  // const metricsQueries = React.useMemo(
+  //   () => validatorMetricsQueryOptions(validatorIds, queryClient),
+  //   [validatorIds],
+  // )
+
+  const configQuery = useQuery(validatorConfigQueries)
+  const stateQuery = useQuery(validatorStateQueries)
+  const poolsQuery = useQuery(validatorPoolsQueries)
+  const nodePoolAssignmentQuery = useQuery(validatorNodePoolAssignmentQueries)
+  // const metricsQuery = useQuery(metricsQueries)
 
   // Fetch enrichment data
   const rewardTokenQueries = useQueries({
-    queries: configQueries.data
-      .map((q) => q?.rewardTokenId)
-      .filter((id): id is bigint => id !== undefined && id > 0n)
-      .map((id) => assetQueryOptions(Number(id))),
+    queries:
+      configQuery.data
+        ?.map((q) => q.rewardTokenId)
+        .filter((id): id is bigint => id !== undefined && id > 0n)
+        .map((id) => assetQueryOptions(Number(id))) ?? [],
   })
 
   const gatingAssetQueries = useQueries({
-    queries: configQueries.data
-      .flatMap((q) =>
-        q?.entryGatingType === GatingType.AssetId
-          ? q.entryGatingAssets.filter((id): id is bigint => id > 0n)
-          : [],
-      )
-      .map((id) => assetQueryOptions(Number(id))),
+    queries:
+      configQuery.data
+        ?.map((q) =>
+          q.entryGatingType === GatingType.AssetId
+            ? q.entryGatingAssets.filter((id): id is bigint => id > 0n)
+            : [],
+        )
+        .map((id) => assetQueryOptions(Number(id))) ?? [],
   })
 
   const nfdQueries = useQueries({
-    queries: configQueries.data
-      .map((q) => Number(q?.nfdForInfo))
-      .filter((id) => id > 0)
-      .map((id) => nfdQueryOptions(id, { view: 'full' })),
+    queries:
+      configQuery.data
+        ?.map((q) => Number(q.nfdForInfo))
+        .filter((id) => id > 0)
+        .map((id) => nfdQueryOptions(id, { view: 'full' })) ?? [],
   })
-
-  // Memoize metrics query options
-  const metricsQueries = React.useMemo(
-    () =>
-      validatorIds.map((id) => ({
-        ...validatorMetricsQueryOptions(id, queryClient),
-        enabled: !stateQueries.isFetching && !poolsQueries.isFetching,
-      })),
-    [validatorIds, stateQueries.isFetching, poolsQueries.isFetching],
-  )
 
   // nodely performance data
   const nodelyPerfQuery = useQuery(nodelyPerfMetricsQueryOptions())
 
-  // Use queued queries for metrics
-  const queuedMetricsQueries = useQueuedQueries(metricsQueries, 4) // Process 4 validators every second
+  // console.log('state data', stateQueries.data)
 
   // Combine all data synchronously
   const validators = React.useMemo(() => {
@@ -111,15 +109,21 @@ export function useValidators(): {
       const validatorId = validatorIds[i]
 
       // Find the data for this validator ID in each query result
-      const config = queryClient.getQueryData(validatorConfigQueryOptions(validatorId).queryKey)
-      const state = queryClient.getQueryData(validatorStateQueryOptions(validatorId).queryKey)
-      const pools = queryClient.getQueryData(validatorPoolsQueryOptions(validatorId).queryKey)
-      const nodePoolAssignment = queryClient.getQueryData(
-        validatorNodePoolAssignmentsQueryOptions(validatorId).queryKey,
-      )
-      const metrics = queryClient.getQueryData(
-        validatorMetricsQueryOptions(validatorId, queryClient).queryKey,
-      )
+      const config = queryClient
+        .getQueryData(validatorConfigsQueryOptions(validatorIds).queryKey)
+        ?.at(i)
+      const state = queryClient
+        .getQueryData(validatorStatesQueryOptions(validatorIds).queryKey)
+        ?.at(i)
+      const pools = queryClient
+        .getQueryData(validatorPoolsQueryOptions(validatorIds).queryKey)
+        ?.at(i)
+      const nodePoolAssignment = queryClient
+        .getQueryData(validatorNodePoolAssignmentsQueryOptions(validatorIds).queryKey)
+        ?.at(i)
+      // const metrics = queryClient
+      //   .getQueryData(validatorMetricsQueryOptions(validatorIds, queryClient).queryKey)
+      //   ?.at(i)
 
       if (!config || !state || !pools || !nodePoolAssignment) continue
 
@@ -164,12 +168,12 @@ export function useValidators(): {
       }
 
       // Add metrics if available
-      if (metrics) {
-        baseValidator.rewardsBalance = metrics.rewardsBalance
-        baseValidator.roundsSinceLastPayout = metrics.roundsSinceLastPayout
-        baseValidator.apy = metrics.apy
-        baseValidator.extDeposits = metrics.extDeposits
-      }
+      // if (metrics) {
+      //   baseValidator.rewardsBalance = metrics.rewardsBalance
+      //   baseValidator.roundsSinceLastPayout = metrics.roundsSinceLastPayout
+      //   baseValidator.apy = metrics.apy
+      //   baseValidator.extDeposits = metrics.extDeposits
+      // }
 
       result.push(baseValidator)
     }
@@ -177,27 +181,24 @@ export function useValidators(): {
     return result
   }, [
     validatorIds,
-    configQueries.data,
-    stateQueries.data,
-    poolsQueries.data,
-    nodePoolAssignmentQueries.data,
+    configQuery.data,
+    stateQuery.data,
+    poolsQuery.data,
+    nodePoolAssignmentQuery.data,
     rewardTokenQueries,
     gatingAssetQueries,
     nfdQueries,
-    queuedMetricsQueries.data,
+    // metricsQuery.data,
   ])
 
   const isLoading =
-    configQueries.isLoading ||
-    stateQueries.isLoading ||
-    poolsQueries.isLoading ||
-    nodePoolAssignmentQueries.isLoading
+    configQuery.isLoading ||
+    stateQuery.isLoading ||
+    poolsQuery.isLoading ||
+    nodePoolAssignmentQuery.isLoading
 
   const error =
-    configQueries.error ||
-    stateQueries.error ||
-    poolsQueries.error ||
-    nodePoolAssignmentQueries.error
+    configQuery.error || stateQuery.error || poolsQuery.error || nodePoolAssignmentQuery.error
 
   return {
     validators,

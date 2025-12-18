@@ -1,14 +1,8 @@
-import { useQuery } from '@tanstack/react-query'
-import { ErrorComponent, createFileRoute } from '@tanstack/react-router'
-import { useWallet } from '@txnlab/use-wallet-react'
 import { ValidatorNotFoundError } from '@/api/contracts'
 import {
   constraintsQueryOptions,
   stakesQueryOptions,
-  validatorConfigQueryOptions,
-  validatorStateQueryOptions,
-  validatorPoolsQueryOptions,
-  validatorNodePoolAssignmentsQueryOptions,
+  validatorAllQueryOptions,
 } from '@/api/queries'
 import { Loading } from '@/components/Loading'
 import { Meta } from '@/components/Meta'
@@ -17,27 +11,22 @@ import { ValidatorDetails } from '@/components/ValidatorDetails'
 import { DetailsHeader } from '@/components/ValidatorDetails/DetailsHeader'
 import { XGovSignUpBanner } from '@/components/XGovSignUpBanner'
 import { useValidator } from '@/hooks/useValidator'
+import { useQuery } from '@tanstack/react-query'
+import { createFileRoute, ErrorComponent } from '@tanstack/react-router'
+import { useWallet } from '@txnlab/use-wallet-react'
 
 export const Route = createFileRoute('/validators_/$validatorId')({
   beforeLoad: () => {
     return {
       queryOptions: {
-        config: validatorConfigQueryOptions,
-        state: validatorStateQueryOptions,
-        pools: validatorPoolsQueryOptions,
-        nodePoolAssignments: validatorNodePoolAssignmentsQueryOptions,
+        data: validatorAllQueryOptions,
       },
     }
   },
   loader: async ({ context: { queryClient, queryOptions }, params }) => {
     const validatorId = Number(params.validatorId)
     try {
-      await Promise.all([
-        queryClient.ensureQueryData(queryOptions.config(validatorId)),
-        queryClient.ensureQueryData(queryOptions.state(validatorId)),
-        queryClient.ensureQueryData(queryOptions.pools(validatorId)),
-        queryClient.ensureQueryData(queryOptions.nodePoolAssignments(validatorId)),
-      ])
+      await Promise.all([queryClient.ensureQueryData(queryOptions.data(validatorId))])
     } catch (error) {
       throw new ValidatorNotFoundError(
         `Validator with id "${Number(validatorId)}" not found! Error: ${error}`,

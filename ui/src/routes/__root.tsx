@@ -1,10 +1,10 @@
+import { blockTimeQueryOptions, constraintsQueryOptions, mbrQueryOptions } from '@/api/queries'
+import { Layout } from '@/components/Layout'
+import { useCheckForUpdates } from '@/hooks/useCheckForUpdates'
 import { QueryClient } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { createRootRouteWithContext, Outlet } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/router-devtools'
-import { blockTimeQueryOptions, constraintsQueryOptions, mbrQueryOptions } from '@/api/queries'
-import { Layout } from '@/components/Layout'
-import { useCheckForUpdates } from '@/hooks/useCheckForUpdates'
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient

@@ -1,5 +1,3 @@
-import { AlgoAmount } from '@algorandfoundation/algokit-utils/types/amount'
-import algosdk from 'algosdk'
 import { fetchAccountBalance, fetchAsset, isOptedInToAsset } from '@/api/algod'
 import {
   algorandClient,
@@ -11,6 +9,7 @@ import {
   getXGovRegistryClient,
 } from '@/api/clients'
 import { fetchNfd } from '@/api/nfd'
+import { fetchNodelyVotingPerf } from '@/api/nodely'
 import { ALGORAND_ZERO_ADDRESS_STRING } from '@/constants/accounts'
 import { GatingType } from '@/constants/gating'
 import { StakedInfo, StakedInfoFromTuple, ValidatorPoolKey } from '@/contracts/StakingPoolClient'
@@ -23,6 +22,7 @@ import {
   ValidatorCurState,
   ValidatorRegistryClient,
 } from '@/contracts/ValidatorRegistryClient'
+import { wrapTransactionSigner } from '@/hooks/useTransactionState'
 import { StakerPoolData, StakerValidatorData } from '@/interfaces/staking'
 import {
   EntryGatingAssets,
@@ -33,75 +33,105 @@ import {
   ValidatorConfigInput,
 } from '@/interfaces/validator'
 import { BalanceChecker } from '@/utils/balanceChecker'
-import { encodeCallParams } from '@/utils/tests/abi'
-import { TransactionHandlerProps } from './transactionState'
-import { wrapTransactionSigner } from '@/hooks/useTransactionState'
 import { sleep } from '@/utils/time'
-import { fetchNodelyVotingPerf } from '@/api/nodely'
+import { AlgoAmount } from '@algorandfoundation/algokit-utils/types/amount'
+import algosdk, { getApplicationAddress } from 'algosdk'
+import { AllPoolInfo } from 'reti-fast-sdk/dist/generated/RetiReaderSDK'
+import { ghostSDK } from './ghostSdk'
+import { TransactionHandlerProps } from './transactionState'
 
 export async function fetchNumValidators(): Promise<number> {
+  console.log('fetchNumValidators called')
   const validatorClient = await getSimulateValidatorClient()
-  const numValidators = await validatorClient.getNumValidators({ args: {} })
+  const numValidators = await validatorClient.state.global.numValidators()
   return Number(numValidators)
 }
 
-export async function fetchValidatorConfig(validatorId: number | bigint): Promise<ValidatorConfig> {
-  const validatorClient = await getSimulateValidatorClient()
-  const config = await validatorClient.getValidatorConfig({
-    args: { validatorId },
-  })
-  return config
+export async function fetchValidatorConfig(validatorIds: number[]): Promise<ValidatorConfig[]> {
+  console.log('fetchValidatorConfig called with ids:', validatorIds)
+  return ghostSDK.getValidatorConfig(validatorIds)
 }
 
-export async function fetchValidatorState(
-  validatorId: number | bigint,
-): Promise<ValidatorCurState> {
-  const validatorClient = await getSimulateValidatorClient()
-  const state = await validatorClient.getValidatorState({
-    args: { validatorId },
-  })
-  return state
+export async function fetchValidatorStates(validatorIds: number[]): Promise<ValidatorCurState[]> {
+  console.log('fetchValidatorStates called with ids:', validatorIds)
+  return ghostSDK.getValidatorStates(validatorIds)
 }
 
-export async function fetchValidatorPools(validatorId: number | bigint): Promise<LocalPoolInfo[]> {
-  const validatorClient = await getSimulateValidatorClient()
-  const poolsData = await validatorClient.getPools({
-    args: { validatorId },
-    note: encodeCallParams('getPools', { validatorId }), // Used by MSW in tests
-  })
+export function convertPoolTupleToPool(pool: [bigint, number, bigint]): PoolInfo {
+  return {
+    poolAppId: pool[0],
+    totalStakers: pool[1],
+    totalAlgoStaked: pool[2],
+  }
+}
 
-  const poolAddresses: string[] = []
-  const poolAlgodVersions: (string | undefined)[] = []
+export function convertPoolTolocalPoolInfo(
+  pool: PoolInfo,
+  poolId: number,
+  algodVersion?: string,
+): LocalPoolInfo {
+  const poolAddress = getApplicationAddress(pool.poolAppId).toString()
+  return {
+    poolId: BigInt(poolId),
+    poolAppId: pool.poolAppId,
+    totalStakers: pool.totalStakers,
+    totalAlgoStaked: pool.totalAlgoStaked,
+    poolAddress,
+    algodVersion,
+  }
+}
 
-  for (const poolInfo of poolsData) {
-    const stakingPoolClient = await getSimulateStakingPoolClient(poolInfo[0])
+export async function fetchValidatorsPools(validatorIds: number[]): Promise<LocalPoolInfo[][]> {
+  const poolsDataArray = await ghostSDK.getPools(validatorIds)
+  const poolAppIds = poolsDataArray.flat().map((pool) => Number(pool.poolAppId))
+  const algodVersionResults = await ghostSDK.getPoolAlgodVersions(poolAppIds)
+  const results: LocalPoolInfo[][] = []
 
-    poolAddresses.push(stakingPoolClient.appAddress.toString())
-    poolAlgodVersions.push((await stakingPoolClient.state.global.algodVer()).asString())
+  for (let i = 0; i < poolsDataArray.length; i++) {
+    const poolsData = poolsDataArray[i]
+
+    const poolAddresses: string[] = []
+    const poolAlgodVersions: (string | undefined)[] = []
+
+    for (const poolInfo of poolsData) {
+      poolAddresses.push(getApplicationAddress(poolInfo.poolAppId).toString())
+      const poolAppIdIndex = poolAppIds.indexOf(Number(poolInfo.poolAppId))
+      poolAlgodVersions.push(
+        poolAppIdIndex !== -1 ? algodVersionResults[poolAppIdIndex] : undefined,
+      )
+    }
+
+    // Transform raw pool data into LocalPoolInfo[]
+    results.push(
+      poolsData.map((poolInfo: PoolInfo, i: number) =>
+        convertPoolTolocalPoolInfo(poolInfo, i + 1, poolAlgodVersions[i]),
+      ),
+    )
   }
 
-  // Transform raw pool data into LocalPoolInfo[]
-  return poolsData.map(
-    (poolInfo: [bigint, number, bigint], i: number) =>
-      ({
-        poolId: BigInt(i + 1),
-        poolAppId: poolInfo[0],
-        totalStakers: poolInfo[1],
-        totalAlgoStaked: poolInfo[2],
-        poolAddress: poolAddresses[i],
-        algodVersion: poolAlgodVersions[i],
-      }) satisfies LocalPoolInfo,
-  )
+  return results
 }
 
 export async function fetchValidatorNodePoolAssignments(
-  validatorId: number | bigint,
-): Promise<NodePoolAssignmentConfig> {
-  const validatorClient = await getSimulateValidatorClient()
-  const assignments = await validatorClient.getNodePoolAssignments({
-    args: { validatorId },
-  })
-  return assignments
+  validatorIds: number[],
+): Promise<NodePoolAssignmentConfig[]> {
+  return ghostSDK.getNodePoolAssignments(validatorIds)
+}
+
+export interface SinglePoolInfo extends AllPoolInfo {
+  pools: LocalPoolInfo[]
+}
+
+export async function fetchSinglePoolInfo(validatorId: number): Promise<SinglePoolInfo> {
+  console.time('single ' + String(validatorId))
+  const data = await ghostSDK.getAllPoolInfo(validatorId)
+  console.timeEnd('single ' + String(validatorId))
+  return {
+    ...data,
+    pools: data.poolInfo.map((poolInfo: [bigint, number, bigint], i: number) =>
+      convertPoolTolocalPoolInfo(convertPoolTupleToPool(poolInfo), i + 1 /* poolId is 1-based */),
+    ),
+  }
 }
 
 /**
@@ -164,11 +194,11 @@ export async function processPoolData(pool: LocalPoolInfo): Promise<PoolData> {
  * to seed the query cache with complete data.
  */
 export async function fetchValidator(validatorId: number): Promise<Validator> {
-  const [config, state, pools, nodePoolAssignment] = await Promise.all([
-    fetchValidatorConfig(validatorId),
-    fetchValidatorState(validatorId),
-    fetchValidatorPools(validatorId),
-    fetchValidatorNodePoolAssignments(validatorId),
+  const [[config], [state], [pools], [nodePoolAssignment]] = await Promise.all([
+    fetchValidatorConfig([validatorId]),
+    fetchValidatorStates([validatorId]),
+    fetchValidatorsPools([validatorId]),
+    fetchValidatorNodePoolAssignments([validatorId]),
   ])
 
   if (!config || !state || !pools || !nodePoolAssignment) {
@@ -637,6 +667,7 @@ export async function fetchStakerPoolData(
 
 export async function fetchStakerValidatorData(staker: string): Promise<StakerValidatorData[]> {
   try {
+    console.time('fetchStakerValidatorData')
     const poolKeys = await fetchStakedPoolsForAccount(staker)
 
     const allPools: Array<StakerPoolData> = []
@@ -689,7 +720,7 @@ export async function fetchStakerValidatorData(staker: string): Promise<StakerVa
 
       return acc
     }, [] as StakerValidatorData[])
-
+    console.timeEnd('fetchStakerValidatorData')
     return stakerValidatorData
   } catch (error) {
     console.error(error)
