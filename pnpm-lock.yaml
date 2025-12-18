@@ -4594,7 +4594,7 @@ packages:
     hasBin: true
 
   reti-fast-sdk@file:ui/reti-fast-sdk-1.0.0.tgz:
-    resolution: {integrity: sha512-LB+1YUnbxtTsvo8ZARKptSZr47aYTu8BFeMoQAI3G3azXWqHU33ULZKoUEHFVyncw3JxuV4bPugQ9WtpEq17hg==, tarball: file:ui/reti-fast-sdk-1.0.0.tgz}
+    resolution: {integrity: sha512-iZnyt+ZbOtGQQBQ7hCjXzDR9atHA/vLypwc0/VdWJ9jmYEompKLZ/LTtKN8EtSOuNlklpqe3JCIns0EwLAB3bw==, tarball: file:ui/reti-fast-sdk-1.0.0.tgz}
     version: 1.0.0
 
   reusify@1.0.4:
