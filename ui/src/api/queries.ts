@@ -271,7 +271,12 @@ export const assetQueryOptions = (assetId: number) =>
 export const assetsQueryOptions = (assetIds: bigint[] | number[]) =>
   queryOptions<Asset[]>({
     queryKey: ['assets', assetIds.join(',')],
-    queryFn: () => fetchAssets(assetIds),
+    queryFn: () => {
+      return assetIds.length === 1
+        ? // skip simulate for a single asset
+          fetchAsset(Number(assetIds[0])).then((a) => [a])
+        : fetchAssets(assetIds)
+    },
     staleTime: Infinity,
     enabled: assetIds.length > 0,
     refetchOnWindowFocus: false,
