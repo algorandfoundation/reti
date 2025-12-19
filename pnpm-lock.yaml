@@ -249,7 +249,7 @@ importers:
       react-hook-form:
         specifier: 7.53.0
         version: 7.53.0(react@18.3.1)
-      reti-fast-sdk:
+      reti-ghost-sdk:
         specifier: ^0.0.1
         version: 0.0.1
       sonner:
@@ -4593,8 +4593,8 @@ packages:
     resolution: {integrity: sha512-oKWePCxqpd6FlLvGV1VU0x7bkPmmCNolxzjMf4NczoDnQcIWrAF+cPtZn5i6n+RfD2d9i0tzpKnG6Yk168yIyw==}
     hasBin: true
 
-  reti-fast-sdk@0.0.1:
-    resolution: {integrity: sha512-iZgw70izgHNWVErVLHYpZRXoYUtzyrj1wlrFdJmPP6l4Cnk/Nt/G8oipAafytzElTf7Y49ZaUdqX6dS3tDFlTw==}
+  reti-ghost-sdk@0.0.1:
+    resolution: {integrity: sha512-GuGJA1drNm7xUwPXDHzyrKkKKwS7CYrcIMUdQoip3I9V68b7PYwmHMfYeQjHVtbsdfM2Cp+oPDUjs3jviZfTYA==}
 
   reusify@1.0.4:
     resolution: {integrity: sha512-U9nH88a3fc/ekCF1l0/UP1IosiuIjyTh7hBvXVMHYgVcfGvt897Xguj2UOLDeI5BG2m7/uwyaLVT6fbtCwTyzw==}
@@ -10069,7 +10069,7 @@ snapshots:
       path-parse: 1.0.7
       supports-preserve-symlinks-flag: 1.0.0
 
-  reti-fast-sdk@0.0.1:
+  reti-ghost-sdk@0.0.1:
     dependencies:
       '@algorandfoundation/algokit-utils': 9.2.0(algosdk@3.5.2)
       algosdk: 3.5.2
