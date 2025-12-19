@@ -6,5 +6,5 @@ export const ghostSDK = new RetiGhostSDK({
   registryAppId: RETI_APP_ID,
 })
 
-// disable params caching, out algorand client has paras cache already
-ghostSDK.ghostSDK.cacheParamsTimeout = 0
+// disable params caching, our algorand client has params cache already
+ghostSDK.baseSDK.cacheParamsTimeout = 0

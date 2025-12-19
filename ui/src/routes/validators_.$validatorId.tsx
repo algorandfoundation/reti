@@ -2,7 +2,7 @@ import { ValidatorNotFoundError } from '@/api/contracts'
 import {
   constraintsQueryOptions,
   stakesQueryOptions,
-  validatorAllQueryOptions,
+  validatorSingleQueryOptions,
 } from '@/api/queries'
 import { Loading } from '@/components/Loading'
 import { Meta } from '@/components/Meta'
@@ -19,7 +19,7 @@ export const Route = createFileRoute('/validators_/$validatorId')({
   beforeLoad: () => {
     return {
       queryOptions: {
-        data: validatorAllQueryOptions,
+        data: validatorSingleQueryOptions,
       },
     }
   },

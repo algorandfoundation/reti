@@ -120,7 +120,7 @@ export interface GhostValidator extends GhostValidatorBase {
   pools: LocalPoolInfo[]
 }
 
-export async function fetchSinglePoolInfo(validatorId: number): Promise<GhostValidator> {
+export async function fetchSingleValidatorInfo(validatorId: number): Promise<GhostValidator> {
   console.time('single ' + String(validatorId))
   const [data] = await ghostSDK.getValidators([validatorId])
   console.timeEnd('single ' + String(validatorId))
@@ -130,6 +130,19 @@ export async function fetchSinglePoolInfo(validatorId: number): Promise<GhostVal
       convertPoolTolocalPoolInfo(convertPoolTupleToPool(poolInfo), i + 1 /* poolId is 1-based */),
     ),
   }
+}
+
+export async function fetchValidatorInfo(validatorIds: number[]): Promise<GhostValidator[]> {
+  console.log('Fetching', validatorIds.length, 'validators from Ghost SDK')
+  console.time('full')
+  const data = await ghostSDK.getValidators(validatorIds)
+  console.timeEnd('full')
+  return data.map((data) => ({
+    ...data,
+    pools: data.poolInfo.map((poolInfo: [bigint, number, bigint], i: number) =>
+      convertPoolTolocalPoolInfo(convertPoolTupleToPool(poolInfo), i + 1 /* poolId is 1-based */),
+    ),
+  }))
 }
 
 /**

@@ -6,8 +6,8 @@ import {
 import {
   assetQueryOptions,
   nfdQueryOptions,
-  validatorAllQueryOptions,
   validatorSingleMetricsQueryOptions,
+  validatorSingleQueryOptions,
 } from '@/api/queries'
 import { GatingType } from '@/constants/gating'
 import { Asset } from '@/interfaces/asset'
@@ -24,7 +24,7 @@ export function useValidator(validatorId: number): Validator | undefined {
   // Core validator queries
   const [allPoolInfoQuery, metricsQuery] = useSuspenseQueries({
     queries: [
-      validatorAllQueryOptions(validatorId),
+      validatorSingleQueryOptions(validatorId),
       validatorSingleMetricsQueryOptions(validatorId, queryClient),
     ],
   })

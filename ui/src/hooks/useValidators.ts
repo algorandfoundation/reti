@@ -4,10 +4,7 @@ import {
   nfdQueryOptions,
   nodelyPerfMetricsQueryOptions,
   numValidatorsQueryOptions,
-  validatorConfigsQueryOptions,
-  validatorNodePoolAssignmentsQueryOptions,
-  validatorPoolsQueryOptions,
-  validatorStatesQueryOptions,
+  validatorQueryOptions,
 } from '@/api/queries'
 import { GatingType } from '@/constants/gating'
 import { Asset } from '@/interfaces/asset'
@@ -35,23 +32,8 @@ export function useValidators(): {
   }, [numValidators])
 
   // Memoize query options
-  const validatorConfigQueries = React.useMemo(
-    () => validatorConfigsQueryOptions(validatorIds),
-    [validatorIds],
-  )
-
-  const validatorStateQueries = React.useMemo(
-    () => validatorStatesQueryOptions(validatorIds, 120000, false),
-    [validatorIds],
-  )
-
-  const validatorPoolsQueries = React.useMemo(
-    () => validatorPoolsQueryOptions(validatorIds, 120000, false),
-    [validatorIds],
-  )
-
-  const validatorNodePoolAssignmentQueries = React.useMemo(
-    () => validatorNodePoolAssignmentsQueryOptions(validatorIds),
+  const validatorQueryOptionsMemo = React.useMemo(
+    () => validatorQueryOptions(validatorIds),
     [validatorIds],
   )
 
@@ -63,37 +45,34 @@ export function useValidators(): {
   //   [validatorIds],
   // )
 
-  const configQuery = useQuery(validatorConfigQueries)
-  const stateQuery = useQuery(validatorStateQueries)
-  const poolsQuery = useQuery(validatorPoolsQueries)
-  const nodePoolAssignmentQuery = useQuery(validatorNodePoolAssignmentQueries)
+  const validatorQuery = useQuery(validatorQueryOptionsMemo)
   // const metricsQuery = useQuery(metricsQueries)
 
   const assetIds = React.useMemo(() => {
     const rewardAssetIds =
-      configQuery.data
-        ?.map((q) => q.rewardTokenId)
+      validatorQuery.data
+        ?.map((q) => q.config.rewardTokenId)
         .filter((id): id is bigint => id !== undefined && id > 0n) ?? []
 
     const gatingAssetIds =
-      configQuery.data?.flatMap((q) =>
-        q.entryGatingType === GatingType.AssetId
-          ? q.entryGatingAssets.filter((id): id is bigint => id > 0n)
+      validatorQuery.data?.flatMap((q) =>
+        q.config.entryGatingType === GatingType.AssetId
+          ? q.config.entryGatingAssets.filter((id): id is bigint => id > 0n)
           : [],
       ) ?? []
 
     return unique([...rewardAssetIds, ...gatingAssetIds])
-  }, [configQuery.data])
+  }, [validatorQuery.data])
 
   const assetQuery = useQuery(assetsQueryOptions(assetIds))
 
   const nfdQueries = useQueries({
     queries:
-      configQuery.data
-        ?.map((q) => Number(q.nfdForInfo))
+      validatorQuery.data
+        ?.map((q) => Number(q.config.nfdForInfo))
         .filter((id) => id > 0)
         .map((id) => nfdQueryOptions(id, { view: 'full' })) ?? [],
-  })
+  }) // TODO chunk 20
 
   // nodely performance data
   const nodelyPerfQuery = useQuery(nodelyPerfMetricsQueryOptions())
@@ -104,22 +83,13 @@ export function useValidators(): {
   const validators = React.useMemo(() => {
     const result: Validator[] = []
 
+    if (!validatorQuery.data) return result
+
     for (let i = 0; i < validatorIds.length; i++) {
       const validatorId = validatorIds[i]
 
-      // Find the data for this validator ID in each query result
-      const config = queryClient
-        .getQueryData(validatorConfigsQueryOptions(validatorIds).queryKey)
-        ?.at(i)
-      const state = queryClient
-        .getQueryData(validatorStatesQueryOptions(validatorIds).queryKey)
-        ?.at(i)
-      const pools = queryClient
-        .getQueryData(validatorPoolsQueryOptions(validatorIds).queryKey)
-        ?.at(i)
-      const nodePoolAssignment = queryClient
-        .getQueryData(validatorNodePoolAssignmentsQueryOptions(validatorIds).queryKey)
-        ?.at(i)
+      const { config, state, pools, nodeAssignment: nodePoolAssignment } = validatorQuery.data[i]!
+
       // const metrics = queryClient
       //   .getQueryData(validatorMetricsQueryOptions(validatorIds, queryClient).queryKey)
       //   ?.at(i)
@@ -180,27 +150,13 @@ export function useValidators(): {
     return result
   }, [
     validatorIds,
-    configQuery.data,
-    stateQuery.data,
-    poolsQuery.data,
-    nodePoolAssignmentQuery.data,
+    validatorQuery.data,
     assetQuery.data,
     nfdQueries,
     // metricsQuery.data,
   ])
 
-  const isLoading =
-    configQuery.isLoading ||
-    stateQuery.isLoading ||
-    poolsQuery.isLoading ||
-    nodePoolAssignmentQuery.isLoading
+  const { isLoading, error } = validatorQuery
 
-  const error =
-    configQuery.error || stateQuery.error || poolsQuery.error || nodePoolAssignmentQuery.error
-
-  return {
-    validators,
-    isLoading,
-    error,
-  }
+  return { validators, isLoading, error }
 }

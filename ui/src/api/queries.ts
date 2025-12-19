@@ -11,10 +11,11 @@ import {
   fetchNumValidators,
   fetchPoolApy,
   fetchProtocolConstraints,
-  fetchSinglePoolInfo,
+  fetchSingleValidatorInfo,
   fetchStakedInfoForPool,
   fetchStakerValidatorData,
   fetchValidatorConfig as fetchValidatorConfigs,
+  fetchValidatorInfo,
   fetchValidatorNodePoolAssignments,
   fetchValidatorsPools,
   fetchValidatorStates,
@@ -93,15 +94,26 @@ export const validatorPoolsQueryOptions = (
     refetchOnMount: false,
   })
 
-export const validatorAllQueryOptions = (validatorId: number, enabled = true) =>
+export const validatorSingleQueryOptions = (validatorId: number, enabled = true) =>
   queryOptions({
-    queryKey: ['validator-all', validatorId.toString()],
-    queryFn: () => fetchSinglePoolInfo(validatorId),
+    queryKey: ['validator-single', validatorId.toString()],
+    queryFn: () => fetchSingleValidatorInfo(validatorId),
     staleTime: Infinity,
     refetchInterval: 1000 * 30, // 30 seconds
     refetchOnWindowFocus: true,
     refetchOnMount: false,
     enabled,
+  })
+
+export const validatorQueryOptions = (validatorIds: number[], enabled = true) =>
+  queryOptions({
+    queryKey: ['validator', validatorIds.join(',')],
+    queryFn: () => fetchValidatorInfo(validatorIds),
+    staleTime: Infinity,
+    refetchInterval: 1000 * 30, // 30 seconds
+    refetchOnWindowFocus: true,
+    refetchOnMount: false,
+    enabled: validatorIds.length > 0 && enabled,
   })
 
 export const validatorNodePoolAssignmentsQueryOptions = (validatorIds: number[], enabled = true) =>
@@ -159,7 +171,7 @@ export const validatorSingleMetricsQueryOptions = (validatorId: number, queryCli
     queryFn: async () => {
       // Get cached data from other queries
       const { config, state, pools } = await queryClient.ensureQueryData(
-        validatorAllQueryOptions(validatorId),
+        validatorSingleQueryOptions(validatorId),
       )
 
       const params = await algorandClient.getSuggestedParams()
