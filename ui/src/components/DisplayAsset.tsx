@@ -1,10 +1,10 @@
-import algosdk from 'algosdk'
-import * as React from 'react'
+import { Asset } from '@/interfaces/asset'
 import { ExplorerLink } from '@/utils/explorer'
 import { cn } from '@/utils/ui'
+import * as React from 'react'
 
 interface DisplayAssetProps {
-  asset?: algosdk.modelsv2.Asset
+  asset?: Asset
   show?: 'name' | 'unit-name' | 'full'
   link?: boolean
   fallback?: React.ReactNode
@@ -22,7 +22,7 @@ export function DisplayAsset({
     return <span className="font-mono">{unitName}</span>
   }
 
-  const renderDisplayAsset = (asset: algosdk.modelsv2.Asset) => {
+  const renderDisplayAsset = (asset: Asset) => {
     const { name, unitName } = asset.params
 
     if (unitName && show === 'unit-name') {

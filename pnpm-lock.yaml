@@ -250,8 +250,8 @@ importers:
         specifier: 7.53.0
         version: 7.53.0(react@18.3.1)
       reti-ghost-sdk:
-        specifier: ^0.0.1
-        version: 0.0.1
+        specifier: link:/home/bit/code/reti-ghost-sdk/projects/sdk
+        version: link:../../reti-ghost-sdk/projects/sdk
       sonner:
         specifier: 1.5.0
         version: 1.5.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -4131,10 +4131,6 @@ packages:
     resolution: {integrity: sha512-LaNjtRWUBY++zB5nE/NwcaoMylSPk+S+ZHNB1TzdbMJMny6dynpAGt7X/tl/QYq3TIeE6nxHppbo2LGymrG5Pw==}
     engines: {node: '>=10'}
 
-  p-map@7.0.4:
-    resolution: {integrity: sha512-tkAQEw8ysMzmkhgw8k+1U/iPhWNhykKnSk4Rd5zLoPJCuJaGRPo6YposrZgaxHKzDHdDWWZvE/Sk7hsL2X/CpQ==}
-    engines: {node: '>=18'}
-
   p-queue@8.1.0:
     resolution: {integrity: sha512-mxLDbbGIBEXTJL0zEx8JIylaj3xQ7Z/7eEVjcF9fJX4DBiH9oqe+oahYnlKKxm0Ci9TlWTyhSHgygxMxjIB2jw==}
     engines: {node: '>=18'}
@@ -4592,9 +4588,6 @@ packages:
   resolve@1.22.8:
     resolution: {integrity: sha512-oKWePCxqpd6FlLvGV1VU0x7bkPmmCNolxzjMf4NczoDnQcIWrAF+cPtZn5i6n+RfD2d9i0tzpKnG6Yk168yIyw==}
     hasBin: true
-
-  reti-ghost-sdk@0.0.1:
-    resolution: {integrity: sha512-GuGJA1drNm7xUwPXDHzyrKkKKwS7CYrcIMUdQoip3I9V68b7PYwmHMfYeQjHVtbsdfM2Cp+oPDUjs3jviZfTYA==}
 
   reusify@1.0.4:
     resolution: {integrity: sha512-U9nH88a3fc/ekCF1l0/UP1IosiuIjyTh7hBvXVMHYgVcfGvt897Xguj2UOLDeI5BG2m7/uwyaLVT6fbtCwTyzw==}
@@ -9613,8 +9606,6 @@ snapshots:
     dependencies:
       p-limit: 3.1.0
 
-  p-map@7.0.4: {}
-
   p-queue@8.1.0:
     dependencies:
       eventemitter3: 5.0.1
@@ -10068,12 +10059,6 @@ snapshots:
       is-core-module: 2.15.1
       path-parse: 1.0.7
       supports-preserve-symlinks-flag: 1.0.0
-
-  reti-ghost-sdk@0.0.1:
-    dependencies:
-      '@algorandfoundation/algokit-utils': 9.2.0(algosdk@3.5.2)
-      algosdk: 3.5.2
-      p-map: 7.0.4
 
   reusify@1.0.4: {}
 

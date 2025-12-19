@@ -1,13 +1,13 @@
-import algosdk from 'algosdk'
-import { Check } from 'lucide-react'
-import * as React from 'react'
-import { FieldPath, FieldValues, UseFormReturn } from 'react-hook-form'
-import { useDebouncedCallback } from 'use-debounce'
 import { fetchAsset as fetchAssetInformation } from '@/api/algod'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { AlgodHttpError } from '@/interfaces/algod'
+import { Asset } from '@/interfaces/asset'
 import { cn } from '@/utils/ui'
+import { Check } from 'lucide-react'
+import * as React from 'react'
+import { FieldPath, FieldValues, UseFormReturn } from 'react-hook-form'
+import { useDebouncedCallback } from 'use-debounce'
 
 const ERROR_EMPTY_FIELD = 'No asset ID entered'
 const ERROR_NOT_FOUND = 'Asset not found'
@@ -21,8 +21,8 @@ interface AssetLookupProps<
   form: UseFormReturn<TFieldValues>
   id: string
   name: TName
-  asset: algosdk.modelsv2.Asset | null
-  setAsset: (asset: algosdk.modelsv2.Asset | null) => void
+  asset: Asset | null
+  setAsset: (asset: Asset | null) => void
   isFetching: boolean
   setIsFetching: (isFetching: boolean) => void
   errorMessage?: string

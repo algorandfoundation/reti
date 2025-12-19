@@ -1,4 +1,4 @@
-import algosdk from 'algosdk'
+import { Asset } from '@/interfaces/asset'
 import Big from 'big.js'
 /**
  * Convert an asset amount from base units to whole units
@@ -196,7 +196,7 @@ type FormatAssetAmountOptions = Omit<FormatAmountOptions, 'decimals'> & {
  * @see {@link formatAmount}
  */
 export function formatAssetAmount(
-  asset: algosdk.modelsv2.Asset,
+  asset: Asset,
   amount: number | bigint | string,
   options: FormatAssetAmountOptions = {},
 ): string {

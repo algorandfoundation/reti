@@ -1,11 +1,12 @@
+import { ALGORAND_ZERO_ADDRESS_STRING } from '@/constants/accounts'
+import { GatingType } from '@/constants/gating'
+import { Constraints } from '@/contracts/ValidatorRegistryClient'
+import { Asset } from '@/interfaces/asset'
+import { convertToBaseUnits } from '@/utils/format'
+import { isValidName, isValidRoot } from '@/utils/nfd'
 import { AlgoAmount } from '@algorandfoundation/algokit-utils/types/amount'
 import algosdk from 'algosdk'
 import { RefinementCtx, z } from 'zod'
-import { ALGORAND_ZERO_ADDRESS_STRING } from '@/constants/accounts'
-import { GatingType } from '@/constants/gating'
-import { convertToBaseUnits } from '@/utils/format'
-import { isValidName, isValidRoot } from '@/utils/nfd'
-import { Constraints } from '@/contracts/ValidatorRegistryClient'
 
 /**
  * Validator schema definitions for form validation
@@ -310,7 +311,7 @@ export const entryGatingRefinement = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any,
   ctx: RefinementCtx,
-  assets: Array<algosdk.modelsv2.Asset | null>,
+  assets: Array<Asset | null>,
 ) => {
   const {
     entryGatingType,

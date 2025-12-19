@@ -23,6 +23,7 @@ import {
   ValidatorRegistryClient,
 } from '@/contracts/ValidatorRegistryClient'
 import { wrapTransactionSigner } from '@/hooks/useTransactionState'
+import { Asset } from '@/interfaces/asset'
 import { StakerPoolData, StakerValidatorData } from '@/interfaces/staking'
 import {
   EntryGatingAssets,
@@ -36,24 +37,21 @@ import { BalanceChecker } from '@/utils/balanceChecker'
 import { sleep } from '@/utils/time'
 import { AlgoAmount } from '@algorandfoundation/algokit-utils/types/amount'
 import algosdk, { getApplicationAddress } from 'algosdk'
-import { AllPoolInfo } from 'reti-ghost-sdk/dist/generated/RetiReaderSDK'
+import { Validator as GhostValidatorBase } from 'reti-ghost-sdk/dist/generated/RetiReaderSDK'
 import { ghostSDK } from './ghostSdk'
 import { TransactionHandlerProps } from './transactionState'
 
 export async function fetchNumValidators(): Promise<number> {
-  console.log('fetchNumValidators called')
   const validatorClient = await getSimulateValidatorClient()
   const numValidators = await validatorClient.state.global.numValidators()
   return Number(numValidators)
 }
 
 export async function fetchValidatorConfig(validatorIds: number[]): Promise<ValidatorConfig[]> {
-  console.log('fetchValidatorConfig called with ids:', validatorIds)
   return ghostSDK.getValidatorConfig(validatorIds)
 }
 
 export async function fetchValidatorStates(validatorIds: number[]): Promise<ValidatorCurState[]> {
-  console.log('fetchValidatorStates called with ids:', validatorIds)
   return ghostSDK.getValidatorStates(validatorIds)
 }
 
@@ -118,13 +116,13 @@ export async function fetchValidatorNodePoolAssignments(
   return ghostSDK.getNodePoolAssignments(validatorIds)
 }
 
-export interface SinglePoolInfo extends AllPoolInfo {
+export interface GhostValidator extends GhostValidatorBase {
   pools: LocalPoolInfo[]
 }
 
-export async function fetchSinglePoolInfo(validatorId: number): Promise<SinglePoolInfo> {
+export async function fetchSinglePoolInfo(validatorId: number): Promise<GhostValidator> {
   console.time('single ' + String(validatorId))
-  const data = await ghostSDK.getAllPoolInfo(validatorId)
+  const [data] = await ghostSDK.getValidators([validatorId])
   console.timeEnd('single ' + String(validatorId))
   return {
     ...data,
@@ -235,7 +233,7 @@ export async function fetchValidator(validatorId: number): Promise<Validator> {
           return null
         }),
       ).then((assets) => {
-        validator.gatingAssets = assets.filter(Boolean) as algosdk.modelsv2.Asset[]
+        validator.gatingAssets = assets.filter(Boolean) as Asset[]
       }),
     )
   }

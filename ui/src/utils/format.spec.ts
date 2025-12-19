@@ -1,14 +1,15 @@
-import algosdk from 'algosdk'
 import {
   convertFromBaseUnits,
   convertToBaseUnits,
   formatAlgoAmount,
-  formatAssetAmount,
   formatAmount,
+  formatAssetAmount,
   formatWithPrecision,
   roundToFirstNonZeroDecimal,
   roundToWholeAlgos,
 } from '@/utils/format'
+import { modelsv2 } from 'algosdk'
+import { Asset } from 'algosdk/dist/types/client/v2/algod/models/types'
 
 describe('convertFromBaseUnits', () => {
   it('should convert from base units correctly', () => {
@@ -158,14 +159,14 @@ describe('formatWithPrecision', () => {
 })
 
 describe('formatAssetAmount', () => {
-  const params = new algosdk.modelsv2.AssetParams({
+  const params = new modelsv2.AssetParams({
     creator: '',
     decimals: 6,
     name: 'Test Asset',
     total: 1000000n,
     unitName: 'TEST',
   })
-  const asset = new algosdk.modelsv2.Asset({
+  const asset = new Asset({
     params,
     index: 12345n,
   })

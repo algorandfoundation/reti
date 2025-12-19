@@ -1,16 +1,3 @@
-import { AlgoAmount } from '@algorandfoundation/algokit-utils/types/amount'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from '@tanstack/react-router'
-import { useWallet } from '@txnlab/use-wallet-react'
-import algosdk from 'algosdk'
-import { isAxiosError } from 'axios'
-import { ArrowUpRight, Check, Monitor, MonitorCheck, WalletMinimal, X } from 'lucide-react'
-import * as React from 'react'
-import { useFieldArray, useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { useDebouncedCallback } from 'use-debounce'
-import { z } from 'zod'
 import { addValidator, fetchValidator } from '@/api/contracts'
 import { fetchNfd } from '@/api/nfd'
 import { AlgoSymbol } from '@/components/AlgoSymbol'
@@ -55,7 +42,20 @@ import {
   setValidatorQueriesData,
   transformEntryGatingAssets,
 } from '@/utils/contracts'
+import { AlgoAmount } from '@algorandfoundation/algokit-utils/types/amount'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useQueryClient } from '@tanstack/react-query'
+import { useNavigate } from '@tanstack/react-router'
+import { useWallet } from '@txnlab/use-wallet-react'
+import { isAxiosError } from 'axios'
+import { ArrowUpRight, Check, Monitor, MonitorCheck, WalletMinimal, X } from 'lucide-react'
+import * as React from 'react'
+import { useFieldArray, useForm } from 'react-hook-form'
+import { toast } from 'sonner'
+import { useDebouncedCallback } from 'use-debounce'
+import { z } from 'zod'
 // import { validatorAutoFill } from '@/utils/development'
+import { Asset } from '@/interfaces/asset'
 import { convertToBaseUnits } from '@/utils/format'
 import { getNfdAppFromViteEnvironment } from '@/utils/network/getNfdConfig'
 import { isValidName, trimExtension } from '@/utils/nfd'
@@ -75,9 +75,9 @@ export function AddValidatorForm({ constraints }: AddValidatorFormProps) {
   const [isFetchingNfdCreator, setIsFetchingNfdCreator] = React.useState(false)
   const [nfdParentAppId, setNfdParentAppId] = React.useState<bigint>(0n)
   const [isFetchingNfdParent, setIsFetchingNfdParent] = React.useState(false)
-  const [rewardToken, setRewardToken] = React.useState<algosdk.modelsv2.Asset | null>(null)
+  const [rewardToken, setRewardToken] = React.useState<Asset | null>(null)
   const [isFetchingRewardToken, setIsFetchingRewardToken] = React.useState(false)
-  const [gatingAssets, setGatingAssets] = React.useState<Array<algosdk.modelsv2.Asset | null>>([])
+  const [gatingAssets, setGatingAssets] = React.useState<Array<Asset | null>>([])
   const [isFetchingGatingAssetIndex, setIsFetchingGatingAssetIndex] = React.useState<number>(-1)
   const [epochTimeframe, setEpochTimeframe] = React.useState('blocks')
   const [isSigning, setIsSigning] = React.useState(false)
@@ -166,7 +166,7 @@ export function AddValidatorForm({ constraints }: AddValidatorFormProps) {
     })
   }
 
-  const handleSetGatingAssetById = async (index: number, value: algosdk.modelsv2.Asset | null) => {
+  const handleSetGatingAssetById = async (index: number, value: Asset | null) => {
     setGatingAssets((prev) => {
       const newAssets = [...prev]
       newAssets[index] = value

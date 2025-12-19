@@ -16,12 +16,12 @@ import {
 } from '@/api/contracts'
 import { fetchNfd, fetchNfdReverseLookup } from '@/api/nfd'
 import { fetchNodely24hPerf } from '@/api/nodely'
+import { Asset } from '@/interfaces/asset'
 import { Nfd, NfdGetLookupParams, NfdGetNFDParams } from '@/interfaces/nfd'
 import { calculateValidatorPoolMetrics } from '@/utils/contracts'
 import { resolveIpfsUrl } from '@/utils/ipfs'
 import { AlgoAmount } from '@algorandfoundation/algokit-utils/types/amount'
 import { keepPreviousData, QueryClient, queryOptions } from '@tanstack/react-query'
-import algosdk from 'algosdk'
 import { AxiosError } from 'axios'
 import { CacheRequestConfig } from 'axios-cache-interceptor'
 
@@ -246,7 +246,7 @@ export const nfdLookupQueryOptions = (
 ////////////////////////////////////////////////////////////
 
 export const assetQueryOptions = (assetId: number) =>
-  queryOptions<algosdk.modelsv2.Asset>({
+  queryOptions<Asset>({
     queryKey: ['asset', assetId],
     queryFn: () => fetchAsset(assetId),
     staleTime: Infinity,

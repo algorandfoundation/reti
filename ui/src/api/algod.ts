@@ -1,9 +1,10 @@
 import { AccountBalance, AlgodHttpError, AssetCreatorHolding, Exclude } from '@/interfaces/algod'
+import { Asset } from '@/interfaces/asset'
 import { BigMath } from '@/utils/bigint'
 import { getAlgodConfigFromViteEnvironment } from '@/utils/network/getAlgoClientConfigs'
 import { AlgoAmount } from '@algorandfoundation/algokit-utils/types/amount'
 import { ClientManager } from '@algorandfoundation/algokit-utils/types/client-manager'
-import algosdk from 'algosdk'
+import algosdk, { modelsv2 } from 'algosdk'
 import { ghostSDK } from './ghostSdk'
 
 const algodConfig = getAlgodConfigFromViteEnvironment()
@@ -30,7 +31,7 @@ export async function fetchAccountBalance(
   return availableBalance ? accountInfo.amount - accountInfo.minBalance : accountInfo.amount
 }
 
-export async function fetchAsset(assetId: bigint | number): Promise<algosdk.modelsv2.Asset> {
+export async function fetchAsset(assetId: bigint | number): Promise<Asset> {
   try {
     const asset = await algodClient.getAssetByID(assetId).do()
     return asset
@@ -61,9 +62,7 @@ export async function fetchBalance(address: string | null): Promise<AccountBalan
   }
 }
 
-export async function fetchAssetHoldings(
-  address: string | null,
-): Promise<algosdk.modelsv2.AssetHolding[]> {
+export async function fetchAssetHoldings(address: string | null): Promise<modelsv2.AssetHolding[]> {
   if (!address) {
     throw new Error('No address provided')
   }

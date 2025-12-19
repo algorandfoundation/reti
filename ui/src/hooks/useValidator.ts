@@ -10,9 +10,9 @@ import {
   validatorSingleMetricsQueryOptions,
 } from '@/api/queries'
 import { GatingType } from '@/constants/gating'
+import { Asset } from '@/interfaces/asset'
 import { Validator } from '@/interfaces/validator'
 import { useQuery, useQueryClient, useSuspenseQueries } from '@tanstack/react-query'
-import algosdk from 'algosdk'
 import * as React from 'react'
 
 /**
@@ -81,9 +81,7 @@ export function useValidator(validatorId: number): Validator | undefined {
     }
 
     if (baseValidator.config.entryGatingType === GatingType.AssetId) {
-      baseValidator.gatingAssets = gatingAssetQueries
-        .map((q) => q.data)
-        .filter(Boolean) as algosdk.modelsv2.Asset[]
+      baseValidator.gatingAssets = gatingAssetQueries.map((q) => q.data).filter(Boolean) as Asset[]
     }
 
     if (nfdQuery?.data) {
