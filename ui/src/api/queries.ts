@@ -174,9 +174,11 @@ export const validatorSingleMetricsQueryOptions = (validatorId: number, queryCli
         validatorSingleQueryOptions(validatorId),
       )
 
-      const params = await algorandClient.getSuggestedParams()
       const poolDataPromises = pools.map((pool) => processPoolData(pool))
-      const processedPoolsData = await Promise.all(poolDataPromises)
+      const [params, ...processedPoolsData] = await Promise.all([
+        algorandClient.getSuggestedParams(),
+        ...poolDataPromises,
+      ])
 
       // Ignore pools with less than 30k ALGO balance
       const filteredPoolsData = processedPoolsData.filter(

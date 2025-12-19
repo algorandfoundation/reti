@@ -1,18 +1,13 @@
+import { convertPoolTolocalPoolInfo, createBaseValidator } from '@/api/contracts'
 import {
-  convertPoolTolocalPoolInfo,
-  convertPoolTupleToPool,
-  createBaseValidator,
-} from '@/api/contracts'
-import {
-  assetQueryOptions,
+  assetsQueryOptions,
   nfdQueryOptions,
   validatorSingleMetricsQueryOptions,
   validatorSingleQueryOptions,
 } from '@/api/queries'
 import { GatingType } from '@/constants/gating'
-import { Asset } from '@/interfaces/asset'
 import { Validator } from '@/interfaces/validator'
-import { useQuery, useQueryClient, useSuspenseQueries } from '@tanstack/react-query'
+import { useQueryClient, useSuspenseQueries, useSuspenseQuery } from '@tanstack/react-query'
 import * as React from 'react'
 
 /**
@@ -22,34 +17,23 @@ export function useValidator(validatorId: number): Validator | undefined {
   const queryClient = useQueryClient()
 
   // Core validator queries
-  const [allPoolInfoQuery, metricsQuery] = useSuspenseQueries({
+  const [validatorQuery, metricsQuery] = useSuspenseQueries({
     queries: [
       validatorSingleQueryOptions(validatorId),
       validatorSingleMetricsQueryOptions(validatorId, queryClient),
     ],
   })
 
-  const config = allPoolInfoQuery.data?.config
-  const state = allPoolInfoQuery.data?.state
-  const pools = allPoolInfoQuery.data?.poolInfo
-  const nodePoolAssignment = allPoolInfoQuery.data?.nodeAssignment
+  const config = validatorQuery.data?.config
 
-  // Reward token query
-  const rewardTokenQuery = useQuery({
-    ...assetQueryOptions(Number(config?.rewardTokenId)),
-    enabled: Boolean(config && config.rewardTokenId > 0n),
-  })
+  const assetIds = React.useMemo(() => {
+    return [
+      validatorQuery.data?.config.rewardTokenId,
+      ...validatorQuery.data?.config.entryGatingAssets,
+    ].filter((v) => !!v && v > 0n)
+  }, [validatorQuery.data])
 
-  // Gating asset queries
-  const gatingAssetQueries = useSuspenseQueries({
-    queries: [
-      ...(config?.entryGatingType === GatingType.AssetId
-        ? config.entryGatingAssets
-            .filter((id): id is bigint => id > 0n)
-            .map((id) => assetQueryOptions(Number(id)))
-        : []),
-    ],
-  })
+  const assetQuery = useSuspenseQuery(assetsQueryOptions(assetIds))
 
   // NFD query
   const [nfdQuery] = useSuspenseQueries({
@@ -62,26 +46,34 @@ export function useValidator(validatorId: number): Validator | undefined {
 
   // Combine all data synchronously
   const validator = React.useMemo((): Validator | undefined => {
-    if (!config || !state || !pools || !nodePoolAssignment) return undefined
+    if (!validatorQuery.data) return undefined
+
+    const { config, nodeAssignment: nodePoolAssignment, pools, state } = validatorQuery.data
 
     // Create base validator
     const baseValidator = createBaseValidator({
       id: validatorId,
-      config: config!,
-      state: state,
-      pools: pools.map((tuple, index) =>
-        convertPoolTolocalPoolInfo(convertPoolTupleToPool(tuple), index + 1),
-      ),
-      nodePoolAssignment: nodePoolAssignment,
+      config,
+      state,
+      nodePoolAssignment,
+      pools: pools.map((poolInfo, index) => {
+        return convertPoolTolocalPoolInfo(poolInfo, index + 1)
+      }),
     })
 
     // Add enrichment data
-    if (rewardTokenQuery.data) {
-      baseValidator.rewardToken = rewardTokenQuery.data
+    if (config.rewardTokenId) {
+      baseValidator.rewardToken = assetQuery.data?.find(
+        ({ index }) => index === config.rewardTokenId,
+      )
     }
 
     if (baseValidator.config.entryGatingType === GatingType.AssetId) {
-      baseValidator.gatingAssets = gatingAssetQueries.map((q) => q.data).filter(Boolean) as Asset[]
+      const gatingAssets = config.entryGatingAssets
+        .filter((assetId) => !!assetId)
+        .map((assetId) => assetQuery.data.find((asset) => asset.index === assetId))
+        .filter((e) => e !== undefined)
+      baseValidator.gatingAssets = gatingAssets?.length > 0 ? gatingAssets : undefined
     }
 
     if (nfdQuery?.data) {
@@ -97,14 +89,7 @@ export function useValidator(validatorId: number): Validator | undefined {
     }
 
     return baseValidator
-  }, [
-    validatorId,
-    allPoolInfoQuery.data,
-    rewardTokenQuery.data,
-    gatingAssetQueries,
-    nfdQuery?.data,
-    metricsQuery.data,
-  ])
+  }, [validatorId, validatorQuery.data, nfdQuery?.data, assetQuery.data, metricsQuery.data])
 
   return validator
 }
