@@ -1,14 +1,3 @@
-import { AlgoAmount } from '@algorandfoundation/algokit-utils/types/amount'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useRouter } from '@tanstack/react-router'
-import { useWallet } from '@txnlab/use-wallet-react'
-import { ArrowUpRight, MessageCircleWarning, RefreshCcw } from 'lucide-react'
-import * as React from 'react'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { useDebouncedCallback } from 'use-debounce'
-import { z } from 'zod'
 import { fetchAccountInformation } from '@/api/algod'
 import {
   addStake,
@@ -16,7 +5,7 @@ import {
   fetchValidator,
   findPoolForStaker,
 } from '@/api/contracts'
-import { mbrQueryOptions } from '@/api/queries'
+import { mbrAndProtocolConstraintsQueryOptions } from '@/api/queries'
 import { AlgoDisplayAmount } from '@/components/AlgoDisplayAmount'
 import { Loading } from '@/components/Loading'
 import { NfdDisplay } from '@/components/NfdDisplay'
@@ -41,9 +30,11 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { GatingType } from '@/constants/gating'
+import { Constraints } from '@/contracts/ValidatorRegistryClient'
 import { StakerPoolData, StakerValidatorData } from '@/interfaces/staking'
 import { Validator } from '@/interfaces/validator'
 import { InsufficientBalanceError } from '@/utils/balanceChecker'
+import { BigMath } from '@/utils/bigint'
 import {
   calculateMaxAvailableToStake,
   fetchValueToVerify,
@@ -52,8 +43,17 @@ import {
 import { ellipseAddressJsx } from '@/utils/ellipseAddress'
 import { ExplorerLink } from '@/utils/explorer'
 import { formatAlgoAmount, formatAmount } from '@/utils/format'
-import { Constraints } from '@/contracts/ValidatorRegistryClient'
-import { BigMath } from '@/utils/bigint'
+import { AlgoAmount } from '@algorandfoundation/algokit-utils/types/amount'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useRouter } from '@tanstack/react-router'
+import { useWallet } from '@txnlab/use-wallet-react'
+import { ArrowUpRight, MessageCircleWarning, RefreshCcw } from 'lucide-react'
+import * as React from 'react'
+import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
+import { useDebouncedCallback } from 'use-debounce'
+import { z } from 'zod'
 
 interface AddStakeModalProps {
   validator: Validator | null
@@ -111,8 +111,8 @@ export function AddStakeModal({
     return valueToVerify > 0
   }
 
-  const mbrQuery = useQuery(mbrQueryOptions)
-  const addStakerMbr = mbrQuery.data?.addStakerMbr || 0n
+  const mbrAndProtocolConstraintsQuery = useQuery(mbrAndProtocolConstraintsQueryOptions)
+  const addStakerMbr = mbrAndProtocolConstraintsQuery.data?.mbrAmounts.addStakerMbr || 0n
 
   // @todo: make this a custom hook, call from higher up and pass down as prop
   const mbrRequiredQuery = useQuery({

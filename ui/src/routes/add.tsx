@@ -1,13 +1,13 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { Navigate, createFileRoute, redirect } from '@tanstack/react-router'
-import { useWallet } from '@txnlab/use-wallet-react'
-import { constraintsQueryOptions } from '@/api/queries'
+import { mbrAndProtocolConstraintsQueryOptions } from '@/api/queries'
+import { AddValidatorForm } from '@/components/AddValidatorForm'
 import { ErrorAlert } from '@/components/ErrorAlert'
 import { Loading } from '@/components/Loading'
 import { Meta } from '@/components/Meta'
 import { PageHeader } from '@/components/PageHeader'
 import { PageMain } from '@/components/PageMain'
-import { AddValidatorForm } from '@/components/AddValidatorForm'
+import { useSuspenseQuery } from '@tanstack/react-query'
+import { Navigate, createFileRoute, redirect } from '@tanstack/react-router'
+import { useWallet } from '@txnlab/use-wallet-react'
 
 export const Route = createFileRoute('/add')({
   beforeLoad: ({ context }) => {
@@ -17,7 +17,8 @@ export const Route = createFileRoute('/add')({
       })
     }
   },
-  loader: ({ context: { queryClient } }) => queryClient.ensureQueryData(constraintsQueryOptions),
+  loader: ({ context: { queryClient } }) =>
+    queryClient.ensureQueryData(mbrAndProtocolConstraintsQueryOptions),
   component: AddValidator,
   pendingComponent: () => <Loading size="lg" className="opacity-50" />,
   errorComponent: ({ error }) => {
@@ -31,8 +32,8 @@ export const Route = createFileRoute('/add')({
 })
 
 function AddValidator() {
-  const constraintsQuery = useSuspenseQuery(constraintsQueryOptions)
-  const constraints = constraintsQuery.data
+  const mbrAndConstraintsQuery = useSuspenseQuery(mbrAndProtocolConstraintsQueryOptions)
+  const constraints = mbrAndConstraintsQuery.data.constraints
 
   const { activeAddress } = useWallet()
 

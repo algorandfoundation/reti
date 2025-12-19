@@ -6,7 +6,10 @@ import {
   linkPoolToNfd,
   requestSubscribeXGov,
 } from '@/api/contracts'
-import { mbrQueryOptions, validatorNodePoolAssignmentsQueryOptions } from '@/api/queries'
+import {
+  mbrAndProtocolConstraintsQueryOptions,
+  validatorNodePoolAssignmentsQueryOptions,
+} from '@/api/queries'
 import { AlgoDisplayAmount } from '@/components/AlgoDisplayAmount'
 import { DisplayAsset } from '@/components/DisplayAsset'
 import { NfdDisplay } from '@/components/NfdDisplay'
@@ -104,8 +107,8 @@ export function AddPoolModal({
 
   const availableBalance = amount - minBalance < 0n ? 0n : amount - minBalance
 
-  const mbrQuery = useQuery(mbrQueryOptions)
-  const { addPoolMbr = 0n, poolInitMbr = 0n } = mbrQuery.data || {}
+  const mbrQuery = useQuery(mbrAndProtocolConstraintsQueryOptions)
+  const { addPoolMbr = 0n, poolInitMbr = 0n } = mbrQuery.data?.mbrAmounts || {}
 
   const assignmentQuery = useQuery(
     validatorNodePoolAssignmentsQueryOptions([validator?.id || 0], !!validator),

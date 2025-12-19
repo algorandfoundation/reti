@@ -1,6 +1,6 @@
 import { ValidatorNotFoundError } from '@/api/contracts'
 import {
-  constraintsQueryOptions,
+  mbrAndProtocolConstraintsQueryOptions,
   stakesQueryOptions,
   validatorSingleQueryOptions,
 } from '@/api/queries'
@@ -48,7 +48,7 @@ function Dashboard() {
   const validator = useValidator(Number(validatorId))
   const { activeAddress } = useWallet()
 
-  const constraintsQuery = useQuery(constraintsQueryOptions)
+  const mbrAndProtocolConstraintsQuery = useQuery(mbrAndProtocolConstraintsQueryOptions)
   const stakesQuery = useQuery(stakesQueryOptions(activeAddress))
   const stakesByValidator = stakesQuery.data || []
 
@@ -62,7 +62,7 @@ function Dashboard() {
       <PageMain>
         <ValidatorDetails
           validator={validator!}
-          constraints={constraintsQuery.data!}
+          constraints={mbrAndProtocolConstraintsQuery.data!.constraints}
           stakesByValidator={stakesByValidator}
         />
       </PageMain>

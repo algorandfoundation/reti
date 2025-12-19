@@ -15,7 +15,6 @@ import { GatingType } from '@/constants/gating'
 import { StakedInfo, StakedInfoFromTuple, ValidatorPoolKey } from '@/contracts/StakingPoolClient'
 import {
   Constraints,
-  MbrAmounts,
   NodePoolAssignmentConfig,
   PoolInfo,
   ValidatorConfig,
@@ -38,6 +37,7 @@ import { sleep } from '@/utils/time'
 import { AlgoAmount } from '@algorandfoundation/algokit-utils/types/amount'
 import algosdk, { getApplicationAddress } from 'algosdk'
 import { Validator as GhostValidatorBase } from 'reti-ghost-sdk'
+import { MbrAmountsAndProtocolConstraints } from 'reti-ghost-sdk/dist/generated/RetiReaderSDK'
 import { ghostSDK } from './ghostSdk'
 import { TransactionHandlerProps } from './transactionState'
 
@@ -340,11 +340,11 @@ export function callGetMbrAmounts(validatorClient: ValidatorRegistryClient) {
   return validatorClient.send.getMbrAmounts({ args: {} })
 }
 
-export async function fetchMbrAmounts(client?: ValidatorRegistryClient): Promise<MbrAmounts> {
+export async function fetchMbrAmountsAndProtocolContraints(
+  client?: ValidatorRegistryClient,
+): Promise<MbrAmountsAndProtocolConstraints> {
   try {
-    const validatorClient = client || (await getSimulateValidatorClient())
-
-    return (await callGetMbrAmounts(validatorClient)).return!
+    return await ghostSDK.getMbrAmountsAndProtocolConstraints()
   } catch (error) {
     console.error(error)
     throw error

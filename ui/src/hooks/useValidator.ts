@@ -6,6 +6,7 @@ import {
   validatorSingleQueryOptions,
 } from '@/api/queries'
 import { GatingType } from '@/constants/gating'
+import { Asset } from '@/interfaces/asset'
 import { Validator } from '@/interfaces/validator'
 import { useQueryClient, useSuspenseQueries, useSuspenseQuery } from '@tanstack/react-query'
 import * as React from 'react'
@@ -72,7 +73,7 @@ export function useValidator(validatorId: number): Validator | undefined {
       const gatingAssets = config.entryGatingAssets
         .filter((assetId) => !!assetId)
         .map((assetId) => assetQuery.data.find((asset) => asset.index === assetId))
-        .filter((e) => e !== undefined)
+        .filter((e) => e !== undefined) as Asset[]
       baseValidator.gatingAssets = gatingAssets?.length > 0 ? gatingAssets : undefined
     }
 

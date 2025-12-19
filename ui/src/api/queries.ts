@@ -7,10 +7,9 @@ import {
 } from '@/api/algod'
 import { algorandClient } from '@/api/clients'
 import {
-  fetchMbrAmounts,
+  fetchMbrAmountsAndProtocolContraints,
   fetchNumValidators,
   fetchPoolApy,
-  fetchProtocolConstraints,
   fetchSingleValidatorInfo,
   fetchStakedInfoForPool,
   fetchStakerValidatorData,
@@ -42,16 +41,10 @@ export const numValidatorsQueryOptions = queryOptions({
   staleTime: 1000 * 60, // 1 minute
 })
 
-export const mbrQueryOptions = queryOptions({
+export const mbrAndProtocolConstraintsQueryOptions = queryOptions({
   queryKey: ['mbr'],
-  queryFn: () => fetchMbrAmounts(),
+  queryFn: () => fetchMbrAmountsAndProtocolContraints(),
   staleTime: Infinity,
-})
-
-export const constraintsQueryOptions = queryOptions({
-  queryKey: ['constraints'],
-  queryFn: () => fetchProtocolConstraints(),
-  staleTime: 1000 * 60 * 60, // 1 hour
 })
 
 ////////////////////////////////////////////////////////////
