@@ -1,4 +1,10 @@
-import { fetchAsset, fetchAssetHoldings, fetchBalance, fetchBlockTimes } from '@/api/algod'
+import {
+  fetchAsset,
+  fetchAssetHoldings,
+  fetchAssets,
+  fetchBalance,
+  fetchBlockTimes,
+} from '@/api/algod'
 import { algorandClient } from '@/api/clients'
 import {
   fetchMbrAmounts,
@@ -251,6 +257,16 @@ export const assetQueryOptions = (assetId: number) =>
     queryFn: () => fetchAsset(assetId),
     staleTime: Infinity,
     enabled: assetId > 0,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  })
+
+export const assetsQueryOptions = (assetIds: bigint[] | number[]) =>
+  queryOptions<Asset[]>({
+    queryKey: ['assets', assetIds.join(',')],
+    queryFn: () => fetchAssets(assetIds),
+    staleTime: Infinity,
+    enabled: assetIds.length > 0,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   })

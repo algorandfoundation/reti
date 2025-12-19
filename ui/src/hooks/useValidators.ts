@@ -1,6 +1,6 @@
 import { createBaseValidator } from '@/api/contracts'
 import {
-  assetQueryOptions,
+  assetsQueryOptions,
   nfdQueryOptions,
   nodelyPerfMetricsQueryOptions,
   numValidatorsQueryOptions,
@@ -12,6 +12,7 @@ import {
 import { GatingType } from '@/constants/gating'
 import { Asset } from '@/interfaces/asset'
 import { Validator } from '@/interfaces/validator'
+import { unique } from '@/utils/tests/utils'
 import { useQueries, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import * as React from 'react'
 
@@ -68,25 +69,23 @@ export function useValidators(): {
   const nodePoolAssignmentQuery = useQuery(validatorNodePoolAssignmentQueries)
   // const metricsQuery = useQuery(metricsQueries)
 
-  // Fetch enrichment data
-  const rewardTokenQueries = useQueries({
-    queries:
+  const assetIds = React.useMemo(() => {
+    const rewardAssetIds =
       configQuery.data
         ?.map((q) => q.rewardTokenId)
-        .filter((id): id is bigint => id !== undefined && id > 0n)
-        .map((id) => assetQueryOptions(Number(id))) ?? [],
-  })
+        .filter((id): id is bigint => id !== undefined && id > 0n) ?? []
 
-  const gatingAssetQueries = useQueries({
-    queries:
-      configQuery.data
-        ?.map((q) =>
-          q.entryGatingType === GatingType.AssetId
-            ? q.entryGatingAssets.filter((id): id is bigint => id > 0n)
-            : [],
-        )
-        .map((id) => assetQueryOptions(Number(id))) ?? [],
-  })
+    const gatingAssetIds =
+      configQuery.data?.flatMap((q) =>
+        q.entryGatingType === GatingType.AssetId
+          ? q.entryGatingAssets.filter((id): id is bigint => id > 0n)
+          : [],
+      ) ?? []
+
+    return unique([...rewardAssetIds, ...gatingAssetIds])
+  }, [configQuery.data])
+
+  const assetQuery = useQuery(assetsQueryOptions(assetIds))
 
   const nfdQueries = useQueries({
     queries:
@@ -138,9 +137,9 @@ export function useValidators(): {
 
       // Add enrichment data if available
       if (baseValidator.config.rewardTokenId > 0) {
-        const rewardToken = rewardTokenQueries.find(
-          (q) => q.data?.index === baseValidator.config.rewardTokenId,
-        )?.data
+        const rewardToken = assetQuery.data?.find(
+          (q) => q.index === baseValidator.config.rewardTokenId,
+        )
         if (rewardToken) {
           baseValidator.rewardToken = rewardToken
         }
@@ -148,7 +147,7 @@ export function useValidators(): {
 
       if (baseValidator.config.entryGatingType === GatingType.AssetId) {
         baseValidator.gatingAssets = baseValidator.config.entryGatingAssets
-          .map((assetId) => gatingAssetQueries.find((q) => q.data?.index === assetId)?.data)
+          .map((assetId) => assetQuery.data?.find((q) => q.index === assetId))
           .filter(Boolean) as Asset[]
       }
 
@@ -185,8 +184,7 @@ export function useValidators(): {
     stateQuery.data,
     poolsQuery.data,
     nodePoolAssignmentQuery.data,
-    rewardTokenQueries,
-    gatingAssetQueries,
+    assetQuery.data,
     nfdQueries,
     // metricsQuery.data,
   ])

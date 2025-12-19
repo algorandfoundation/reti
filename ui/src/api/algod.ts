@@ -45,6 +45,26 @@ export async function fetchAsset(assetId: bigint | number): Promise<Asset> {
   }
 }
 
+export async function fetchAssets(assetIds: bigint[] | number[]): Promise<Asset[]> {
+  try {
+    const assets = await ghostSDK.getAssets(assetIds)
+    const deleted = assets.filter((asset) => 'deleted' in asset && asset.deleted)
+    if (deleted.length > 0) {
+      throw new Error(
+        `One or more assets have been deleted: ${deleted.map((a) => a.index).join(', ')}`,
+      )
+    }
+    return assets as Asset[]
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    if (error.message && error.response) {
+      throw new AlgodHttpError(error.message, error.response)
+    } else {
+      throw error
+    }
+  }
+}
+
 export async function fetchBalance(address: string | null): Promise<AccountBalance> {
   if (!address) {
     throw new Error('No address provided')

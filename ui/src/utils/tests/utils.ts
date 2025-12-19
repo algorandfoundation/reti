@@ -36,3 +36,12 @@ export function parseBoxName(nameParam: string): [string, string] {
 
   return [encoding, value]
 }
+
+/**
+ * Returns a new array with only unique values from the input array.
+ * @param array The input array from which to extract unique values
+ * @returns A new array containing only unique values
+ */
+export function unique<T>(array: T[]): T[] {
+  return Array.from(new Set(array))
+}

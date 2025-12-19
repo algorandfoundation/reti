@@ -37,7 +37,7 @@ import { BalanceChecker } from '@/utils/balanceChecker'
 import { sleep } from '@/utils/time'
 import { AlgoAmount } from '@algorandfoundation/algokit-utils/types/amount'
 import algosdk, { getApplicationAddress } from 'algosdk'
-import { Validator as GhostValidatorBase } from 'reti-ghost-sdk/dist/generated/RetiReaderSDK'
+import { Validator as GhostValidatorBase } from 'reti-ghost-sdk'
 import { ghostSDK } from './ghostSdk'
 import { TransactionHandlerProps } from './transactionState'
 
