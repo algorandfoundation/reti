@@ -205,12 +205,12 @@ export async function processPoolData(pool: LocalPoolInfo): Promise<PoolData> {
  * to seed the query cache with complete data.
  */
 export async function fetchValidator(validatorId: number): Promise<Validator> {
-  const [[config], [state], [pools], [nodePoolAssignment]] = await Promise.all([
-    fetchValidatorConfig([validatorId]),
-    fetchValidatorStates([validatorId]),
-    fetchValidatorsPools([validatorId]),
-    fetchValidatorNodePoolAssignments([validatorId]),
-  ])
+  const {
+    config,
+    state,
+    pools,
+    nodeAssignment: nodePoolAssignment,
+  } = await fetchSingleValidatorInfo(validatorId)
 
   if (!config || !state || !pools || !nodePoolAssignment) {
     throw new ValidatorNotFoundError(`Validator with id "${validatorId}" not found!`)
