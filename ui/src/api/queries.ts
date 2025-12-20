@@ -14,8 +14,8 @@ import {
   fetchStakedInfoForPool,
   fetchStakerValidatorData,
   fetchValidatorConfig as fetchValidatorConfigs,
-  fetchValidatorInfo,
   fetchValidatorNodePoolAssignments,
+  fetchValidatorsInfo,
   fetchValidatorsPools,
   fetchValidatorStates,
   processPoolData,
@@ -87,9 +87,14 @@ export const validatorPoolsQueryOptions = (
     refetchOnMount: false,
   })
 
+export const validatorSingleQueryKey = (validatorId: number) => [
+  'validator-single',
+  validatorId.toString(),
+]
+
 export const validatorSingleQueryOptions = (validatorId: number, enabled = true) =>
   queryOptions({
-    queryKey: ['validator-single', validatorId.toString()],
+    queryKey: validatorSingleQueryKey(validatorId),
     queryFn: () => fetchSingleValidatorInfo(validatorId),
     staleTime: Infinity,
     refetchInterval: 1000 * 30, // 30 seconds
@@ -98,15 +103,22 @@ export const validatorSingleQueryOptions = (validatorId: number, enabled = true)
     enabled,
   })
 
-export const validatorQueryOptions = (validatorIds: number[], enabled = true) =>
+export const validatorsQueryOptions = (validatorIds: number[], queryClient: QueryClient) =>
   queryOptions({
     queryKey: ['validator', validatorIds.join(',')],
-    queryFn: () => fetchValidatorInfo(validatorIds),
+    queryFn: async () => {
+      const data = await fetchValidatorsInfo(validatorIds)
+      data.forEach((validatorData, i) => {
+        const validatorId = validatorIds[i]
+        queryClient.setQueryData(validatorSingleQueryKey(validatorId), validatorData)
+      })
+      return data
+    },
     staleTime: Infinity,
     refetchInterval: 1000 * 30, // 30 seconds
     refetchOnWindowFocus: true,
     refetchOnMount: false,
-    enabled: validatorIds.length > 0 && enabled,
+    enabled: validatorIds.length > 0,
   })
 
 export const validatorNodePoolAssignmentsQueryOptions = (validatorIds: number[], enabled = true) =>
@@ -118,44 +130,6 @@ export const validatorNodePoolAssignmentsQueryOptions = (validatorIds: number[],
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     enabled,
-  })
-
-export const validatorMetricsQueryOptions = (validatorIds: number[], queryClient: QueryClient) =>
-  queryOptions({
-    queryKey: ['validator-metrics', validatorIds.join(',')],
-    queryFn: async () => {
-      // Get cached data from other queries
-      const pools = await queryClient.ensureQueryData(validatorPoolsQueryOptions(validatorIds))
-      const states = await queryClient.ensureQueryData(validatorStatesQueryOptions(validatorIds))
-      const configs = await queryClient.ensureQueryData(validatorConfigsQueryOptions(validatorIds))
-      const params = await algorandClient.getSuggestedParams()
-
-      return Promise.all(
-        validatorIds.map(async (_, i) => {
-          const poolInfo = pools.at(i)!
-          const state = states.at(i)!
-          const config = configs.at(i)!
-
-          const poolDataPromises = poolInfo.map((pool) => processPoolData(pool))
-          const processedPoolsData = await Promise.all(poolDataPromises)
-
-          // Ignore pools with less than 30k ALGO balance
-          const filteredPoolsData = processedPoolsData.filter(
-            (pool) => pool.balance >= AlgoAmount.Algos(30_000).microAlgos,
-          )
-
-          return calculateValidatorPoolMetrics(
-            filteredPoolsData,
-            state.totalAlgoStaked,
-            BigInt(config.epochRoundLength),
-            BigInt(params.firstValid),
-          )
-        }),
-      )
-    },
-    staleTime: 1000 * 60 * 30, // 30 minutes
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
   })
 
 export const validatorSingleMetricsQueryOptions = (validatorId: number, queryClient: QueryClient) =>
@@ -185,7 +159,7 @@ export const validatorSingleMetricsQueryOptions = (validatorId: number, queryCli
         BigInt(params.firstValid),
       )
     },
-    enabled: false,
+    enabled: !!queryClient.getQueryData(validatorSingleQueryKey(validatorId)),
     staleTime: 1000 * 60 * 30, // 30 minutes
     refetchOnWindowFocus: false,
     refetchOnMount: false,

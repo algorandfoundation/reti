@@ -42,6 +42,7 @@ import { ghostSDK } from './ghostSdk'
 import { TransactionHandlerProps } from './transactionState'
 
 export async function fetchNumValidators(): Promise<number> {
+  // TODO merge with getMbr... ? this blocks fetching validators, so if this is quicker then leave as is
   const validatorClient = await getSimulateValidatorClient()
   const numValidators = await validatorClient.state.global.numValidators()
   return Number(numValidators)
@@ -121,9 +122,9 @@ export interface GhostValidator extends GhostValidatorBase {
 }
 
 export async function fetchSingleValidatorInfo(validatorId: number): Promise<GhostValidator> {
-  console.time('single ' + String(validatorId))
+  console.time(`getValidator(${validatorId})`)
   const [data] = await ghostSDK.getValidators([validatorId])
-  console.timeEnd('single ' + String(validatorId))
+  console.timeEnd(`getValidator(${validatorId})`)
   return {
     ...data,
     pools: data.poolInfo.map((poolInfo: [bigint, number, bigint], i: number) =>
@@ -132,11 +133,10 @@ export async function fetchSingleValidatorInfo(validatorId: number): Promise<Gho
   }
 }
 
-export async function fetchValidatorInfo(validatorIds: number[]): Promise<GhostValidator[]> {
-  console.log('Fetching', validatorIds.length, 'validators from Ghost SDK')
-  console.time('full')
+export async function fetchValidatorsInfo(validatorIds: number[]): Promise<GhostValidator[]> {
+  console.time(`getValidators(${validatorIds.length}x)`)
   const data = await ghostSDK.getValidators(validatorIds)
-  console.timeEnd('full')
+  console.timeEnd(`getValidators(${validatorIds.length}x)`)
   return data.map((data) => ({
     ...data,
     pools: data.poolInfo.map((poolInfo: [bigint, number, bigint], i: number) =>

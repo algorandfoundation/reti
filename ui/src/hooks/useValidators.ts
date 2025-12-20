@@ -4,7 +4,8 @@ import {
   nfdQueryOptions,
   nodelyPerfMetricsQueryOptions,
   numValidatorsQueryOptions,
-  validatorQueryOptions,
+  validatorSingleMetricsQueryOptions,
+  validatorsQueryOptions,
 } from '@/api/queries'
 import { GatingType } from '@/constants/gating'
 import { Asset } from '@/interfaces/asset'
@@ -12,6 +13,7 @@ import { Validator } from '@/interfaces/validator'
 import { unique } from '@/utils/tests/utils'
 import { useQueries, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import * as React from 'react'
+import { useQueuedQueries } from './useQueuedQueries'
 
 /**
  * Fetches all validator data and enrichment data in parallel.
@@ -33,20 +35,35 @@ export function useValidators(): {
 
   // Memoize query options
   const validatorQueryOptionsMemo = React.useMemo(
-    () => validatorQueryOptions(validatorIds),
+    () => validatorsQueryOptions(validatorIds, queryClient),
     [validatorIds],
   )
 
-  // plan: use queued queries to rate limit
-  // metrics query should have enabled based on config+state+node data being available
-
-  // const metricsQueries = React.useMemo(
-  //   () => validatorMetricsQueryOptions(validatorIds, queryClient),
-  //   [validatorIds],
-  // )
-
   const validatorQuery = useQuery(validatorQueryOptionsMemo)
-  // const metricsQuery = useQuery(metricsQueries)
+
+  // Memoize metrics query options
+  // sort validators by their total algo staked descending, which is the default sort
+  const metricsQueries = React.useMemo(
+    () =>
+      validatorQuery.data
+        ?.map((validator, id) => ({
+          id: validatorIds[id]!,
+          ...validator,
+        }))
+        .sort(({ state: { totalAlgoStaked: a } }, { state: { totalAlgoStaked: b } }) =>
+          a > b ? -1 : 1,
+        )
+        .map(({ id }) => ({
+          ...validatorSingleMetricsQueryOptions(id, queryClient),
+        })) ?? [],
+    [validatorIds, validatorQuery.data],
+  )
+
+  // nodely performance data
+  const nodelyPerfQuery = useQuery(nodelyPerfMetricsQueryOptions())
+
+  // Use queued queries for metrics. 8 in flight at any time
+  const queuedMetricsQueries = useQueuedQueries(metricsQueries, 8)
 
   const assetIds = React.useMemo(() => {
     const rewardAssetIds =
@@ -74,25 +91,20 @@ export function useValidators(): {
         .map((id) => nfdQueryOptions(id, { view: 'full' })) ?? [],
   }) // TODO chunk 20
 
-  // nodely performance data
-  const nodelyPerfQuery = useQuery(nodelyPerfMetricsQueryOptions())
-
-  // console.log('state data', stateQueries.data)
-
   // Combine all data synchronously
   const validators = React.useMemo(() => {
-    const result: Validator[] = []
+    if (!validatorQuery.data) return []
 
-    if (!validatorQuery.data) return result
+    const result: Validator[] = []
 
     for (let i = 0; i < validatorIds.length; i++) {
       const validatorId = validatorIds[i]
 
       const { config, state, pools, nodeAssignment: nodePoolAssignment } = validatorQuery.data[i]!
 
-      // const metrics = queryClient
-      //   .getQueryData(validatorMetricsQueryOptions(validatorIds, queryClient).queryKey)
-      //   ?.at(i)
+      const metrics = queryClient.getQueryData(
+        validatorSingleMetricsQueryOptions(validatorId, queryClient).queryKey,
+      )
 
       if (!config || !state || !pools || !nodePoolAssignment) continue
 
@@ -129,6 +141,7 @@ export function useValidators(): {
           baseValidator.nfd = nfd
         }
       }
+
       if (nodelyPerfQuery.data && nodelyPerfQuery.data.data) {
         const perfScore = nodelyPerfQuery.data.data.find(
           (q) => q.validatorid === baseValidator.id.toString(),
@@ -137,24 +150,18 @@ export function useValidators(): {
       }
 
       // Add metrics if available
-      // if (metrics) {
-      //   baseValidator.rewardsBalance = metrics.rewardsBalance
-      //   baseValidator.roundsSinceLastPayout = metrics.roundsSinceLastPayout
-      //   baseValidator.apy = metrics.apy
-      //   baseValidator.extDeposits = metrics.extDeposits
-      // }
+      if (metrics) {
+        baseValidator.rewardsBalance = metrics.rewardsBalance
+        baseValidator.roundsSinceLastPayout = metrics.roundsSinceLastPayout
+        baseValidator.apy = metrics.apy
+        baseValidator.extDeposits = metrics.extDeposits
+      }
 
       result.push(baseValidator)
     }
 
     return result
-  }, [
-    validatorIds,
-    validatorQuery.data,
-    assetQuery.data,
-    nfdQueries,
-    // metricsQuery.data,
-  ])
+  }, [validatorIds, validatorQuery.data, assetQuery.data, nfdQueries, queuedMetricsQueries.data])
 
   const { isLoading, error } = validatorQuery
 
