@@ -24,10 +24,10 @@ export function getStakingPoolFactory(): [AlgorandClient, StakingPoolFactory] {
   return [algorandClient, new StakingPoolFactory({ algorand: algorandClient })]
 }
 
-export async function getValidatorClient(
+export function getValidatorClient(
   signer: algosdk.TransactionSigner,
   activeAddress: string,
-): Promise<ValidatorRegistryClient> {
+): ValidatorRegistryClient {
   algorandClient.setSigner(activeAddress, signer)
   return algorandClient.client.getTypedAppClientById(ValidatorRegistryClient, {
     defaultSender: activeAddress,
@@ -35,20 +35,18 @@ export async function getValidatorClient(
   })
 }
 
-export async function getSimulateValidatorClient(
-  senderAddr: string = FEE_SINK,
-): Promise<ValidatorRegistryClient> {
+export function getSimulateValidatorClient(senderAddr: string = FEE_SINK): ValidatorRegistryClient {
   return algorandClient.client.getTypedAppClientById(ValidatorRegistryClient, {
     defaultSender: senderAddr,
     appId: RETI_APP_ID,
   })
 }
 
-export async function getStakingPoolClient(
+export function getStakingPoolClient(
   poolAppId: bigint,
   signer: algosdk.TransactionSigner,
   activeAddress: string,
-): Promise<StakingPoolClient> {
+): StakingPoolClient {
   algorandClient.setSigner(activeAddress, signer)
   return algorandClient.client.getTypedAppClientById(StakingPoolClient, {
     defaultSender: activeAddress,
@@ -56,20 +54,20 @@ export async function getStakingPoolClient(
   })
 }
 
-export async function getSimulateStakingPoolClient(
+export function getSimulateStakingPoolClient(
   poolAppId: bigint,
   senderAddr: string = FEE_SINK,
-): Promise<StakingPoolClient> {
+): StakingPoolClient {
   return algorandClient.client.getTypedAppClientById(StakingPoolClient, {
     defaultSender: senderAddr,
     appId: poolAppId,
   })
 }
 
-export async function getXGovRegistryClient(
+export function getXGovRegistryClient(
   signer: algosdk.TransactionSigner,
   activeAddress: string,
-): Promise<XGovRegistryClient> {
+): XGovRegistryClient {
   algorandClient.setSigner(activeAddress, signer)
   return algorandClient.client.getTypedAppClientById(XGovRegistryClient, {
     defaultSender: activeAddress,
@@ -77,9 +75,7 @@ export async function getXGovRegistryClient(
   })
 }
 
-export async function getSimulateXGovRegistryClient(
-  senderAddr: string = FEE_SINK,
-): Promise<XGovRegistryClient> {
+export function getSimulateXGovRegistryClient(senderAddr: string = FEE_SINK): XGovRegistryClient {
   return algorandClient.client.getTypedAppClientById(XGovRegistryClient, {
     defaultSender: senderAddr,
     appId: XGOV_REGISTRY_APP_ID,

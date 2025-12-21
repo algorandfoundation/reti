@@ -250,7 +250,7 @@ importers:
         specifier: 7.53.0
         version: 7.53.0(react@18.3.1)
       reti-ghost-sdk:
-        specifier: ^0.1.2
+        specifier: '=0.1.2'
         version: 0.1.2
       sonner:
         specifier: 1.5.0

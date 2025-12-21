@@ -1,11 +1,11 @@
-import { encodeUint64 } from 'algosdk'
-import { getSimulateXGovRegistryClient } from './clients'
 import {
   GlobalKeysState,
   XGovBoxValue,
   XGovSubscribeRequestBoxValue,
-  // @ts-expect-error module resolution issue
+// @ts-expect-error module resolution issue
 } from '@algorandfoundation/xgov-clients/registry'
+import { encodeUint64 } from 'algosdk'
+import { getSimulateXGovRegistryClient } from './clients'
 
 export function requestBoxName(id: number): Uint8Array {
   return new Uint8Array(Buffer.concat([Buffer.from('r'), encodeUint64(id)]))
@@ -13,7 +13,7 @@ export function requestBoxName(id: number): Uint8Array {
 
 export async function getXGovGlobalState(): Promise<GlobalKeysState | undefined> {
   try {
-    const client = await getSimulateXGovRegistryClient()
+    const client = getSimulateXGovRegistryClient()
     return (await client.state.global.getAll()) as unknown as GlobalKeysState
   } catch (e) {
     console.error('failed to fetch global registry contract state', e)
@@ -24,7 +24,7 @@ export async function getXGovGlobalState(): Promise<GlobalKeysState | undefined>
 export async function getXGovBoxes(
   xgovAddresses: string[],
 ): Promise<{ [address: string]: XGovBoxValue }> {
-  const client = await getSimulateXGovRegistryClient()
+  const client = getSimulateXGovRegistryClient()
   const results = await Promise.allSettled(
     xgovAddresses.map(async (address) => {
       const box = await client.state.box.xgovBox.value(address)
@@ -50,7 +50,7 @@ export async function getXGovRequestBoxes(
   xgovAddresses: string[],
 ): Promise<{ [id: number]: XGovSubscribeRequestBoxValue } | null> {
   try {
-    const client = await getSimulateXGovRegistryClient()
+    const client = getSimulateXGovRegistryClient()
     const requests = await client.state.box.requestBox.getMap()
 
     const requestBoxes: { [id: number]: XGovSubscribeRequestBoxValue } = {}
