@@ -10,6 +10,7 @@ import {
   fetchMbrAmountsAndProtocolContraints,
   fetchNumValidators,
   fetchPoolApy,
+  fetchPoolBalancesAndLastPayouts,
   fetchSingleValidatorInfo,
   fetchStakedInfoForPool,
   fetchStakerValidatorData,
@@ -132,6 +133,45 @@ export const validatorNodePoolAssignmentsQueryOptions = (validatorIds: number[],
     enabled,
   })
 
+export const poolBalanceAndLastPayoutQueryKey = (poolAppId: bigint) => [
+  'pool-balance-last-payout',
+  poolAppId.toString(),
+]
+
+export const poolBalanceAndLastPayoutQueryOptions = (poolAppId: bigint) =>
+  queryOptions({
+    queryKey: poolBalanceAndLastPayoutQueryKey(poolAppId),
+    queryFn: async () => {
+      const [data] = await fetchPoolBalancesAndLastPayouts([poolAppId])
+      return data
+    },
+    staleTime: Infinity,
+    refetchInterval: 1000 * 60 * 30, // 30 minutes, same as validatorSingleMetricsQueryOptions
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  })
+
+export const poolBalancesAndLastPayoutsQueryOptions = (
+  poolAppIds: bigint[],
+  queryClient: QueryClient,
+) =>
+  queryOptions({
+    queryKey: ['pool-balances-last-payouts', poolAppIds.join(',')],
+    queryFn: async () => {
+      const data = await fetchPoolBalancesAndLastPayouts(poolAppIds)
+      data.forEach((balanceData, i) => {
+        const poolAppId = poolAppIds[i]
+        queryClient.setQueryData(poolBalanceAndLastPayoutQueryKey(poolAppId), balanceData)
+      })
+      return data
+    },
+    staleTime: Infinity,
+    refetchInterval: 1000 * 60 * 30, // 30 minutes, same as validatorSingleMetricsQueryOptions
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    enabled: poolAppIds.length > 0,
+  })
+
 export const validatorSingleMetricsQueryOptions = (validatorId: number, queryClient: QueryClient) =>
   queryOptions({
     queryKey: ['validator-metrics', String(validatorId)],
@@ -141,7 +181,17 @@ export const validatorSingleMetricsQueryOptions = (validatorId: number, queryCli
         validatorSingleQueryOptions(validatorId),
       )
 
-      const poolDataPromises = pools.map((pool) => processPoolData(pool))
+      const poolAppIds = pools.map((pool: { poolAppId: bigint }) => pool.poolAppId)
+      const poolBalancesLastPayouts = await Promise.all(
+        poolAppIds.map((poolAppId) =>
+          queryClient.ensureQueryData(poolBalanceAndLastPayoutQueryOptions(poolAppId)),
+        ),
+      )
+
+      const poolDataPromises = pools.map((pool, i) =>
+        processPoolData(pool, poolBalancesLastPayouts[i]!),
+      )
+
       const [params, ...processedPoolsData] = await Promise.all([
         algorandClient.getSuggestedParams(),
         ...poolDataPromises,

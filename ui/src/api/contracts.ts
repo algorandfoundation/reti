@@ -1,4 +1,4 @@
-import { fetchAccountBalance, fetchAsset, isOptedInToAsset } from '@/api/algod'
+import { fetchAsset, isOptedInToAsset } from '@/api/algod'
 import {
   algorandClient,
   getSimulateStakingPoolClient,
@@ -36,7 +36,7 @@ import { BalanceChecker } from '@/utils/balanceChecker'
 import { sleep } from '@/utils/time'
 import { AlgoAmount } from '@algorandfoundation/algokit-utils/types/amount'
 import algosdk, { getApplicationAddress } from 'algosdk'
-import { Validator as GhostValidatorBase } from 'reti-ghost-sdk'
+import { Validator as GhostValidatorBase, PoolBalanceAndLastPayout } from 'reti-ghost-sdk'
 import { MbrAmountsAndProtocolConstraints } from 'reti-ghost-sdk/dist/generated/RetiReaderSDK'
 import { ghostSDK } from './ghostSdk'
 import { TransactionHandlerProps } from './transactionState'
@@ -145,6 +145,18 @@ export async function fetchValidatorsInfo(validatorIds: number[]): Promise<Ghost
   }))
 }
 
+export async function fetchPoolBalancesAndLastPayouts(
+  poolAppIds: bigint[],
+): Promise<PoolBalanceAndLastPayout[]> {
+  const start = Date.now()
+  const data = await ghostSDK.getPoolBalancesAndLastPayouts(poolAppIds)
+  const end = Date.now()
+  console.log(
+    `fetchPoolBalancesAndLastPayouts for ${poolAppIds.length} pools took ${end - start}ms`,
+  )
+  return data
+}
+
 /**
  * Creates a base validator object from the validator data
  */
@@ -170,25 +182,13 @@ export function createBaseValidator({
   }
 }
 
-export async function processPoolData(pool: LocalPoolInfo): Promise<PoolData> {
+export async function processPoolData(
+  pool: LocalPoolInfo,
+  { balance: poolBalance, lastPayout: stakingPoolLastPayout }: PoolBalanceAndLastPayout,
+): Promise<PoolData> {
   const poolAddress = algosdk.getApplicationAddress(pool.poolAppId)
 
-  // Define the promises for the async operations
-  const balancePromise = fetchAccountBalance(poolAddress.toString(), true)
-
-  const lastPayoutPromise = (async () => {
-    const stakingPoolClient = await getSimulateStakingPoolClient(pool.poolAppId)
-    return stakingPoolClient.state.global.lastPayout()
-  })()
-
-  const nodelyPerfPromise = fetchNodelyVotingPerf(poolAddress.toString())
-
-  // Execute all promises in parallel and wait for them to resolve
-  const [poolBalance, stakingPoolLastPayout, nodelyData] = await Promise.all([
-    balancePromise,
-    lastPayoutPromise,
-    nodelyPerfPromise,
-  ])
+  const nodelyData = await fetchNodelyVotingPerf(poolAddress.toString())
 
   // Construct the PoolData object using the results
   const poolData: PoolData = {
