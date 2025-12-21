@@ -110,6 +110,7 @@ export function AddPoolModal({
   const mbrQuery = useQuery(mbrAndProtocolConstraintsQueryOptions)
   const { addPoolMbr = 0n, poolInitMbr = 0n } = mbrQuery.data?.mbrAmounts || {}
 
+  // TODO replace with validator.
   const assignmentQuery = useQuery(
     validatorNodePoolAssignmentsQueryOptions([validator?.id || 0], !!validator),
   )

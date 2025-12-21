@@ -9,7 +9,6 @@ import { ToStringTypes } from '@/interfaces/utils'
 import { Asset } from './asset'
 
 export type EntryGatingAssets = [bigint, bigint, bigint, bigint]
-// export type EntryGatingAssets = bigint[]
 
 export type ValidatorConfigInput = Omit<
   ToStringTypes<ValidatorConfig>,
@@ -29,7 +28,6 @@ export interface LocalPoolInfo {
 export interface NodeConfig {
   poolAppIds: bigint[]
 }
-// export type NodeConfig = [bigint, ...bigint[]]
 
 export type NodeInfo = {
   index: number

@@ -14,11 +14,9 @@ import {
   fetchSingleValidatorInfo,
   fetchStakedInfoForPool,
   fetchStakerValidatorData,
-  fetchValidatorConfig as fetchValidatorConfigs,
   fetchValidatorNodePoolAssignments,
   fetchValidatorsInfo,
   fetchValidatorsPools,
-  fetchValidatorStates,
   processPoolData,
 } from '@/api/contracts'
 import { fetchNfd, fetchNfdReverseLookup } from '@/api/nfd'
@@ -51,29 +49,6 @@ export const mbrAndProtocolConstraintsQueryOptions = queryOptions({
 ////////////////////////////////////////////////////////////
 // Validator data queries
 ////////////////////////////////////////////////////////////
-
-export const validatorConfigsQueryOptions = (validatorIds: number[]) =>
-  queryOptions({
-    queryKey: ['validator-config', validatorIds.join(',')],
-    queryFn: () => fetchValidatorConfigs(validatorIds),
-    staleTime: Infinity,
-    refetchInterval: 1000 * 60 * 60 * 2, // 2 hours
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-  })
-
-export const validatorStatesQueryOptions = (
-  validatorIds: number[],
-  refetchInterval = 1000 * 30, // 30 seconds
-  refetchOnWindowFocus = true,
-) =>
-  queryOptions({
-    queryKey: ['validator-state', validatorIds.join(',')],
-    queryFn: () => fetchValidatorStates(validatorIds),
-    refetchInterval,
-    refetchOnWindowFocus,
-    refetchOnMount: false,
-  })
 
 export const validatorPoolsQueryOptions = (
   validatorIds: number[],
@@ -109,6 +84,8 @@ export const validatorsQueryOptions = (validatorIds: number[], queryClient: Quer
     queryKey: ['validator', validatorIds.join(',')],
     queryFn: async () => {
       const data = await fetchValidatorsInfo(validatorIds)
+      // cache the results under individual validator query keys
+      // metrics relies on this cached data
       data.forEach((validatorData, i) => {
         const validatorId = validatorIds[i]
         queryClient.setQueryData(validatorSingleQueryKey(validatorId), validatorData)
@@ -159,6 +136,7 @@ export const poolBalancesAndLastPayoutsQueryOptions = (
     queryKey: ['pool-balances-last-payouts', poolAppIds.join(',')],
     queryFn: async () => {
       const data = await fetchPoolBalancesAndLastPayouts(poolAppIds)
+      // cache the results under individual pool query keys
       data.forEach((balanceData, i) => {
         const poolAppId = poolAppIds[i]
         queryClient.setQueryData(poolBalanceAndLastPayoutQueryKey(poolAppId), balanceData)
