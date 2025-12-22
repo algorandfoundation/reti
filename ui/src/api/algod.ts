@@ -1,9 +1,11 @@
-import { AlgoAmount } from '@algorandfoundation/algokit-utils/types/amount'
-import { ClientManager } from '@algorandfoundation/algokit-utils/types/client-manager'
-import algosdk from 'algosdk'
 import { AccountBalance, AlgodHttpError, AssetCreatorHolding, Exclude } from '@/interfaces/algod'
+import { Asset } from '@/interfaces/asset'
 import { BigMath } from '@/utils/bigint'
 import { getAlgodConfigFromViteEnvironment } from '@/utils/network/getAlgoClientConfigs'
+import { AlgoAmount } from '@algorandfoundation/algokit-utils/types/amount'
+import { ClientManager } from '@algorandfoundation/algokit-utils/types/client-manager'
+import algosdk, { modelsv2 } from 'algosdk'
+import { ghostSDK } from './ghostSdk'
 
 const algodConfig = getAlgodConfigFromViteEnvironment()
 const algodClient = ClientManager.getAlgodClient({
@@ -29,10 +31,30 @@ export async function fetchAccountBalance(
   return availableBalance ? accountInfo.amount - accountInfo.minBalance : accountInfo.amount
 }
 
-export async function fetchAsset(assetId: bigint | number): Promise<algosdk.modelsv2.Asset> {
+export async function fetchAsset(assetId: bigint | number): Promise<Asset> {
   try {
     const asset = await algodClient.getAssetByID(assetId).do()
     return asset
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    if (error.message && error.response) {
+      throw new AlgodHttpError(error.message, error.response)
+    } else {
+      throw error
+    }
+  }
+}
+
+export async function fetchAssets(assetIds: bigint[] | number[]): Promise<Asset[]> {
+  try {
+    const assets = await ghostSDK.getAssets(assetIds)
+    const deleted = assets.filter((asset) => 'deleted' in asset && asset.deleted)
+    if (deleted.length > 0) {
+      throw new Error(
+        `One or more assets have been deleted: ${deleted.map((a) => a.index).join(', ')}`,
+      )
+    }
+    return assets as Asset[]
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (error.message && error.response) {
@@ -60,9 +82,7 @@ export async function fetchBalance(address: string | null): Promise<AccountBalan
   }
 }
 
-export async function fetchAssetHoldings(
-  address: string | null,
-): Promise<algosdk.modelsv2.AssetHolding[]> {
+export async function fetchAssetHoldings(address: string | null): Promise<modelsv2.AssetHolding[]> {
   if (!address) {
     throw new Error('No address provided')
   }
@@ -151,25 +171,7 @@ export async function fetchAssetCreatorHoldings(
  */
 export async function fetchBlockTimes(numRounds: number = 10): Promise<number[]> {
   try {
-    const status = await algodClient.status().do()
-    if (!status) {
-      throw new Error('Failed to fetch node status')
-    }
-
-    const lastRound = Number(status.lastRound)
-
-    const blockTimes: number[] = []
-    for (let round = lastRound - numRounds; round < lastRound; round++) {
-      try {
-        const blockResponse = await algodClient.block(round).do()
-        const block = blockResponse.block
-        blockTimes.push(Number(block.header.timestamp))
-      } catch (error) {
-        throw new Error(`Unable to fetch block for round ${round}: ${error}`)
-      }
-    }
-
-    return blockTimes
+    return (await ghostSDK.getBlockTimestamps(numRounds)).map((b) => Number(b))
   } catch (error) {
     throw new Error(`An error occurred during block time calculation: ${error}`)
   }

@@ -1,8 +1,5 @@
-import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
-import { createFileRoute } from '@tanstack/react-router'
-import { useWallet } from '@txnlab/use-wallet-react'
 import {
-  constraintsQueryOptions,
+  mbrAndProtocolConstraintsQueryOptions,
   numValidatorsQueryOptions,
   stakesQueryOptions,
 } from '@/api/queries'
@@ -13,6 +10,10 @@ import { PageMain } from '@/components/PageMain'
 import { StakingTable } from '@/components/StakingTable'
 import { ValidatorTable } from '@/components/ValidatorTable'
 import { useValidators } from '@/hooks/useValidators'
+import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
+import { createFileRoute } from '@tanstack/react-router'
+import { useWallet } from '@txnlab/use-wallet-react'
+import React from 'react'
 
 export const Route = createFileRoute('/')({
   beforeLoad: ({ context: { queryClient } }) => {
@@ -32,13 +33,13 @@ export const Route = createFileRoute('/')({
 function Dashboard() {
   const { activeAddress } = useWallet()
 
-  const constraintsQuery = useSuspenseQuery(constraintsQueryOptions)
-  const constraints = constraintsQuery.data
+  const mbrAndConstraintsQuery = useSuspenseQuery(mbrAndProtocolConstraintsQueryOptions)
+  const constraints = mbrAndConstraintsQuery.data?.constraints
 
   const { validators, isLoading: validatorsLoading, error: validatorsError } = useValidators()
 
   const stakesQuery = useQuery(stakesQueryOptions(activeAddress))
-  const stakesByValidator = stakesQuery.data || []
+  const stakesByValidator = React.useMemo(() => stakesQuery.data || [], [stakesQuery.data])
 
   if (validatorsError) {
     return <div>Error loading validators: {validatorsError.message}</div>

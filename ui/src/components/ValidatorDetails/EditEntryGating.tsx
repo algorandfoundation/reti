@@ -1,14 +1,3 @@
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useWallet } from '@txnlab/use-wallet-react'
-import algosdk from 'algosdk'
-import { isAxiosError } from 'axios'
-import { ArrowUpRight, Check, RotateCcw, X } from 'lucide-react'
-import * as React from 'react'
-import { useFieldArray, useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { useDebouncedCallback } from 'use-debounce'
-import { z } from 'zod'
 import { changeValidatorRewardInfo, fetchValidator } from '@/api/contracts'
 import { fetchNfd } from '@/api/nfd'
 import { nfdQueryOptions } from '@/api/queries'
@@ -37,6 +26,7 @@ import {
 import { EditValidatorModal } from '@/components/ValidatorDetails/EditValidatorModal'
 import { ALGORAND_ZERO_ADDRESS_STRING } from '@/constants/accounts'
 import { GatingType } from '@/constants/gating'
+import { Asset } from '@/interfaces/asset'
 import { EntryGatingAssets, Validator } from '@/interfaces/validator'
 import { InsufficientBalanceError } from '@/utils/balanceChecker'
 import { setValidatorQueriesData, transformEntryGatingAssets } from '@/utils/contracts'
@@ -45,6 +35,16 @@ import { getNfdAppFromViteEnvironment } from '@/utils/network/getNfdConfig'
 import { isValidName, trimExtension } from '@/utils/nfd'
 import { cn } from '@/utils/ui'
 import { entryGatingRefinement, validatorSchemas } from '@/utils/validation'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useWallet } from '@txnlab/use-wallet-react'
+import { isAxiosError } from 'axios'
+import { ArrowUpRight, Check, RotateCcw, X } from 'lucide-react'
+import * as React from 'react'
+import { useFieldArray, useForm } from 'react-hook-form'
+import { toast } from 'sonner'
+import { useDebouncedCallback } from 'use-debounce'
+import { z } from 'zod'
 
 const nfdAppUrl = getNfdAppFromViteEnvironment()
 
@@ -55,7 +55,7 @@ interface EditEntryGatingProps {
 export function EditEntryGating({ validator }: EditEntryGatingProps) {
   const [isOpen, setIsOpen] = React.useState<boolean>(false)
   const [isSigning, setIsSigning] = React.useState(false)
-  const [gatingAssets, setGatingAssets] = React.useState<Array<algosdk.modelsv2.Asset | null>>([])
+  const [gatingAssets, setGatingAssets] = React.useState<Array<Asset | null>>([])
   const [isFetchingGatingAssetIndex, setIsFetchingGatingAssetIndex] = React.useState<number>(-1)
 
   const {
@@ -151,7 +151,7 @@ export function EditEntryGating({ validator }: EditEntryGatingProps) {
     })
   }
 
-  const handleSetGatingAssetById = async (index: number, value: algosdk.modelsv2.Asset | null) => {
+  const handleSetGatingAssetById = async (index: number, value: Asset | null) => {
     setGatingAssets((prev) => {
       const newAssets = [...prev]
       newAssets[index] = value

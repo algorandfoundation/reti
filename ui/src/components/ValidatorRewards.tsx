@@ -1,8 +1,8 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { validatorMetricsQueryOptions } from '@/api/queries'
+import { validatorSingleMetricsQueryOptions } from '@/api/queries'
 import { AlgoDisplayAmount } from '@/components/AlgoDisplayAmount'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Validator } from '@/interfaces/validator'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 
 interface ValidatorRewardsProps {
   validator: Validator
@@ -10,7 +10,7 @@ interface ValidatorRewardsProps {
 
 export function ValidatorRewards({ validator }: ValidatorRewardsProps) {
   const queryClient = useQueryClient()
-  const metricsQuery = useQuery(validatorMetricsQueryOptions(validator.id, queryClient))
+  const metricsQuery = useQuery(validatorSingleMetricsQueryOptions(validator.id, queryClient))
 
   if (metricsQuery.isLoading) {
     return (

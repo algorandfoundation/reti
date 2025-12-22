@@ -1,15 +1,14 @@
-import algosdk from 'algosdk'
-import { Nfd } from '@/interfaces/nfd'
-import { ToStringTypes } from '@/interfaces/utils'
 import {
   NodePoolAssignmentConfig,
   ValidatorConfig,
   ValidatorCurState,
   ValidatorPoolKey,
 } from '@/contracts/ValidatorRegistryClient'
+import { Nfd } from '@/interfaces/nfd'
+import { ToStringTypes } from '@/interfaces/utils'
+import { Asset } from './asset'
 
 export type EntryGatingAssets = [bigint, bigint, bigint, bigint]
-// export type EntryGatingAssets = bigint[]
 
 export type ValidatorConfigInput = Omit<
   ToStringTypes<ValidatorConfig>,
@@ -29,7 +28,6 @@ export interface LocalPoolInfo {
 export interface NodeConfig {
   poolAppIds: bigint[]
 }
-// export type NodeConfig = [bigint, ...bigint[]]
 
 export type NodeInfo = {
   index: number
@@ -44,8 +42,8 @@ export type Validator = {
   nodePoolAssignment: NodePoolAssignmentConfig
   rewardsBalance?: bigint
   roundsSinceLastPayout?: bigint
-  rewardToken?: algosdk.modelsv2.Asset
-  gatingAssets?: algosdk.modelsv2.Asset[]
+  rewardToken?: Asset
+  gatingAssets?: Asset[]
   nfd?: Nfd
   apy?: number
   extDeposits?: number

@@ -1,7 +1,3 @@
-import { useQuery } from '@tanstack/react-query'
-import { EventProps } from '@tremor/react'
-import { useWallet } from '@txnlab/use-wallet-react'
-import * as React from 'react'
 import { validatorNodePoolAssignmentsQueryOptions } from '@/api/queries'
 import { AddPoolModal } from '@/components/AddPoolModal'
 import { AddStakeModal } from '@/components/AddStakeModal'
@@ -9,7 +5,7 @@ import { ErrorAlert } from '@/components/ErrorAlert'
 import { Loading } from '@/components/Loading'
 import { PoolIcon } from '@/components/PoolIcon'
 import { Button } from '@/components/ui/button'
-import { Card, CardTitle, CardHeader, CardContent, CardFooter } from '@/components/ui/card'
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { UnstakeModal } from '@/components/UnstakeModal'
 import { Constraints } from '@/contracts/ValidatorRegistryClient'
 import { useStakersChartData } from '@/hooks/useStakersChartData'
@@ -25,12 +21,16 @@ import {
 import { convertFromBaseUnits } from '@/utils/format'
 import { getPoolIndexFromName, getPoolNameFromIndex } from '@/utils/pools'
 import { cn } from '@/utils/ui'
+import { useQuery } from '@tanstack/react-query'
+import { EventProps } from '@tremor/react'
+import { useWallet } from '@txnlab/use-wallet-react'
+import * as React from 'react'
 import { Details } from './Details'
 import { Highlights } from './Highlights'
 import { PoolsChart } from './PoolsChart'
 import { SelectPool } from './SelectPool'
-import { StakingPoolInfo } from './StakingPoolInfo'
 import { StakersList } from './StakersList'
+import { StakingPoolInfo } from './StakingPoolInfo'
 import { SunsetNotice } from './SunsetNotice'
 
 interface ValidatorDetailsProps {
@@ -65,9 +65,10 @@ export function ValidatorDetails({
     pauseRefetch: !!addPoolValidator, // Pause refetch when adding pool
   })
 
-  const { data: poolAssignment } = useQuery(
-    validatorNodePoolAssignmentsQueryOptions(validator.id, canEdit),
+  const { data: poolAssignments } = useQuery(
+    validatorNodePoolAssignmentsQueryOptions([validator.id], canEdit),
   )
+  const poolAssignment = poolAssignments?.at(0)
 
   const validatorHasSlots = React.useMemo(() => {
     return poolAssignment

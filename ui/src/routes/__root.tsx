@@ -1,10 +1,10 @@
+import { blockTimeQueryOptions, mbrAndProtocolConstraintsQueryOptions } from '@/api/queries'
+import { Layout } from '@/components/Layout'
+import { useCheckForUpdates } from '@/hooks/useCheckForUpdates'
 import { QueryClient } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { createRootRouteWithContext, Outlet } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/router-devtools'
-import { blockTimeQueryOptions, constraintsQueryOptions, mbrQueryOptions } from '@/api/queries'
-import { Layout } from '@/components/Layout'
-import { useCheckForUpdates } from '@/hooks/useCheckForUpdates'
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient
@@ -13,16 +13,18 @@ export const Route = createRootRouteWithContext<{
   beforeLoad: () => {
     return {
       blockTimeQueryOptions,
-      constraintsQueryOptions,
-      mbrQueryOptions,
+      mbrAndProtocolConstraintsQueryOptions,
     }
   },
   loader: ({
-    context: { queryClient, blockTimeQueryOptions, constraintsQueryOptions, mbrQueryOptions },
+    context: {
+      queryClient,
+      blockTimeQueryOptions,
+      mbrAndProtocolConstraintsQueryOptions: mbrQueryOptions,
+    },
   }) => {
+    queryClient.ensureQueryData(mbrAndProtocolConstraintsQueryOptions)
     queryClient.ensureQueryData(blockTimeQueryOptions)
-    queryClient.ensureQueryData(constraintsQueryOptions)
-    queryClient.ensureQueryData(mbrQueryOptions)
   },
   component: Root,
   notFoundComponent: () => {

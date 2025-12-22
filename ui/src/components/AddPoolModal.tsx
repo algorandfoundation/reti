@@ -1,13 +1,3 @@
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { ProgressBar } from '@tremor/react'
-import { useWallet } from '@txnlab/use-wallet-react'
-import algosdk, { getApplicationAddress } from 'algosdk'
-import { CheckIcon, Copy } from 'lucide-react'
-import * as React from 'react'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { z } from 'zod'
 import { fetchAccountInformation } from '@/api/algod'
 import {
   addStakingPool,
@@ -16,11 +6,14 @@ import {
   linkPoolToNfd,
   requestSubscribeXGov,
 } from '@/api/contracts'
-import { mbrQueryOptions, validatorNodePoolAssignmentsQueryOptions } from '@/api/queries'
+import {
+  mbrAndProtocolConstraintsQueryOptions,
+  validatorNodePoolAssignmentsQueryOptions,
+} from '@/api/queries'
 import { AlgoDisplayAmount } from '@/components/AlgoDisplayAmount'
 import { DisplayAsset } from '@/components/DisplayAsset'
-import { NfdLookup } from '@/components/NfdLookup'
 import { NfdDisplay } from '@/components/NfdDisplay'
+import { NfdLookup } from '@/components/NfdLookup'
 import { NodeSelect } from '@/components/NodeSelect'
 import { Button } from '@/components/ui/button'
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible'
@@ -41,8 +34,11 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { NodePoolAssignmentConfig, ValidatorPoolKey } from '@/contracts/ValidatorRegistryClient'
+import { useRegistry } from '@/hooks/useRegistry'
+import { useRequestBoxes } from '@/hooks/useRequestBoxes'
 import { Nfd } from '@/interfaces/nfd'
 import { Validator } from '@/interfaces/validator'
+import { useTheme } from '@/providers/ThemeProvider'
 import { BalanceChecker, InsufficientBalanceError } from '@/utils/balanceChecker'
 import {
   findFirstAvailableNode,
@@ -55,9 +51,16 @@ import { ExplorerLink } from '@/utils/explorer'
 import { formatAlgoAmount } from '@/utils/format'
 import { isValidName } from '@/utils/nfd'
 import { cn } from '@/utils/ui'
-import { useRegistry } from '@/hooks/useRegistry'
-import { useTheme } from '@/providers/ThemeProvider'
-import { useRequestBoxes } from '@/hooks/useRequestBoxes'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { ProgressBar } from '@tremor/react'
+import { useWallet } from '@txnlab/use-wallet-react'
+import algosdk, { getApplicationAddress } from 'algosdk'
+import { CheckIcon, Copy } from 'lucide-react'
+import * as React from 'react'
+import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
+import { z } from 'zod'
 
 interface AddPoolModalProps {
   validator: Validator | null
@@ -104,13 +107,14 @@ export function AddPoolModal({
 
   const availableBalance = amount - minBalance < 0n ? 0n : amount - minBalance
 
-  const mbrQuery = useQuery(mbrQueryOptions)
-  const { addPoolMbr = 0n, poolInitMbr = 0n } = mbrQuery.data || {}
+  const mbrQuery = useQuery(mbrAndProtocolConstraintsQueryOptions)
+  const { addPoolMbr = 0n, poolInitMbr = 0n } = mbrQuery.data?.mbrAmounts || {}
 
+  // TODO replace with validator.
   const assignmentQuery = useQuery(
-    validatorNodePoolAssignmentsQueryOptions(validator?.id || 0, !!validator),
+    validatorNodePoolAssignmentsQueryOptions([validator?.id || 0], !!validator),
   )
-  const poolAssignment = assignmentQuery.data || poolAssignmentProp
+  const poolAssignment = assignmentQuery.data?.at(0) || poolAssignmentProp
 
   const nodesInfo = React.useMemo(() => {
     if (!poolAssignment || !validator) {

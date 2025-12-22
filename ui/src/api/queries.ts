@@ -1,28 +1,34 @@
-import { AlgoAmount } from '@algorandfoundation/algokit-utils/types/amount'
-import { keepPreviousData, QueryClient, queryOptions } from '@tanstack/react-query'
-import algosdk from 'algosdk'
-import { AxiosError } from 'axios'
-import { CacheRequestConfig } from 'axios-cache-interceptor'
-import { fetchAsset, fetchAssetHoldings, fetchBalance, fetchBlockTimes } from '@/api/algod'
 import {
-  fetchMbrAmounts,
+  fetchAsset,
+  fetchAssetHoldings,
+  fetchAssets,
+  fetchBalance,
+  fetchBlockTimes,
+} from '@/api/algod'
+import { algorandClient } from '@/api/clients'
+import {
+  fetchMbrAmountsAndProtocolContraints,
   fetchNumValidators,
   fetchPoolApy,
-  fetchProtocolConstraints,
+  fetchPoolBalancesAndLastPayouts,
+  fetchSingleValidatorInfo,
   fetchStakedInfoForPool,
   fetchStakerValidatorData,
-  fetchValidatorConfig,
   fetchValidatorNodePoolAssignments,
-  fetchValidatorPools,
-  fetchValidatorState,
+  fetchValidatorsInfo,
+  fetchValidatorsPools,
   processPoolData,
 } from '@/api/contracts'
-import { algorandClient } from '@/api/clients'
 import { fetchNfd, fetchNfdReverseLookup } from '@/api/nfd'
+import { fetchNodely24hPerf } from '@/api/nodely'
+import { Asset } from '@/interfaces/asset'
 import { Nfd, NfdGetLookupParams, NfdGetNFDParams } from '@/interfaces/nfd'
 import { calculateValidatorPoolMetrics } from '@/utils/contracts'
 import { resolveIpfsUrl } from '@/utils/ipfs'
-import { fetchNodely24hPerf } from '@/api/nodely'
+import { AlgoAmount } from '@algorandfoundation/algokit-utils/types/amount'
+import { keepPreviousData, QueryClient, queryOptions } from '@tanstack/react-query'
+import { AxiosError } from 'axios'
+import { CacheRequestConfig } from 'axios-cache-interceptor'
 
 ////////////////////////////////////////////////////////////
 // Core protocol data queries
@@ -34,62 +40,69 @@ export const numValidatorsQueryOptions = queryOptions({
   staleTime: 1000 * 60, // 1 minute
 })
 
-export const mbrQueryOptions = queryOptions({
+export const mbrAndProtocolConstraintsQueryOptions = queryOptions({
   queryKey: ['mbr'],
-  queryFn: () => fetchMbrAmounts(),
+  queryFn: () => fetchMbrAmountsAndProtocolContraints(),
   staleTime: Infinity,
-})
-
-export const constraintsQueryOptions = queryOptions({
-  queryKey: ['constraints'],
-  queryFn: () => fetchProtocolConstraints(),
-  staleTime: 1000 * 60 * 60, // 1 hour
 })
 
 ////////////////////////////////////////////////////////////
 // Validator data queries
 ////////////////////////////////////////////////////////////
 
-export const validatorConfigQueryOptions = (validatorId: number) =>
-  queryOptions({
-    queryKey: ['validator-config', String(validatorId)],
-    queryFn: () => fetchValidatorConfig(validatorId),
-    staleTime: Infinity,
-    refetchInterval: 1000 * 60 * 60 * 2, // 2 hours
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-  })
-
-export const validatorStateQueryOptions = (
-  validatorId: number,
-  refetchInterval = 1000 * 30, // 30 seconds
-  refetchOnWindowFocus = true,
-) =>
-  queryOptions({
-    queryKey: ['validator-state', String(validatorId)],
-    queryFn: () => fetchValidatorState(validatorId),
-    refetchInterval,
-    refetchOnWindowFocus,
-    refetchOnMount: false,
-  })
-
 export const validatorPoolsQueryOptions = (
-  validatorId: number,
+  validatorIds: number[],
   refetchInterval = 1000 * 30, // 30 seconds
   refetchOnWindowFocus = true,
 ) =>
   queryOptions({
-    queryKey: ['validator-pools', String(validatorId)],
-    queryFn: () => fetchValidatorPools(validatorId),
+    queryKey: ['validator-pools', validatorIds.join(',')],
+    queryFn: () => fetchValidatorsPools(validatorIds),
     refetchInterval,
     refetchOnWindowFocus,
     refetchOnMount: false,
   })
 
-export const validatorNodePoolAssignmentsQueryOptions = (validatorId: number, enabled = true) =>
+export const validatorSingleQueryKey = (validatorId: number) => [
+  'validator-single',
+  validatorId.toString(),
+]
+
+export const validatorSingleQueryOptions = (validatorId: number, enabled = true) =>
   queryOptions({
-    queryKey: ['validator-node-pool-assignments', String(validatorId)],
-    queryFn: () => fetchValidatorNodePoolAssignments(validatorId),
+    queryKey: validatorSingleQueryKey(validatorId),
+    queryFn: () => fetchSingleValidatorInfo(validatorId),
+    staleTime: Infinity,
+    refetchInterval: 1000 * 30, // 30 seconds
+    refetchOnWindowFocus: true,
+    refetchOnMount: false,
+    enabled,
+  })
+
+export const validatorsQueryOptions = (validatorIds: number[], queryClient: QueryClient) =>
+  queryOptions({
+    queryKey: ['validator', validatorIds.join(',')],
+    queryFn: async () => {
+      const data = await fetchValidatorsInfo(validatorIds)
+      // cache the results under individual validator query keys
+      // metrics relies on this cached data
+      data.forEach((validatorData, i) => {
+        const validatorId = validatorIds[i]
+        queryClient.setQueryData(validatorSingleQueryKey(validatorId), validatorData)
+      })
+      return data
+    },
+    staleTime: Infinity,
+    refetchInterval: 1000 * 30, // 30 seconds
+    refetchOnWindowFocus: true,
+    refetchOnMount: false,
+    enabled: validatorIds.length > 0,
+  })
+
+export const validatorNodePoolAssignmentsQueryOptions = (validatorIds: number[], enabled = true) =>
+  queryOptions({
+    queryKey: ['validator-node-pool-assignments', validatorIds.join(',')],
+    queryFn: () => fetchValidatorNodePoolAssignments(validatorIds),
     staleTime: Infinity,
     refetchInterval: 1000 * 60 * 60 * 2, // 2 hours
     refetchOnWindowFocus: false,
@@ -97,18 +110,70 @@ export const validatorNodePoolAssignmentsQueryOptions = (validatorId: number, en
     enabled,
   })
 
-export const validatorMetricsQueryOptions = (validatorId: number, queryClient: QueryClient) =>
+export const poolBalanceAndLastPayoutQueryKey = (poolAppId: bigint) => [
+  'pool-balance-last-payout',
+  poolAppId.toString(),
+]
+
+export const poolBalanceAndLastPayoutQueryOptions = (poolAppId: bigint) =>
+  queryOptions({
+    queryKey: poolBalanceAndLastPayoutQueryKey(poolAppId),
+    queryFn: async () => {
+      const [data] = await fetchPoolBalancesAndLastPayouts([poolAppId])
+      return data
+    },
+    staleTime: Infinity,
+    refetchInterval: 1000 * 60 * 30, // 30 minutes, same as validatorSingleMetricsQueryOptions
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  })
+
+export const poolBalancesAndLastPayoutsQueryOptions = (
+  poolAppIds: bigint[],
+  queryClient: QueryClient,
+) =>
+  queryOptions({
+    queryKey: ['pool-balances-last-payouts', poolAppIds.join(',')],
+    queryFn: async () => {
+      const data = await fetchPoolBalancesAndLastPayouts(poolAppIds)
+      // cache the results under individual pool query keys
+      data.forEach((balanceData, i) => {
+        const poolAppId = poolAppIds[i]
+        queryClient.setQueryData(poolBalanceAndLastPayoutQueryKey(poolAppId), balanceData)
+      })
+      return data
+    },
+    staleTime: Infinity,
+    refetchInterval: 1000 * 60 * 30, // 30 minutes, same as validatorSingleMetricsQueryOptions
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    enabled: poolAppIds.length > 0,
+  })
+
+export const validatorSingleMetricsQueryOptions = (validatorId: number, queryClient: QueryClient) =>
   queryOptions({
     queryKey: ['validator-metrics', String(validatorId)],
     queryFn: async () => {
       // Get cached data from other queries
-      const pools = await queryClient.ensureQueryData(validatorPoolsQueryOptions(validatorId))
-      const state = await queryClient.ensureQueryData(validatorStateQueryOptions(validatorId))
-      const config = await queryClient.ensureQueryData(validatorConfigQueryOptions(validatorId))
+      const { config, state, pools } = await queryClient.ensureQueryData(
+        validatorSingleQueryOptions(validatorId),
+      )
 
-      const params = await algorandClient.getSuggestedParams()
-      const poolDataPromises = pools.map((pool) => processPoolData(pool))
-      const processedPoolsData = await Promise.all(poolDataPromises)
+      const poolAppIds = pools.map((pool: { poolAppId: bigint }) => pool.poolAppId)
+      const poolBalancesLastPayouts = await Promise.all(
+        poolAppIds.map((poolAppId) =>
+          queryClient.ensureQueryData(poolBalanceAndLastPayoutQueryOptions(poolAppId)),
+        ),
+      )
+
+      const poolDataPromises = pools.map((pool, i) =>
+        processPoolData(pool, poolBalancesLastPayouts[i]!),
+      )
+
+      const [params, ...processedPoolsData] = await Promise.all([
+        algorandClient.getSuggestedParams(),
+        ...poolDataPromises,
+      ])
 
       // Ignore pools with less than 30k ALGO balance
       const filteredPoolsData = processedPoolsData.filter(
@@ -122,6 +187,7 @@ export const validatorMetricsQueryOptions = (validatorId: number, queryClient: Q
         BigInt(params.firstValid),
       )
     },
+    enabled: !!queryClient.getQueryData(validatorSingleQueryKey(validatorId)),
     staleTime: 1000 * 60 * 30, // 30 minutes
     refetchOnWindowFocus: false,
     refetchOnMount: false,
@@ -195,11 +261,26 @@ export const nfdLookupQueryOptions = (
 ////////////////////////////////////////////////////////////
 
 export const assetQueryOptions = (assetId: number) =>
-  queryOptions<algosdk.modelsv2.Asset>({
+  queryOptions<Asset>({
     queryKey: ['asset', assetId],
     queryFn: () => fetchAsset(assetId),
     staleTime: Infinity,
     enabled: assetId > 0,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  })
+
+export const assetsQueryOptions = (assetIds: bigint[] | number[]) =>
+  queryOptions<Asset[]>({
+    queryKey: ['assets', assetIds.join(',')],
+    queryFn: () => {
+      return assetIds.length === 1
+        ? // skip simulate for a single asset
+          fetchAsset(Number(assetIds[0])).then((a) => [a])
+        : fetchAssets(assetIds)
+    },
+    staleTime: Infinity,
+    enabled: assetIds.length > 0,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   })
