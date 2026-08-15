@@ -163,7 +163,7 @@ export function AssetLookup<
                 ) : asset ? (
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-mono text-muted-foreground">
-                      {asset.params.unitName}
+                      {asset.params?.unitName}
                     </span>
                     <Check className="h-5 w-5 text-green-500" />
                   </div>

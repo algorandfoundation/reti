@@ -1,10 +1,16 @@
-import { useQuery, useQueryClient, useSuspenseQueries } from '@tanstack/react-query'
+import {
+  useQuery,
+  useQueryClient,
+  useSuspenseQueries,
+  useSuspenseQuery,
+} from '@tanstack/react-query'
 import algosdk from 'algosdk'
 import * as React from 'react'
 import { createBaseValidator } from '@/api/contracts'
 import {
   assetQueryOptions,
   nfdQueryOptions,
+  poolGlobalStatesQueryOptions,
   validatorConfigQueryOptions,
   validatorMetricsQueryOptions,
   validatorNodePoolAssignmentsQueryOptions,
@@ -21,16 +27,28 @@ export function useValidator(validatorId: number): Validator | undefined {
   const queryClient = useQueryClient()
 
   // Core validator queries
-  const [configQuery, stateQuery, poolsQuery, nodePoolAssignmentQuery, metricsQuery] =
-    useSuspenseQueries({
-      queries: [
-        validatorConfigQueryOptions(validatorId),
-        validatorStateQueryOptions(validatorId),
-        validatorPoolsQueryOptions(validatorId),
-        validatorNodePoolAssignmentsQueryOptions(validatorId),
-        validatorMetricsQueryOptions(validatorId, queryClient),
-      ],
-    })
+  const [configQuery, stateQuery, poolsQuery, nodePoolAssignmentQuery] = useSuspenseQueries({
+    queries: [
+      validatorConfigQueryOptions(validatorId),
+      validatorStateQueryOptions(validatorId),
+      validatorPoolsQueryOptions(validatorId),
+      validatorNodePoolAssignmentsQueryOptions(validatorId),
+      // Not read here. Suspending on it is what guarantees the metrics queryFn below finds it
+      // in the cache instead of falling back to a request per pool.
+      poolGlobalStatesQueryOptions,
+    ],
+  })
+
+  // Metrics takes its inputs explicitly, so it has to run after the queries above resolve.
+  // Suspense guarantees their data is defined here, including the bulk pool state its queryFn
+  // reads back out of the cache.
+  const metricsQuery = useSuspenseQuery(
+    validatorMetricsQueryOptions(validatorId, queryClient, {
+      pools: poolsQuery.data,
+      totalAlgoStaked: stateQuery.data.totalAlgoStaked,
+      epochRoundLength: configQuery.data.epochRoundLength,
+    }),
+  )
 
   // Reward token query
   const rewardTokenQuery = useQuery({

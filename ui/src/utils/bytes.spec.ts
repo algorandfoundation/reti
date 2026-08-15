@@ -1,9 +1,11 @@
 import algosdk from 'algosdk'
 import {
+  boxNameForId,
   concatUint8Arrays,
   gatingValueFromBigint,
   decodeUint8ArrayToBigint,
   chunkBytes,
+  idFromBoxName,
 } from '@/utils/bytes'
 
 describe('concatUint8Arrays', () => {
@@ -39,6 +41,35 @@ describe('decodeUint8ArrayToBigint', () => {
     expect(() => decodeUint8ArrayToBigint(invalidData)).toThrow(
       'Data is too short to contain a valid encoded bigint.',
     )
+  })
+})
+
+describe('boxNameForId / idFromBoxName', () => {
+  it('encodes an ASCII prefix followed by a big-endian uint64', () => {
+    expect(boxNameForId('v', 1)).toEqual(new Uint8Array([0x76, 0, 0, 0, 0, 0, 0, 0, 1]))
+    expect(boxNameForId('r', 258)).toEqual(new Uint8Array([0x72, 0, 0, 0, 0, 0, 0, 1, 2]))
+  })
+
+  it('round trips ids, including ones past Number.MAX_SAFE_INTEGER', () => {
+    expect(idFromBoxName('v', boxNameForId('v', 42))).toBe(42n)
+    expect(idFromBoxName('v', boxNameForId('v', 9007199254740993n))).toBe(9007199254740993n)
+  })
+
+  it('rejects a name whose prefix does not match', () => {
+    // 'sps' is the stakerPoolSet BoxMap, and shares no prefix with 'v'
+    expect(idFromBoxName('v', boxNameForId('s', 1))).toBeNull()
+  })
+
+  it('rejects a name of the wrong length, since algod filters by prefix not exact match', () => {
+    expect(idFromBoxName('v', new Uint8Array([0x76, 0, 0, 0, 0, 0, 0, 1]))).toBeNull()
+    expect(idFromBoxName('v', new Uint8Array(35).fill(0x76))).toBeNull()
+  })
+
+  it('handles a multi-character prefix', () => {
+    const name = boxNameForId('sps', 7)
+    expect(name).toHaveLength(11)
+    expect(idFromBoxName('sps', name)).toBe(7n)
+    expect(idFromBoxName('spx', name)).toBeNull()
   })
 })
 

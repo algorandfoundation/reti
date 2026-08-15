@@ -1,7 +1,16 @@
 import { AlgoAmount } from '@algorandfoundation/algokit-utils/types/amount'
 import algosdk from 'algosdk'
-import { fetchAccountBalance, fetchAsset, isOptedInToAsset } from '@/api/algod'
 import {
+  fetchAccountBalance,
+  fetchAccountInformation,
+  fetchAppBoxValue,
+  fetchAppBoxes,
+  fetchApplication,
+  fetchAsset,
+  isOptedInToAsset,
+} from '@/api/algod'
+import {
+  RETI_APP_ID,
   algorandClient,
   getSimulateStakingPoolClient,
   getSimulateValidatorClient,
@@ -23,17 +32,26 @@ import {
   ValidatorCurState,
   ValidatorRegistryClient,
 } from '@/contracts/ValidatorRegistryClient'
+import { AlgodHttpError } from '@/interfaces/algod'
 import { StakerPoolData, StakerValidatorData } from '@/interfaces/staking'
 import {
   EntryGatingAssets,
   FindPoolForStakerResponse,
   LocalPoolInfo,
   PoolData,
+  PoolGlobalState,
   Validator,
+  ValidatorCoreData,
   ValidatorConfigInput,
 } from '@/interfaces/validator'
 import { BalanceChecker } from '@/utils/balanceChecker'
-import { encodeCallParams } from '@/utils/tests/abi'
+import {
+  VALIDATOR_BOX_PREFIX,
+  decodeValidatorBoxName,
+  decodeValidatorInfo,
+  validatorBoxName,
+  validatorInfoToParts,
+} from '@/utils/contracts'
 import { TransactionHandlerProps } from './transactionState'
 import { wrapTransactionSigner } from '@/hooks/useTransactionState'
 import { sleep } from '@/utils/time'
@@ -45,63 +63,150 @@ export async function fetchNumValidators(): Promise<number> {
   return Number(numValidators)
 }
 
+/**
+ * Fetches config, state, pools and node/pool assignments for EVERY validator in a single
+ * paginated request.
+ *
+ * All four of those live in the same `v` + validatorId box, so reading the boxes in bulk
+ * (algosdk >= 3.6 `include('values')`) replaces four simulate calls per validator plus a
+ * per-pool global state read - roughly 900 round trips on mainnet - with one.
+ */
+export async function fetchAllValidatorData(): Promise<ValidatorCoreData[]> {
+  const { boxes } = await fetchAppBoxes(RETI_APP_ID, { prefix: VALIDATOR_BOX_PREFIX })
+
+  const validators = boxes
+    .map((box) => {
+      const id = decodeValidatorBoxName(box.name)
+      if (id === null) {
+        return null
+      }
+      try {
+        return validatorInfoToParts(id, decodeValidatorInfo(box.value))
+      } catch (error) {
+        // Drop the one box rather than failing the whole dashboard. Decoding is a pure
+        // function of an immutable contract's layout, so this shouldn't happen - but if it
+        // ever does, 224 working validators beat an empty page.
+        console.warn(`Skipping validator box ${id}, could not be decoded:`, error)
+        return null
+      }
+    })
+    .filter((validator): validator is ValidatorCoreData => validator !== null)
+    // Box listing is lexicographic by name; sort explicitly so row order can't depend on it
+    .sort((a, b) => a.id - b.id)
+
+  if (import.meta.env.DEV) {
+    // Boxes are ground truth, but a divergence here would mean a contract-level bug
+    fetchNumValidators()
+      .then((numValidators) => {
+        if (numValidators !== validators.length) {
+          console.warn(
+            `getNumValidators() returned ${numValidators} but found ${validators.length} validator boxes`,
+          )
+        }
+      })
+      .catch(() => {})
+  }
+
+  return validators
+}
+
+/**
+ * Fetches a single validator's core data with one box read.
+ */
+export async function fetchValidatorCoreData(
+  validatorId: number | bigint,
+): Promise<ValidatorCoreData> {
+  const id = Number(validatorId)
+  try {
+    const value = await fetchAppBoxValue(RETI_APP_ID, validatorBoxName(validatorId))
+    return validatorInfoToParts(id, decodeValidatorInfo(value))
+  } catch (error) {
+    if (error instanceof AlgodHttpError && error.response.status === 404) {
+      throw new ValidatorNotFoundError(`Validator with id "${id}" not found!`)
+    }
+    throw error
+  }
+}
+
 export async function fetchValidatorConfig(validatorId: number | bigint): Promise<ValidatorConfig> {
-  const validatorClient = await getSimulateValidatorClient()
-  const config = await validatorClient.getValidatorConfig({
-    args: { validatorId },
-  })
-  return config
+  return (await fetchValidatorCoreData(validatorId)).config
 }
 
 export async function fetchValidatorState(
   validatorId: number | bigint,
 ): Promise<ValidatorCurState> {
-  const validatorClient = await getSimulateValidatorClient()
-  const state = await validatorClient.getValidatorState({
-    args: { validatorId },
-  })
-  return state
+  return (await fetchValidatorCoreData(validatorId)).state
 }
 
 export async function fetchValidatorPools(validatorId: number | bigint): Promise<LocalPoolInfo[]> {
-  const validatorClient = await getSimulateValidatorClient()
-  const poolsData = await validatorClient.getPools({
-    args: { validatorId },
-    note: encodeCallParams('getPools', { validatorId }), // Used by MSW in tests
-  })
-
-  const poolAddresses: string[] = []
-  const poolAlgodVersions: (string | undefined)[] = []
-
-  for (const poolInfo of poolsData) {
-    const stakingPoolClient = await getSimulateStakingPoolClient(poolInfo[0])
-
-    poolAddresses.push(stakingPoolClient.appAddress.toString())
-    poolAlgodVersions.push((await stakingPoolClient.state.global.algodVer()).asString())
-  }
-
-  // Transform raw pool data into LocalPoolInfo[]
-  return poolsData.map(
-    (poolInfo: [bigint, number, bigint], i: number) =>
-      ({
-        poolId: BigInt(i + 1),
-        poolAppId: poolInfo[0],
-        totalStakers: poolInfo[1],
-        totalAlgoStaked: poolInfo[2],
-        poolAddress: poolAddresses[i],
-        algodVersion: poolAlgodVersions[i],
-      }) satisfies LocalPoolInfo,
-  )
+  return (await fetchValidatorCoreData(validatorId)).pools
 }
 
 export async function fetchValidatorNodePoolAssignments(
   validatorId: number | bigint,
 ): Promise<NodePoolAssignmentConfig> {
-  const validatorClient = await getSimulateValidatorClient()
-  const assignments = await validatorClient.getNodePoolAssignments({
-    args: { validatorId },
-  })
-  return assignments
+  return (await fetchValidatorCoreData(validatorId)).nodePoolAssignment
+}
+
+/** Global state keys a staking pool exposes that aren't in the validator box. */
+const POOL_LAST_PAYOUT_KEY = 'lastPayout'
+const POOL_ALGOD_VER_KEY = 'algodVer'
+
+/** TealValue discriminators: 1 is a byte string, 2 is a uint. */
+const TEAL_TYPE_BYTES = 1
+const TEAL_TYPE_UINT = 2
+
+function decodePoolGlobalState(globalState: algosdk.modelsv2.TealKeyValue[] = []): PoolGlobalState {
+  const decoder = new TextDecoder()
+  const state: PoolGlobalState = {}
+
+  for (const { key, value } of globalState) {
+    switch (decoder.decode(key)) {
+      case POOL_LAST_PAYOUT_KEY:
+        if (value.type === TEAL_TYPE_UINT) {
+          state.lastPayout = value.uint
+        }
+        break
+      case POOL_ALGOD_VER_KEY:
+        // Stored as bytes, not a uint
+        if (value.type === TEAL_TYPE_BYTES) {
+          state.algodVer = decoder.decode(value.bytes)
+        }
+        break
+    }
+  }
+
+  return state
+}
+
+/**
+ * Every staking pool's global state in a single request.
+ *
+ * Pools are created by the registry's own app account, so its `createdApps` carries the full
+ * global state of all of them - `lastPayout` for every pool without a call per pool. The
+ * payload stays small (~38KB gzipped for 283 pools) because they share one approval program.
+ */
+export async function fetchPoolGlobalStates(): Promise<Map<bigint, PoolGlobalState>> {
+  const registryAddress = algosdk.getApplicationAddress(RETI_APP_ID).toString()
+  const account = await fetchAccountInformation(registryAddress)
+  const createdApps = account.createdApps ?? []
+
+  // algod caps the resources it returns per account, and does so silently. 283 pools is far
+  // under the cap today, but this has to fail loudly rather than quietly drop pools - callers
+  // fill any gap per pool via fetchPoolGlobalState.
+  if (Number(account.totalCreatedApps) !== createdApps.length) {
+    console.warn(
+      `Truncated pool global state: account reports ${account.totalCreatedApps} created apps, response carried ${createdApps.length}. Missing pools will be read individually.`,
+    )
+  }
+
+  return new Map(createdApps.map((app) => [app.id, decodePoolGlobalState(app.params?.globalState)]))
+}
+
+/** Single-pool read, for anything the bulk request above didn't carry. */
+export async function fetchPoolGlobalState(poolAppId: bigint): Promise<PoolGlobalState> {
+  const application = await fetchApplication(poolAppId)
+  return decodePoolGlobalState(application.params?.globalState)
 }
 
 /**
@@ -129,30 +234,36 @@ export function createBaseValidator({
   }
 }
 
-export async function processPoolData(pool: LocalPoolInfo): Promise<PoolData> {
+/**
+ * @param globalState - the pool's entry from {@link fetchPoolGlobalStates}. Omitted only when
+ *   the bulk read didn't carry this pool, which costs one request to recover.
+ */
+export async function processPoolData(
+  pool: LocalPoolInfo,
+  globalState?: PoolGlobalState,
+): Promise<PoolData> {
   const poolAddress = algosdk.getApplicationAddress(pool.poolAppId)
 
   // Define the promises for the async operations
   const balancePromise = fetchAccountBalance(poolAddress.toString(), true)
 
-  const lastPayoutPromise = (async () => {
-    const stakingPoolClient = await getSimulateStakingPoolClient(pool.poolAppId)
-    return stakingPoolClient.state.global.lastPayout()
-  })()
+  const globalStatePromise = globalState
+    ? Promise.resolve(globalState)
+    : fetchPoolGlobalState(pool.poolAppId)
 
   const nodelyPerfPromise = fetchNodelyVotingPerf(poolAddress.toString())
 
   // Execute all promises in parallel and wait for them to resolve
-  const [poolBalance, stakingPoolLastPayout, nodelyData] = await Promise.all([
+  const [poolBalance, poolGlobalState, nodelyData] = await Promise.all([
     balancePromise,
-    lastPayoutPromise,
+    globalStatePromise,
     nodelyPerfPromise,
   ])
 
   // Construct the PoolData object using the results
   const poolData: PoolData = {
-    balance: poolBalance, // Using totalAlgoStaked from global state
-    lastPayout: stakingPoolLastPayout,
+    balance: poolBalance,
+    lastPayout: poolGlobalState.lastPayout,
     apy: nodelyData.apy,
     extDeposits: nodelyData.total_external_deposits,
   }
@@ -164,16 +275,7 @@ export async function processPoolData(pool: LocalPoolInfo): Promise<PoolData> {
  * to seed the query cache with complete data.
  */
 export async function fetchValidator(validatorId: number): Promise<Validator> {
-  const [config, state, pools, nodePoolAssignment] = await Promise.all([
-    fetchValidatorConfig(validatorId),
-    fetchValidatorState(validatorId),
-    fetchValidatorPools(validatorId),
-    fetchValidatorNodePoolAssignments(validatorId),
-  ])
-
-  if (!config || !state || !pools || !nodePoolAssignment) {
-    throw new ValidatorNotFoundError(`Validator with id "${validatorId}" not found!`)
-  }
+  const { config, state, pools, nodePoolAssignment } = await fetchValidatorCoreData(validatorId)
 
   // Create base validator
   const validator = createBaseValidator({
