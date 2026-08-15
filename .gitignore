@@ -1,2 +1,5 @@
+# `.env.*` does not match a bare `.env`, and bootstrap writes mnemonics into nodemgr env files
+.env
 .env.*
 node_modules/
+.idea/
