@@ -16,6 +16,7 @@ import ErrorBoundary from '@/components/ErrorBoundary'
 import { Toaster } from '@/components/ui/sonner'
 import { WalletShortcutHandler } from '@/components/WalletShortcutHandler'
 import { WALLETCONNECT_PROJECT_ID } from '@/constants/env'
+import { hydrateQueryCache } from '@/lib/queryPersister'
 import { ThemeProvider } from '@/providers/ThemeProvider'
 import { routeTree } from '@/routeTree.gen'
 import '@/styles/main.css'
@@ -143,5 +144,11 @@ function App() {
 const rootElement = document.getElementById('app')!
 if (!rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement)
-  root.render(<App />)
+  // Restore the persisted cache before the router runs, so the dashboard paints from disk and
+  // then refreshes, rather than starting its prefetch against an empty cache. index.html holds
+  // a static spinner for the duration; drop it once React owns the screen.
+  void hydrateQueryCache(queryClient).then(() => {
+    root.render(<App />)
+    document.getElementById('app-loading')?.remove()
+  })
 }

@@ -36,3 +36,24 @@ export function parseBoxName(nameParam: string): [string, string] {
 
   return [encoding, value]
 }
+
+/**
+ * Parses an 'encoding:value' box name (or prefix) into raw bytes. Unlike `parseBoxName`,
+ * this is safe for binary names such as 'v' + uint64, which are not valid UTF-8.
+ * @param {string} nameParam - The name parameter in the format 'encoding:value'
+ * @returns {Uint8Array} The raw box name bytes
+ */
+export function parseBoxNameBytes(nameParam: string): Uint8Array {
+  const [encoding, value] = nameParam.split(':', 2)
+
+  if (encoding === 'b64' && value !== undefined) {
+    return new Uint8Array(Buffer.from(value, 'base64'))
+  }
+
+  return new Uint8Array(Buffer.from(value ?? nameParam, 'utf-8'))
+}
+
+/** Base64 key used to look up a box fixture by its raw name bytes. */
+export function boxNameKey(name: Uint8Array): string {
+  return Buffer.from(name).toString('base64')
+}

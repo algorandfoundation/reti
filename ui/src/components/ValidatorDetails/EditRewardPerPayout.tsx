@@ -48,8 +48,8 @@ export function EditRewardPerPayout({ validator }: EditRewardPerPayoutProps) {
     rewardPerPayout,
   } = validator.config
 
-  const tokenUnitName = validator.rewardToken?.params.unitName
-  const tokenDecimals = validator.rewardToken?.params.decimals
+  const tokenUnitName = validator.rewardToken?.params?.unitName
+  const tokenDecimals = validator.rewardToken?.params?.decimals
 
   const rewardPerPayoutWholeUnits = convertFromBaseUnits(rewardPerPayout, tokenDecimals)
 
@@ -98,7 +98,7 @@ export function EditRewardPerPayout({ validator }: EditRewardPerPayoutProps) {
 
       const newRewardPerPayoutBaseUnits = convertToBaseUnits(
         values.rewardPerPayout,
-        validator.rewardToken.params.decimals,
+        validator.rewardToken.params?.decimals,
       )
 
       toast.loading('Sign transactions to update reward amount per payout...', { id: toastId })

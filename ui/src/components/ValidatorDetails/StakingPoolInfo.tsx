@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { ProgressBar } from '@tremor/react'
 import { Copy } from 'lucide-react'
-import { nfdLookupQueryOptions } from '@/api/queries'
+import { nfdLookupQueryOptions, poolGlobalStatesQueryOptions } from '@/api/queries'
 import { AlgoDisplayAmount } from '@/components/AlgoDisplayAmount'
 import { Loading } from '@/components/Loading'
 import { NfdDisplay } from '@/components/NfdDisplay'
@@ -34,6 +34,13 @@ export function StakingPoolInfo({
   const poolNfdQuery = useQuery(
     nfdLookupQueryOptions(poolInfo?.poolAddress || null, { view: 'thumbnail' }, { cache: false }),
   )
+
+  // Not stored in the validator box. Comes from the same bulk read of every pool's global
+  // state that the dashboard's metrics use, so getting here is normally a cache hit.
+  const poolGlobalStatesQuery = useQuery(poolGlobalStatesQueryOptions)
+  const algodVersion = poolInfo
+    ? poolGlobalStatesQuery.data?.get(poolInfo.poolAppId)?.algodVer
+    : undefined
 
   const numPools = validator.state.numPools
   const maxStakePerPool = calculateMaxAlgoPerPool(validator, constraints)
@@ -213,8 +220,8 @@ export function StakingPoolInfo({
           <div className="py-4 grid grid-cols-2 gap-4">
             <dt className="text-sm font-medium leading-6 text-muted-foreground">Algod version</dt>
             <dd className="flex items-center gap-x-2 text-sm">
-              {poolInfo.algodVersion ? (
-                <span className="font-mono">{poolInfo.algodVersion}</span>
+              {algodVersion ? (
+                <span className="font-mono">{algodVersion}</span>
               ) : (
                 <span className="text-muted-foreground">--</span>
               )}

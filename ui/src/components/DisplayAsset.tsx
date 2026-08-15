@@ -23,7 +23,7 @@ export function DisplayAsset({
   }
 
   const renderDisplayAsset = (asset: algosdk.modelsv2.Asset) => {
-    const { name, unitName } = asset.params
+    const { name, unitName } = asset.params ?? {}
 
     if (unitName && show === 'unit-name') {
       return renderUnitName(unitName)
