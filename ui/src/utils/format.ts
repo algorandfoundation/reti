@@ -201,8 +201,8 @@ export function formatAssetAmount(
   options: FormatAssetAmountOptions = {},
 ): string {
   const { precision, trim, maxLength, compact, unitName } = options
-  const decimals = Number(asset.params.decimals)
-  const assetUnitName = unitName ? asset.params.unitName : ''
+  const decimals = Number(asset.params?.decimals ?? 0)
+  const assetUnitName = unitName ? asset.params?.unitName : ''
 
   const formatOptions = { precision, trim, maxLength, compact, decimals }
 

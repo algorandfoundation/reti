@@ -4,8 +4,67 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>R&eacute;ti Pooling</title>
+    <script>
+      // Apply the stored theme before first paint. ThemeProvider does this in an effect, which
+      // is too late to keep the static shell below (and the app's own first frame) from
+      // flashing the wrong background. Same storage key and class names it uses.
+      ;(function () {
+        try {
+          var theme = localStorage.getItem('vite-ui-theme') || 'dark'
+          if (theme === 'system') {
+            theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+          }
+          document.documentElement.classList.add(theme)
+        } catch (e) {
+          document.documentElement.classList.add('dark')
+        }
+      })()
+    </script>
+    <style>
+      /* Mirrors the --background token in src/styles/main.css, which isn't loaded yet. */
+      html {
+        background-color: hsl(0 0% 100%);
+      }
+      html.dark {
+        background-color: hsl(20 14.3% 4.1%);
+      }
+      /* Shown until React mounts. The query cache is restored from IndexedDB first, so this
+         can be on screen for a moment on a cold or contended storage layer. */
+      #app-loading {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #app-loading::after {
+        content: '';
+        width: 2rem;
+        height: 2rem;
+        border-radius: 9999px;
+        border: 2px solid hsl(240 10% 3.9% / 0.15);
+        border-top-color: hsl(240 10% 3.9% / 0.5);
+        animation: app-loading-spin 0.7s linear infinite;
+      }
+      html.dark #app-loading::after {
+        border-color: hsl(0 0% 95% / 0.15);
+        border-top-color: hsl(0 0% 95% / 0.5);
+      }
+      @keyframes app-loading-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #app-loading::after {
+          animation-duration: 2s;
+        }
+      }
+    </style>
   </head>
   <body className="h-full">
+    <!-- A sibling of #app, not a child: main.tsx only mounts when #app is empty. -->
+    <div id="app-loading"></div>
     <div id="app"></div>
     <script>
       global = globalThis

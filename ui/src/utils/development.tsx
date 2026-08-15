@@ -255,7 +255,7 @@ export async function sendRewardTokensToPool(
   try {
     const tokenId = validator.config.rewardTokenId
     const asset = await fetchAsset(tokenId)
-    const unitName = asset.params.unitName
+    const unitName = asset.params?.unitName
 
     toast.loading(`Sign to send ${rewardTokenAmount} ${unitName} tokens to pool`, {
       id: toastId,

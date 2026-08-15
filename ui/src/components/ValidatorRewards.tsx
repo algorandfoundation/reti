@@ -10,9 +10,19 @@ interface ValidatorRewardsProps {
 
 export function ValidatorRewards({ validator }: ValidatorRewardsProps) {
   const queryClient = useQueryClient()
-  const metricsQuery = useQuery(validatorMetricsQueryOptions(validator.id, queryClient))
 
-  if (metricsQuery.isLoading) {
+  // Observe only. Fetching is owned by the metered queue in useValidators - a live query per
+  // row would have all ~225 validators bypass that queue and hit algod at once on mount.
+  const metricsQuery = useQuery({
+    ...validatorMetricsQueryOptions(validator.id, queryClient, {
+      pools: validator.pools,
+      totalAlgoStaked: validator.state.totalAlgoStaked,
+      epochRoundLength: validator.config.epochRoundLength,
+    }),
+    enabled: false,
+  })
+
+  if (metricsQuery.isPending) {
     return (
       <div className="flex items-center">
         <Skeleton width={48} height={16} />

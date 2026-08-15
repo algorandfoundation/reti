@@ -9,12 +9,17 @@ import {
   AVG_BLOCK_TIME_MS,
   CURRENT_TIME_MS,
   LAST_ROUND,
+  MOCK_ACCOUNT_MICROALGOS,
+  MOCK_ACCOUNT_MIN_BALANCE,
+  MOCK_EXT_DEPOSITS,
+  MOCK_POOL_APY,
+  RETI_APP_ADDRESS,
   RETURN_PREFIX,
 } from '@/utils/tests/constants'
 import { appFixtures } from '@/utils/tests/fixtures/applications'
 import { boxFixtures } from '@/utils/tests/fixtures/boxes'
 import { methodFixtures } from '@/utils/tests/fixtures/methods'
-import { parseBoxName } from '@/utils/tests/utils'
+import { boxNameKey, parseBoxNameBytes } from '@/utils/tests/utils'
 import { MOCK_ROOT_NFD } from '@/utils/tests/fixtures/nfd'
 import { ACCOUNT_1 } from '@/utils/tests/fixtures/accounts'
 
@@ -189,7 +194,6 @@ const handlers = [
         throw new Error('Missing name parameter')
       }
 
-      const [, boxName] = parseBoxName(name)
       const appId = Number(params.id)
 
       const boxesForApp = boxFixtures[appId]
@@ -197,9 +201,9 @@ const handlers = [
         throw new Error(`No fixtures found for app ID: ${appId}`)
       }
 
-      const boxData = boxesForApp[boxName]
+      const boxData = boxesForApp[boxNameKey(parseBoxNameBytes(name))]
       if (!boxData) {
-        throw new Error(`Box name "${boxName}" not recognized`)
+        throw new Error(`Box name "${name}" not recognized`)
       }
 
       const textEncoder = new TextEncoder()
@@ -224,6 +228,101 @@ const handlers = [
       console.error('Error fetching data:', error)
       return HttpResponse.error()
     }
+  }),
+  http.get('http://localhost:4001/v2/applications/:id/boxes', async ({ params, request }) => {
+    try {
+      const url = new URL(request.url)
+      const appId = Number(params.id)
+
+      const boxesForApp = boxFixtures[appId]
+      if (!boxesForApp) {
+        throw new Error(`No fixtures found for app ID: ${appId}`)
+      }
+
+      const prefixParam = url.searchParams.get('prefix')
+      const includeValues = (url.searchParams.get('include') ?? '').split(',').includes('values')
+      const limit = Number(url.searchParams.get('limit')) || undefined
+      const next = url.searchParams.get('next')
+      const round = Number(url.searchParams.get('round')) || LAST_ROUND
+
+      // Fixture keys are base64 of the raw name; sort for stable pagination
+      let names = Object.keys(boxesForApp).sort()
+
+      if (prefixParam) {
+        const prefix = parseBoxNameBytes(prefixParam)
+        names = names.filter((key) => {
+          const name = new Uint8Array(Buffer.from(key, 'base64'))
+          return name.length >= prefix.length && prefix.every((byte, i) => name[i] === byte)
+        })
+      }
+
+      if (next) {
+        const cursor = boxNameKey(parseBoxNameBytes(next))
+        names = names.slice(names.indexOf(cursor) + 1)
+      }
+
+      const hasMore = limit !== undefined && names.length > limit
+      const page = limit !== undefined ? names.slice(0, limit) : names
+
+      const body: {
+        boxes: Array<{ name: string; value?: string }>
+        'next-token'?: string
+        round: number
+      } = {
+        boxes: page.map((key) => ({
+          name: key,
+          ...(includeValues ? { value: boxesForApp[key].value } : {}),
+        })),
+        round,
+      }
+
+      if (hasMore && page.length > 0) {
+        body['next-token'] = `b64:${page[page.length - 1]}`
+      }
+
+      const response = new TextEncoder().encode(JSON.stringify(body)).buffer
+
+      return HttpResponse.arrayBuffer(response, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+    } catch (error) {
+      console.error('Error fetching data:', error)
+      return HttpResponse.error()
+    }
+  }),
+  http.get('http://localhost:4001/v2/accounts/:address', async ({ params }) => {
+    try {
+      const address = String(params.address)
+
+      // Every staking pool is created by the registry's app account, which is how the UI reads
+      // all of their global state in one request
+      const isRegistryAccount = address === RETI_APP_ADDRESS
+      const createdApps = isRegistryAccount ? Object.values(appFixtures) : []
+
+      return HttpResponse.json({
+        address,
+        amount: MOCK_ACCOUNT_MICROALGOS,
+        'amount-without-pending-rewards': MOCK_ACCOUNT_MICROALGOS,
+        'min-balance': MOCK_ACCOUNT_MIN_BALANCE,
+        'pending-rewards': 0,
+        rewards: 0,
+        round: LAST_ROUND,
+        status: 'Offline',
+        'total-apps-opted-in': 0,
+        'total-assets-opted-in': 0,
+        'total-created-apps': createdApps.length,
+        'total-created-assets': 0,
+        'created-apps': createdApps,
+      })
+    } catch (error) {
+      console.error('Error fetching data:', error)
+      return HttpResponse.error()
+    }
+  }),
+  http.get('https://afmetrics.api.nodely.io/v1/realtime/reti/pool/:address/apy', async () => {
+    return HttpResponse.json({ apy: MOCK_POOL_APY, total_external_deposits: MOCK_EXT_DEPOSITS })
   }),
   http.get('http://localhost/nfd/lookup', async ({ request }) => {
     try {

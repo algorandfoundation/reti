@@ -2,8 +2,8 @@ import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { useWallet } from '@txnlab/use-wallet-react'
 import {
+  allValidatorsQueryOptions,
   constraintsQueryOptions,
-  numValidatorsQueryOptions,
   stakesQueryOptions,
 } from '@/api/queries'
 import { Loading } from '@/components/Loading'
@@ -16,8 +16,13 @@ import { useValidators } from '@/hooks/useValidators'
 
 export const Route = createFileRoute('/')({
   beforeLoad: ({ context: { queryClient } }) => {
-    // Prefetch number of validators
-    return queryClient.prefetchQuery(numValidatorsQueryOptions)
+    // Prefetch every validator's core data in a single request
+    const options = allValidatorsQueryOptions(queryClient)
+    const prefetch = queryClient.prefetchQuery(options)
+
+    // Only a cold cache is worth blocking the route on. When the persisted cache was restored
+    // the table paints from it immediately and this refresh lands underneath it.
+    return queryClient.getQueryData(options.queryKey) ? undefined : prefetch
   },
   component: Dashboard,
   pendingComponent: () => <Loading size="lg" className="opacity-50" flex />,
