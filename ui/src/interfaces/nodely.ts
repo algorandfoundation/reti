@@ -3,19 +3,23 @@
 //   type: 'UInt64' | 'Int64' | 'String' | 'Float64'
 // }
 
+/**
+ * One row per staking pool. The `UInt64`/`Int64` columns arrive as bare JSON numbers, not
+ * quoted strings - see the endpoint's own `meta` block.
+ */
 export interface NodelyRetiPerfData {
-  validatorid: string
-  poolid: string
-  poolappid: string
+  validatorid: number
+  poolid: number
+  poolappid: number
   poolappaddr: string
-  rspan: string
-  rounds: string
+  rspan: number
+  rounds: number
   avgfp: number
-  votes: string
+  votes: number
   expSoftVotes: number
   perf: number
   fOnline: number
-  lastSVRnd: string
+  lastSVRnd: number
 }
 
 export interface NodelyRetiPerf {
