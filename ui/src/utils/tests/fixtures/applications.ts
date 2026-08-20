@@ -41,6 +41,7 @@ function stakingPool(appId: number, globalState: TealKeyValue[]): Application {
 export const appFixtures: FixtureData = {
   '1010': stakingPool(1010, [bytesValue('algodVer', ALGOD_VERSION), uintValue('lastPayout', 1000)]),
   '1011': stakingPool(1011, [bytesValue('algodVer', ALGOD_VERSION), uintValue('lastPayout', 1050)]),
-  // No lastPayout: stands in for a pool that has never paid out
-  '1020': stakingPool(1020, [bytesValue('algodVer', ALGOD_VERSION)]),
+  // No algodVer: the node daemon has never reported one. Every pool has lastPayout from
+  // creation, so this - not a missing lastPayout - is what a never-updated pool looks like.
+  '1020': stakingPool(1020, [uintValue('lastPayout', 1080)]),
 }

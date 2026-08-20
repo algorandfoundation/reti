@@ -13,6 +13,7 @@ import {
 import { GatingType } from '@/constants/gating'
 import { useQueuedQueries } from '@/hooks/useQueuedQueries'
 import { Validator } from '@/interfaces/validator'
+import { findValidatorPerf } from '@/utils/nodely'
 
 /**
  * Dedupes and sorts a list of ids, returning a referentially stable array while the
@@ -161,12 +162,7 @@ export function useValidators(): {
           baseValidator.nfd = nfd
         }
       }
-      if (nodelyPerfQuery.data && nodelyPerfQuery.data.data) {
-        const perfScore = nodelyPerfQuery.data.data.find(
-          (q) => q.validatorid === baseValidator.id.toString(),
-        )?.perf
-        baseValidator.perf = perfScore
-      }
+      baseValidator.perf = findValidatorPerf(nodelyPerfQuery.data?.data, baseValidator.id)
 
       // Add metrics if available
       const metrics = queuedMetricsQueries.data[i]
