@@ -1,7 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
 import { ProgressBar } from '@tremor/react'
 import { Copy } from 'lucide-react'
-import { nfdLookupQueryOptions, poolGlobalStatesQueryOptions } from '@/api/queries'
+import { isPoolGlobalStateComplete } from '@/api/contracts'
+import {
+  nfdLookupQueryOptions,
+  poolGlobalStateQueryOptions,
+  poolGlobalStatesQueryOptions,
+} from '@/api/queries'
 import { AlgoDisplayAmount } from '@/components/AlgoDisplayAmount'
 import { Loading } from '@/components/Loading'
 import { NfdDisplay } from '@/components/NfdDisplay'
@@ -38,9 +43,21 @@ export function StakingPoolInfo({
   // Not stored in the validator box. Comes from the same bulk read of every pool's global
   // state that the dashboard's metrics use, so getting here is normally a cache hit.
   const poolGlobalStatesQuery = useQuery(poolGlobalStatesQueryOptions)
-  const algodVersion = poolInfo
-    ? poolGlobalStatesQuery.data?.get(poolInfo.poolAppId)?.algodVer
-    : undefined
+  const bulkPoolState = poolInfo ? poolGlobalStatesQuery.data?.get(poolInfo.poolAppId) : undefined
+
+  // The bulk read can come back without this pool, and can fail outright. Recover just this one
+  // rather than reporting the node as version "--" for the rest of the session. Gated on
+  // lastPayout, not on algodVer: a pool whose daemon has never reported has no algodVer to find,
+  // and re-reading it every time would put back the per-pool request the bulk read removed.
+  const poolStateIncomplete =
+    !!poolInfo && !poolGlobalStatesQuery.isPending && !isPoolGlobalStateComplete(bulkPoolState)
+
+  const poolGlobalStateQuery = useQuery({
+    ...poolGlobalStateQueryOptions(poolInfo?.poolAppId ?? 0n),
+    enabled: poolStateIncomplete,
+  })
+
+  const algodVersion = (poolStateIncomplete ? poolGlobalStateQuery.data : bulkPoolState)?.algodVer
 
   const numPools = validator.state.numPools
   const maxStakePerPool = calculateMaxAlgoPerPool(validator, constraints)

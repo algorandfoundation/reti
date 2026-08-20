@@ -8,6 +8,7 @@ import {
   fetchAllValidatorData,
   fetchMbrAmounts,
   fetchPoolApy,
+  fetchPoolGlobalState,
   fetchPoolGlobalStates,
   fetchProtocolConstraints,
   fetchStakedInfoForPool,
@@ -154,6 +155,21 @@ export const poolGlobalStatesQueryOptions = queryOptions({
   refetchInterval: POOL_GLOBAL_STATES_REFETCH_INTERVAL,
   refetchOnWindowFocus: false,
 })
+
+/**
+ * One pool's global state, for recovering a pool the bulk read above didn't carry - algod caps
+ * the resources it returns per account, and the request can fail outright. Callers gate this on
+ * `isPoolGlobalStateComplete`, so on the normal path it never runs.
+ */
+export const poolGlobalStateQueryOptions = (poolAppId: bigint) =>
+  queryOptions({
+    queryKey: ['pool-global-state', String(poolAppId)],
+    queryFn: () => fetchPoolGlobalState(poolAppId),
+    enabled: !!poolAppId,
+    staleTime: METRICS_STALE_TIME,
+    refetchInterval: POOL_GLOBAL_STATES_REFETCH_INTERVAL,
+    refetchOnWindowFocus: false,
+  })
 
 const NO_POOL_GLOBAL_STATES: ReadonlyMap<bigint, PoolGlobalState> = new Map()
 

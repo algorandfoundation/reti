@@ -180,6 +180,24 @@ function decodePoolGlobalState(globalState: algosdk.modelsv2.TealKeyValue[] = []
 }
 
 /**
+ * Whether a pool's global state was read completely.
+ *
+ * `lastPayout` is written when the pool is created - `stakingPool.algo.ts` sets it to the
+ * creation round to establish the first epoch's baseline - so every pool has it, and all 283
+ * on MainNet do. Its absence therefore means the read didn't carry this pool's state, not that
+ * the pool is new, and the caller should recover it with a per-pool request.
+ *
+ * `algodVer` is deliberately not part of this test: it is only written once the node daemon
+ * reports in, so a pool can legitimately lack it (88 of those 283 do) and re-reading won't
+ * produce one.
+ */
+export function isPoolGlobalStateComplete(
+  state: PoolGlobalState | undefined,
+): state is PoolGlobalState {
+  return state?.lastPayout !== undefined
+}
+
+/**
  * Every staking pool's global state in a single request.
  *
  * Pools are created by the registry's own app account, so its `createdApps` carries the full
@@ -235,8 +253,9 @@ export function createBaseValidator({
 }
 
 /**
- * @param globalState - the pool's entry from {@link fetchPoolGlobalStates}. Omitted only when
- *   the bulk read didn't carry this pool, which costs one request to recover.
+ * @param globalState - the pool's entry from {@link fetchPoolGlobalStates}. Absent or
+ *   incomplete only when the bulk read didn't carry this pool, which costs one request to
+ *   recover.
  */
 export async function processPoolData(
   pool: LocalPoolInfo,
@@ -247,7 +266,10 @@ export async function processPoolData(
   // Define the promises for the async operations
   const balancePromise = fetchAccountBalance(poolAddress.toString(), true)
 
-  const globalStatePromise = globalState
+  // Tested on the field rather than on the entry: a pool whose state came back partial decodes
+  // to `{}`, which is truthy, and would otherwise skip the fallback and surface as a missing
+  // lastPayout - which the Status column renders as "payouts stopped".
+  const globalStatePromise = isPoolGlobalStateComplete(globalState)
     ? Promise.resolve(globalState)
     : fetchPoolGlobalState(pool.poolAppId)
 

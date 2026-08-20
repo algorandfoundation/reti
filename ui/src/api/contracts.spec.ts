@@ -1,5 +1,5 @@
 import { HttpResponse, http } from 'msw'
-import { fetchPoolGlobalStates, processPoolData } from '@/api/contracts'
+import { fetchPoolGlobalStates, isPoolGlobalStateComplete, processPoolData } from '@/api/contracts'
 import { LocalPoolInfo } from '@/interfaces/validator'
 import {
   LAST_ROUND,
@@ -48,8 +48,8 @@ describe('fetchPoolGlobalStates', () => {
       lastPayout: 1000n,
       algodVer: '3.23.1 rel/stable [34171a94] : v0.8.2 [c58270f]',
     })
-    // A pool that has never paid out simply has no lastPayout key
-    expect(states.get(1020n)?.lastPayout).toBeUndefined()
+    // A pool whose node daemon has never reported has no algodVer, but still has lastPayout
+    expect(states.get(1020n)).toEqual({ lastPayout: 1080n })
   })
 
   it('warns and returns what it got when algod truncates the created app list', async () => {
@@ -109,10 +109,38 @@ describe('processPoolData', () => {
     expect(paths).toContain('/v2/applications/1011')
   })
 
-  it('leaves lastPayout undefined for a pool that has never paid out', async () => {
+  it('recovers a pool whose bulk entry came back without lastPayout', async () => {
+    const paths = trackRequests()
+
+    // Truthy, so a presence check would accept it and leave lastPayout undefined - which the
+    // Status column renders as "payouts stopped"
     const poolData = await processPoolData(poolFixture(1020n), { algodVer: '3.23.1' })
 
-    expect(poolData.lastPayout).toBeUndefined()
+    expect(poolData.lastPayout).toBe(1080n)
+    expect(paths).toContain('/v2/applications/1020')
+  })
+
+  it('does not re-read a complete entry that has no algodVer', async () => {
+    const paths = trackRequests()
+
+    const poolData = await processPoolData(poolFixture(1020n), { lastPayout: 1080n })
+
+    expect(poolData.lastPayout).toBe(1080n)
     expect(poolData.balance).toBe(AVAILABLE_BALANCE)
+    expect(paths.some((path) => path.startsWith('/v2/applications/'))).toBe(false)
+  })
+})
+
+describe('isPoolGlobalStateComplete', () => {
+  it('accepts an entry carrying lastPayout, with or without algodVer', () => {
+    expect(isPoolGlobalStateComplete({ lastPayout: 1000n })).toBe(true)
+    expect(isPoolGlobalStateComplete({ lastPayout: 0n, algodVer: '3.23.1' })).toBe(true)
+  })
+
+  it('rejects a missing or partially decoded entry', () => {
+    expect(isPoolGlobalStateComplete(undefined)).toBe(false)
+    expect(isPoolGlobalStateComplete({})).toBe(false)
+    // algodVer alone is not enough - lastPayout is what every pool is guaranteed to have
+    expect(isPoolGlobalStateComplete({ algodVer: '3.23.1' })).toBe(false)
   })
 })
