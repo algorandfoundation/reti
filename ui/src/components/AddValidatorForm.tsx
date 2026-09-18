@@ -109,7 +109,7 @@ export function AddValidatorForm({ constraints }: AddValidatorFormProps) {
       maxAlgoPerPool: validatorSchemas.maxAlgoPerPool(constraints),
       poolsPerNode: validatorSchemas.poolsPerNode(constraints),
     })
-    .superRefine((data, ctx) => rewardTokenRefinement(data, ctx, rewardToken?.params.decimals))
+    .superRefine((data, ctx) => rewardTokenRefinement(data, ctx, rewardToken?.params?.decimals))
     .superRefine((data, ctx) => entryGatingRefinement(data, ctx, gatingAssets))
 
   type FormValues = z.infer<typeof formSchema>
@@ -302,7 +302,7 @@ export function AddValidatorForm({ constraints }: AddValidatorFormProps) {
 
       const rewardPerPayout = convertToBaseUnits(
         Number(values.rewardPerPayout),
-        rewardToken?.params.decimals || 0,
+        rewardToken?.params?.decimals || 0,
       )
 
       const epochRoundLength = getEpochLengthBlocks(

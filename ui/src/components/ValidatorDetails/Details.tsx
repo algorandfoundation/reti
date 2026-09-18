@@ -348,7 +348,7 @@ export function Details({ validator, constraints }: DetailsProps) {
                           {formatAmount(
                             convertFromBaseUnits(
                               validator.config.gatingAssetMinBalance,
-                              validator.gatingAssets[0].params.decimals || 0,
+                              validator.gatingAssets[0].params?.decimals || 0,
                             ),
                           )}{' '}
                           <DisplayAsset asset={validator.gatingAssets[0]} />

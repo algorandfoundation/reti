@@ -54,6 +54,42 @@ export function decodeUint8ArrayToBigint(data: Uint8Array): bigint {
 }
 
 /**
+ * Builds the box name for a `BoxMap<uint64, ...>` entry: the map's ASCII prefix followed by
+ * the key as a big-endian uint64.
+ * @param {string} prefix - The BoxMap's key prefix, e.g. 'v' for `validatorList`
+ * @param {number | bigint} id - The uint64 key
+ * @returns {Uint8Array} The raw box name
+ * @example
+ * boxNameForId('v', 1) // Uint8Array [118, 0, 0, 0, 0, 0, 0, 0, 1]
+ */
+export function boxNameForId(prefix: string, id: number | bigint): Uint8Array {
+  return concatUint8Arrays(new TextEncoder().encode(prefix), algosdk.encodeUint64(BigInt(id)))
+}
+
+/**
+ * Decodes the uint64 key out of a `prefix + uint64` box name, or returns null if the name
+ * isn't one. The length check matters: algod's `prefix` query is a prefix filter, not an exact
+ * match, so a differently shaped box key sharing the prefix would otherwise decode as one.
+ * @param {string} prefix - The BoxMap's key prefix the name is expected to carry
+ * @param {Uint8Array} name - The raw box name
+ * @returns {bigint | null} The decoded key, or null if the name doesn't match the prefix
+ */
+export function idFromBoxName(prefix: string, name: Uint8Array): bigint | null {
+  const prefixBytes = new TextEncoder().encode(prefix)
+
+  if (name.length !== prefixBytes.length + 8) {
+    return null
+  }
+  for (let i = 0; i < prefixBytes.length; i++) {
+    if (name[i] !== prefixBytes[i]) {
+      return null
+    }
+  }
+
+  return algosdk.decodeUint64(name.subarray(prefixBytes.length), 'bigint')
+}
+
+/**
  * Splits a Uint8Array into chunks of a given size.
  * @param {Uint8Array} data - The Uint8Array to split into chunks
  * @param {number} chunkSize - The size of each chunk (default: 64 [bytes])

@@ -1,3 +1,7 @@
+import {
+  getABIStructFromABITuple,
+  getABITupleTypeFromABIStructDefinition,
+} from '@algorandfoundation/algokit-utils/types/app-arc56'
 import { QueryClient } from '@tanstack/react-query'
 import algosdk from 'algosdk'
 import { fetchAccountAssetInformation, fetchAccountInformation } from '@/api/algod'
@@ -5,15 +9,24 @@ import { fetchNfd, fetchNfdSearch } from '@/api/nfd'
 import { GatingType } from '@/constants/gating'
 import { Indicator } from '@/constants/indicator'
 import {
+  APP_SPEC,
   Constraints,
   NodePoolAssignmentConfig,
   ValidatorConfig,
   ValidatorCurState,
+  ValidatorInfo,
 } from '@/contracts/ValidatorRegistryClient'
 import { Nfd, NfdSearchV2Params } from '@/interfaces/nfd'
 import { StakerValidatorData } from '@/interfaces/staking'
-import { LocalPoolInfo, NodeInfo, PoolData, Validator } from '@/interfaces/validator'
+import {
+  LocalPoolInfo,
+  NodeInfo,
+  PoolData,
+  Validator,
+  ValidatorCoreData,
+} from '@/interfaces/validator'
 import { BigMath } from '@/utils/bigint'
+import { boxNameForId, idFromBoxName } from '@/utils/bytes'
 import { dayjs } from '@/utils/dayjs'
 import { convertToBaseUnits, roundToFirstNonZeroDecimal, roundToWholeAlgos } from '@/utils/format'
 
@@ -147,7 +160,7 @@ export function transformEntryGatingAssets(
         gatingAssetMinBalance:
           minBalance === '' || assetIds.length > 1
             ? '1'
-            : convertToBaseUnits(minBalance, assets[0]!.params.decimals).toString(),
+            : convertToBaseUnits(minBalance, assets[0]!.params?.decimals).toString(),
       }
     case String(GatingType.CreatorNfd):
       return {
@@ -520,6 +533,111 @@ export function calculateRewardEligibility(
   return Math.floor(rewardEligibility)
 }
 
+/** Box name prefix for the `validatorList` BoxMap */
+export const VALIDATOR_BOX_PREFIX = 'v'
+
+/**
+ * Hoisted so decoding 200+ boxes doesn't rebuild the tuple type each time.
+ * Note we deliberately do NOT read the prefix from `APP_SPEC.state.maps.box` - TEALScript
+ * 0.106.1 writes it as raw ASCII where ARC-56 requires base64, so consumers that decode it
+ * (including algokit's own `state.box.getMap()`) get the wrong bytes.
+ */
+const VALIDATOR_INFO_TUPLE_TYPE = getABITupleTypeFromABIStructDefinition(
+  APP_SPEC.structs.ValidatorInfo,
+  APP_SPEC.structs,
+)
+
+/** Box name for a validator's entry in the `validatorList` BoxMap. */
+export function validatorBoxName(validatorId: number | bigint): Uint8Array {
+  return boxNameForId(VALIDATOR_BOX_PREFIX, validatorId)
+}
+
+/**
+ * Decodes a validator id from a raw box name, or returns null if the name isn't a
+ * validator box.
+ */
+export function decodeValidatorBoxName(name: Uint8Array): number | null {
+  const id = idFromBoxName(VALIDATOR_BOX_PREFIX, name)
+  return id === null ? null : Number(id)
+}
+
+/**
+ * Decodes a raw `validatorList` box value into the generated ValidatorInfo struct.
+ */
+export function decodeValidatorInfo(value: Uint8Array): ValidatorInfo {
+  return getABIStructFromABITuple(
+    VALIDATOR_INFO_TUPLE_TYPE.decode(value) as algosdk.ABIValue[],
+    APP_SPEC.structs.ValidatorInfo,
+    APP_SPEC.structs,
+  ) as ValidatorInfo
+}
+
+/**
+ * Splits a decoded ValidatorInfo into the four shapes the UI consumes, matching what the
+ * getValidatorConfig / getValidatorState / getPools / getNodePoolAssignments ABI methods
+ * used to return.
+ */
+export function validatorInfoToParts(id: number, info: ValidatorInfo): ValidatorCoreData {
+  if (info.config.id !== BigInt(id)) {
+    throw new Error(
+      `Validator box ${id} decoded with config.id ${info.config.id} - box layout mismatch`,
+    )
+  }
+
+  const pools: LocalPoolInfo[] = []
+
+  // Truncate at the first empty slot rather than slicing by state.numPools. This mirrors
+  // getPools() in the contract, which breaks on poolAppId === 0 because "pools can't be
+  // removed", and stays correct if the counter and the array ever disagree.
+  for (let i = 0; i < info.pools.length; i++) {
+    const [poolAppId, totalStakers, totalAlgoStaked] = info.pools[i]
+    if (poolAppId === 0n) {
+      break
+    }
+    pools.push({
+      poolId: BigInt(i + 1),
+      poolAppId,
+      totalStakers,
+      totalAlgoStaked,
+      poolAddress: algosdk.getApplicationAddress(poolAppId).toString(),
+    })
+  }
+
+  return {
+    id,
+    config: info.config,
+    state: info.state,
+    pools,
+    nodePoolAssignment: info.nodePoolAssignments,
+  }
+}
+
+/**
+ * Seeds the per-validator query caches from bulk-fetched box data, so components and route
+ * loaders that read the individual keys resolve from cache instead of refetching.
+ */
+export function setValidatorCoreQueriesData(
+  queryClient: QueryClient,
+  data: ValidatorCoreData,
+): void {
+  const validatorId = String(data.id)
+
+  queryClient.setQueryData<ValidatorConfig>(['validator-config', validatorId], data.config)
+  queryClient.setQueryData<ValidatorCurState>(['validator-state', validatorId], data.state)
+  queryClient.setQueryData<LocalPoolInfo[]>(['validator-pools', validatorId], data.pools)
+  queryClient.setQueryData<NodePoolAssignmentConfig>(
+    ['validator-node-pool-assignments', validatorId],
+    data.nodePoolAssignment,
+  )
+}
+
+export function seedValidatorCoreQueries(
+  queryClient: QueryClient,
+  data: ValidatorCoreData[],
+): void {
+  data.forEach((validator) => setValidatorCoreQueriesData(queryClient, validator))
+}
+
 /**
  * Update validator data in the query cache after a mutation
  * @param {QueryClient} queryClient - Tanstack Query client instance
@@ -527,22 +645,18 @@ export function calculateRewardEligibility(
  */
 export function setValidatorQueriesData(queryClient: QueryClient, data: Validator): void {
   const { id, config, state, pools, nodePoolAssignment } = data
-  const validatorId = String(id)
 
-  // Update individual validator queries
-  queryClient.setQueryData<ValidatorConfig>(['validator-config', validatorId], {
-    id: BigInt(id),
-    ...config,
-  })
-  queryClient.setQueryData<ValidatorCurState>(['validator-state', validatorId], state)
-  queryClient.setQueryData<LocalPoolInfo[]>(['validator-pools', validatorId], pools)
-  queryClient.setQueryData<NodePoolAssignmentConfig>(
-    ['validator-node-pool-assignments', validatorId],
+  // Validator.config omits `id`; the cached ValidatorConfig includes it
+  setValidatorCoreQueriesData(queryClient, {
+    id,
+    config: { id: BigInt(id), ...config },
+    state,
+    pools,
     nodePoolAssignment,
-  )
+  })
 
-  // Force refetch of num-validators to trigger dashboard update
-  queryClient.invalidateQueries({ queryKey: ['num-validators'] })
+  // Force refetch of the aggregate validator query to trigger dashboard update
+  queryClient.invalidateQueries({ queryKey: ['all-validators'] })
 
   // Prefetch enrichment data if available
   if (data.rewardToken) {

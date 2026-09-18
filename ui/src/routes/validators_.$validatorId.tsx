@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { ErrorComponent, createFileRoute } from '@tanstack/react-router'
 import { useWallet } from '@txnlab/use-wallet-react'
-import { ValidatorNotFoundError } from '@/api/contracts'
+import { ValidatorNotFoundError, fetchValidatorCoreData } from '@/api/contracts'
 import {
   constraintsQueryOptions,
   stakesQueryOptions,
@@ -17,6 +17,7 @@ import { ValidatorDetails } from '@/components/ValidatorDetails'
 import { DetailsHeader } from '@/components/ValidatorDetails/DetailsHeader'
 import { XGovSignUpBanner } from '@/components/XGovSignUpBanner'
 import { useValidator } from '@/hooks/useValidator'
+import { setValidatorCoreQueriesData } from '@/utils/contracts'
 
 export const Route = createFileRoute('/validators_/$validatorId')({
   beforeLoad: () => {
@@ -32,6 +33,12 @@ export const Route = createFileRoute('/validators_/$validatorId')({
   loader: async ({ context: { queryClient, queryOptions }, params }) => {
     const validatorId = Number(params.validatorId)
     try {
+      // All four come from the same box. Seed them from one read when arriving cold
+      // (deep link / refresh); navigating from the dashboard leaves them already cached.
+      if (queryClient.getQueryData(queryOptions.config(validatorId).queryKey) === undefined) {
+        setValidatorCoreQueriesData(queryClient, await fetchValidatorCoreData(validatorId))
+      }
+
       await Promise.all([
         queryClient.ensureQueryData(queryOptions.config(validatorId)),
         queryClient.ensureQueryData(queryOptions.state(validatorId)),

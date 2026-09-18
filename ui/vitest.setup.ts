@@ -1,6 +1,8 @@
 /// <reference types="vitest" />
 
 import '@testing-library/jest-dom/vitest'
+// jsdom has no IndexedDB, which the query cache persister is built on
+import 'fake-indexeddb/auto'
 import { server } from '@/utils/tests/msw/server'
 
 // Polyfill Buffer in JSDOM

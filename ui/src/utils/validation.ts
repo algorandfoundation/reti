@@ -475,13 +475,13 @@ export const entryGatingRefinement = (
         if (asset) {
           const minBalanceBaseUnits = convertToBaseUnits(
             gatingAssetMinBalance,
-            asset.params.decimals,
+            asset.params?.decimals,
           )
-          if (minBalanceBaseUnits > asset.params.total) {
+          if (minBalanceBaseUnits > (asset.params?.total ?? 0n)) {
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
               path: ['gatingAssetMinBalance'],
-              message: `Minimum balance cannot exceed ${asset.params.unitName || 'gating asset'} total supply`,
+              message: `Minimum balance cannot exceed ${asset.params?.unitName || 'gating asset'} total supply`,
             })
           }
         }

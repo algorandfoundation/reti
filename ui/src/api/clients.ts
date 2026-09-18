@@ -17,8 +17,8 @@ export const algorandClient = AlgorandClient.fromConfig({ algodConfig })
   .setDefaultValidityWindow(900)
   .setSuggestedParamsCacheTimeout(1000 * 60 * 5) // 5 minutes
 
-const RETI_APP_ID = BigInt(getRetiAppIdFromViteEnvironment())
-const XGOV_REGISTRY_APP_ID = BigInt(getXGovRegistryAppIdFromViteEnvironment())
+export const RETI_APP_ID = BigInt(getRetiAppIdFromViteEnvironment())
+export const XGOV_REGISTRY_APP_ID = BigInt(getXGovRegistryAppIdFromViteEnvironment())
 
 export function getStakingPoolFactory(): [AlgorandClient, StakingPoolFactory] {
   return [algorandClient, new StakingPoolFactory({ algorand: algorandClient })]

@@ -1,13 +1,27 @@
+import algosdk from 'algosdk'
 import {
   calculateMaxStake,
   calculateRewardEligibility,
   calculateSaturationPercentage,
   calculateValidatorPoolMetrics,
+  decodeValidatorBoxName,
+  decodeValidatorInfo,
   getEpochLengthBlocks,
   isStakingDisabled,
   isUnstakingDisabled,
+  validatorBoxName,
+  validatorInfoToParts,
 } from '@/utils/contracts'
-import { MOCK_CONSTRAINTS, MOCK_VALIDATOR_1, MOCK_VALIDATOR_2 } from './tests/fixtures/validators'
+import { encodeValidatorInfo } from './tests/fixtures/boxes'
+import {
+  MOCK_CONSTRAINTS,
+  MOCK_VALIDATOR_1,
+  MOCK_VALIDATOR_1_CONFIG,
+  MOCK_VALIDATOR_1_POOLS,
+  MOCK_VALIDATOR_1_POOL_ASSIGNMENT,
+  MOCK_VALIDATOR_1_STATE,
+  MOCK_VALIDATOR_2,
+} from './tests/fixtures/validators'
 import { ACCOUNT_1 } from './tests/fixtures/accounts'
 
 describe('getEpochLengthBlocks', () => {
@@ -599,5 +613,75 @@ describe('calculateValidatorPoolMetrics', () => {
     expect(result.rewardsBalance).toBe(0n)
     expect(result.roundsSinceLastPayout).toBe(1000n)
     expect(result.apy).toBeCloseTo(6.33, 1)
+  })
+})
+
+describe('decodeValidatorBoxName', () => {
+  it('decodes a validator id from a valid box name', () => {
+    expect(decodeValidatorBoxName(validatorBoxName(1))).toBe(1)
+    expect(decodeValidatorBoxName(validatorBoxName(42))).toBe(42)
+  })
+
+  it('rejects a 9-byte name with the wrong prefix byte', () => {
+    const name = validatorBoxName(1)
+    name[0] = 0x73 // 's', as in the 'sps' stakerPoolSet boxes
+    expect(decodeValidatorBoxName(name)).toBeNull()
+  })
+
+  it('rejects a name of the wrong length', () => {
+    expect(decodeValidatorBoxName(new Uint8Array([0x76, 0, 0, 0, 0, 0, 0, 1]))).toBeNull()
+    expect(decodeValidatorBoxName(new Uint8Array(35).fill(0x76))).toBeNull()
+  })
+})
+
+describe('decodeValidatorInfo / validatorInfoToParts', () => {
+  const encoded = new Uint8Array(
+    Buffer.from(
+      encodeValidatorInfo({
+        config: MOCK_VALIDATOR_1_CONFIG,
+        state: MOCK_VALIDATOR_1_STATE,
+        pools: MOCK_VALIDATOR_1_POOLS,
+        nodePoolAssignment: MOCK_VALIDATOR_1_POOL_ASSIGNMENT,
+      }),
+      'base64',
+    ),
+  )
+
+  it('round-trips config, state and node pool assignments', () => {
+    const parts = validatorInfoToParts(1, decodeValidatorInfo(encoded))
+
+    expect(parts.id).toBe(1)
+    expect(parts.config).toEqual(MOCK_VALIDATOR_1_CONFIG)
+    expect(parts.state).toEqual(MOCK_VALIDATOR_1_STATE)
+    expect(parts.nodePoolAssignment).toEqual(MOCK_VALIDATOR_1_POOL_ASSIGNMENT)
+  })
+
+  it('truncates pools at the first empty slot rather than padding to 24', () => {
+    const { pools } = validatorInfoToParts(1, decodeValidatorInfo(encoded))
+
+    expect(pools).toHaveLength(MOCK_VALIDATOR_1_POOLS.length)
+    expect(pools).toHaveLength(MOCK_VALIDATOR_1_STATE.numPools)
+    expect(pools).toEqual(MOCK_VALIDATOR_1_POOLS)
+  })
+
+  it('derives poolAddress from poolAppId without a network call', () => {
+    const { pools } = validatorInfoToParts(1, decodeValidatorInfo(encoded))
+
+    pools.forEach((pool) => {
+      expect(pool.poolAddress).toBe(algosdk.getApplicationAddress(pool.poolAppId).toString())
+    })
+  })
+
+  it('decodes uint16 pool stakers as number and uint64 totals as bigint', () => {
+    const parts = validatorInfoToParts(1, decodeValidatorInfo(encoded))
+
+    expect(typeof parts.pools[0].totalStakers).toBe('number')
+    expect(typeof parts.pools[0].totalAlgoStaked).toBe('bigint')
+    expect(typeof parts.state.totalStakers).toBe('bigint')
+    expect(typeof parts.state.numPools).toBe('number')
+  })
+
+  it('throws when the box id does not match the decoded config id', () => {
+    expect(() => validatorInfoToParts(2, decodeValidatorInfo(encoded))).toThrow(/box layout/)
   })
 })

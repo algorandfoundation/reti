@@ -1,12 +1,7 @@
+import algosdk from 'algosdk'
 import { ALGORAND_ZERO_ADDRESS_STRING } from '@/constants/accounts'
 import { LocalPoolInfo, Validator } from '@/interfaces/validator'
-import {
-  ACCOUNT_1,
-  ACCOUNT_2,
-  ACCOUNT_3,
-  ACCOUNT_4,
-  ACCOUNT_5,
-} from '@/utils/tests/fixtures/accounts'
+import { ACCOUNT_1, ACCOUNT_4 } from '@/utils/tests/fixtures/accounts'
 import {
   Constraints,
   NodePoolAssignmentConfig,
@@ -42,22 +37,21 @@ export const MOCK_VALIDATOR_1_STATE: ValidatorCurState = {
   rewardTokenHeldBack: 0n,
 }
 
+// poolAddress is derived from poolAppId (no network call), so fixtures must match
 export const MOCK_VALIDATOR_1_POOLS: LocalPoolInfo[] = [
   {
     poolId: 1n,
     poolAppId: 1010n,
     totalStakers: 2,
     totalAlgoStaked: 70000000000000n,
-    poolAddress: ACCOUNT_2,
-    algodVersion: '3.23.1 rel/stable [34171a94] : v0.8.0 [d346b13]',
+    poolAddress: algosdk.getApplicationAddress(1010n).toString(),
   },
   {
     poolId: 2n,
     poolAppId: 1011n,
     totalStakers: 2,
     totalAlgoStaked: 2000000000000n,
-    poolAddress: ACCOUNT_3,
-    algodVersion: '3.23.1 rel/stable [34171a94] : v0.8.0 [d346b13]',
+    poolAddress: algosdk.getApplicationAddress(1011n).toString(),
   },
 ]
 
@@ -108,8 +102,7 @@ export const MOCK_VALIDATOR_2_POOLS: LocalPoolInfo[] = [
     poolAppId: 1020n,
     totalStakers: 1,
     totalAlgoStaked: 1000n,
-    poolAddress: ACCOUNT_5,
-    algodVersion: '3.23.1 rel/stable [34171a94] : v0.8.0 [d346b13]',
+    poolAddress: algosdk.getApplicationAddress(1020n).toString(),
   },
 ]
 

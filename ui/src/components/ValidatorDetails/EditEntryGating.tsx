@@ -99,7 +99,7 @@ export function EditEntryGating({ validator }: EditEntryGatingProps) {
     gatingAssetMinBalance > 1
       ? convertFromBaseUnits(
           gatingAssetMinBalance,
-          validator.gatingAssets?.[0].params.decimals,
+          validator.gatingAssets?.[0]?.params?.decimals,
         ).toString()
       : ''
 
