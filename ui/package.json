@@ -38,7 +38,7 @@
     "vitest": "2.1.2"
   },
   "dependencies": {
-    "@algorandfoundation/algokit-utils": "9.1.2",
+    "@algorandfoundation/algokit-utils": "9.2.2",
     "@algorandfoundation/xgov-clients": "^3.0.1",
     "@blockshake/defly-connect": "1.2.1",
     "@hookform/resolvers": "3.9.0",
