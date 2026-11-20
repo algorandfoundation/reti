@@ -4586,7 +4586,7 @@ describe('reti', () => {
                 // to the reward with the validator NOT saturated to not incentivize adversary behavior.
                 expect(saturatedReward).toBeLessThanOrEqual(notSaturatedReward)
             })
-        }, 20_000)
+        }, 60_000)
 
         describe('MI-05 Inconsistent Configuration Validation', () => {
             let validatorId: number

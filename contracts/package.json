@@ -13,13 +13,13 @@
         "localnet": "algokit localnet start --name reti --config-dir ./localnet_config",
         "lint": "eslint . --ext ts --max-warnings 0",
         "lint:fix": "eslint . --ext ts --max-warnings 0 --fix",
-        "prettier": "pnpx prettier --check .",
-        "prettier:fix": "pnpx prettier --write .",
+        "prettier": "prettier --check .",
+        "prettier:fix": "prettier --write .",
         "typecheck": "tsc --noEmit"
     },
     "dependencies": {
         "@algorandfoundation/algokit-utils": "9.1.2",
-        "algosdk": "3.6.0"
+        "algosdk": "3.8.0"
     },
     "devDependencies": {
         "@algorandfoundation/algokit-client-generator": "6.0.0",

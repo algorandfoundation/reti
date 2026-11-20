@@ -3,7 +3,7 @@ import { PaymentParams } from '@algorandfoundation/algokit-utils/types/composer'
 import { consoleLogger } from '@algorandfoundation/algokit-utils/types/logging'
 import { LogicError } from '@algorandfoundation/algokit-utils/types/logic-error'
 import { AlgorandTestAutomationContext } from '@algorandfoundation/algokit-utils/types/testing'
-import { Account, getApplicationAddress } from 'algosdk'
+import { Account, getApplicationAddress, modelsv2 } from 'algosdk'
 import { randomUUID } from 'crypto'
 import { StakedInfoFromTuple, StakingPoolClient, ValidatorPoolKey } from '../contracts/clients/StakingPoolClient'
 import {
@@ -197,6 +197,21 @@ export async function getTokenPayoutRatio(validatorClient: ValidatorRegistryClie
     return (await validatorClient.send.getTokenPayoutRatio({ args: { validatorId } })).return!
 }
 
+/**
+ * Total fee, in microAlgo, a simulated group has to pay. The helpers below send every other txn of the group
+ * with a 0 fee, so this is what goes on the method call.
+ *
+ * Uses algod's own figure (`groupUsage`, in millionths of a min fee), reported from algod 5.0.0 on. Mirrors
+ * `requiredGroupFee` in ui/src/utils/fees.ts.
+ */
+function requiredGroupFee(group: modelsv2.SimulateTransactionGroupResult, minFee = 1000n): bigint {
+    const usage = BigInt(group.groupUsage ?? 0)
+    if (usage === 0n) {
+        throw new Error('algod did not report group usage for the simulated group; algod 5.0 or later is required')
+    }
+    return (usage * minFee + 999_999n) / 1_000_000n
+}
+
 export async function addStake(
     context: AlgorandTestAutomationContext,
     validatorClient: ValidatorRegistryClient,
@@ -263,11 +278,7 @@ export async function addStake(
             )
             .simulate({ allowUnnamedResources: true, allowMoreLogging: true })
 
-        fees = AlgoAmount.MicroAlgos(
-            2000 +
-                1000 *
-                    Math.floor(((simulateResults.simulateResponse.txnGroups[0].appBudgetAdded as number) + 699) / 700),
-        )
+        fees = AlgoAmount.MicroAlgos(requiredGroupFee(simulateResults.simulateResponse.txnGroups[0]))
         consoleLogger.info(`addStake fees:${fees.toString()}`)
 
         const results = await validatorClient
@@ -313,9 +324,7 @@ export async function removeStake(
         })
         .simulate({ allowUnnamedResources: true })
 
-    const itxnfees = AlgoAmount.MicroAlgos(
-        1000 * Math.floor(((simulateResults.simulateResponse.txnGroups[0].appBudgetAdded as number) + 699) / 700),
-    )
+    const itxnfees = AlgoAmount.MicroAlgos(requiredGroupFee(simulateResults.simulateResponse.txnGroups[0]))
     consoleLogger.info(`removeStake fees:${itxnfees.toString()}`)
 
     try {
@@ -345,10 +354,8 @@ export async function claimTokens(stakeClient: StakingPoolClient, staker: Accoun
         .claimTokens({ args: {}, staticFee: AlgoAmount.MicroAlgos(240000), sender: staker.addr })
         .simulate({ allowUnnamedResources: true })
 
-    const itxnfees = AlgoAmount.MicroAlgos(
-        1000 * Math.floor(((simulateResults.simulateResponse.txnGroups[0].appBudgetAdded as number) + 699) / 700),
-    )
-    consoleLogger.info(`removeStake fees:${itxnfees.toString()}`)
+    const itxnfees = AlgoAmount.MicroAlgos(requiredGroupFee(simulateResults.simulateResponse.txnGroups[0]))
+    consoleLogger.info(`claimTokens fees:${itxnfees.toString()}`)
 
     try {
         await stakeClient
@@ -385,9 +392,7 @@ export async function epochBalanceUpdate(stakeClient: StakingPoolClient) {
         .epochBalanceUpdate({ args: {}, staticFee: fees, validityWindow: 100 })
         .simulate({ allowUnnamedResources: true, allowMoreLogging: true })
 
-    fees = AlgoAmount.MicroAlgos(
-        1000 * Math.floor(((simulateResults.simulateResponse.txnGroups[0].appBudgetAdded as number) + 699) / 700),
-    )
+    fees = AlgoAmount.MicroAlgos(requiredGroupFee(simulateResults.simulateResponse.txnGroups[0]))
     consoleLogger.info(`epoch update fees of:${fees.toString()}`)
 
     const { logs } = simulateResults.simulateResponse.txnGroups[0].txnResults[2].txnResult

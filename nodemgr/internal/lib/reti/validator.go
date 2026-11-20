@@ -1201,8 +1201,12 @@ func (r *Reti) AddStake(validatorId uint64, staker types.Address, amount uint64,
 	if simResult.SimulateResponse.TxnGroups[0].FailureMessage != "" {
 		return nil, errors.New(simResult.SimulateResponse.TxnGroups[0].FailureMessage)
 	}
-	// Figure out how much app budget was added so we can know the real fees to use when we execute
-	atc, err = getAtc(2*transaction.MinTxnFee + transaction.MinTxnFee*(simResult.SimulateResponse.TxnGroups[0].AppBudgetAdded/700))
+	// Rebuild with the fee the simulated group actually needs, less what the other txns in the group already pay
+	fee, err := feeForLastTxn(simResult.SimulateResponse.TxnGroups[0], transaction.MinTxnFee)
+	if err != nil {
+		return nil, err
+	}
+	atc, err = getAtc(fee)
 	if err != nil {
 		return nil, err
 	}
@@ -1284,6 +1288,9 @@ func (r *Reti) RemoveStake(poolKey ValidatorPoolKey, signer types.Address, stake
 				Sender:          signer,
 				Signer:          algo.SignWithAccountForATC(r.signer, signer.String()),
 			})
+			if err != nil {
+				return atc, err
+			}
 		}
 		if feesToUse == 0 {
 			// we're simulating so go with super high budget
@@ -1334,8 +1341,12 @@ func (r *Reti) RemoveStake(poolKey ValidatorPoolKey, signer types.Address, stake
 	if simResult.SimulateResponse.TxnGroups[0].FailureMessage != "" {
 		return errors.New(simResult.SimulateResponse.TxnGroups[0].FailureMessage)
 	}
-	// Figure out how much app budget was added so we can know the real fees to use when we execute
-	atc, err = getAtc(2*transaction.MinTxnFee + transaction.MinTxnFee*(simResult.SimulateResponse.TxnGroups[0].AppBudgetAdded/700))
+	// Rebuild with the fee the simulated group actually needs, less what the other txns in the group already pay
+	fee, err := feeForLastTxn(simResult.SimulateResponse.TxnGroups[0], transaction.MinTxnFee)
+	if err != nil {
+		return err
+	}
+	atc, err = getAtc(fee)
 	if err != nil {
 		return err
 	}
