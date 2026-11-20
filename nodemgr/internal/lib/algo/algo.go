@@ -120,7 +120,7 @@ func GetStringFromGlobalState(globalState []models.TealKeyValue, keyName string)
 
 // GetBareAccount just returns account information without asset data
 func GetBareAccount(ctx context.Context, algoClient *algod.Client, account string) (models.Account, error) {
-	return algoClient.AccountInformation(account).Exclude("all").Do(ctx)
+	return algoClient.AccountInformation(account).Exclude([]string{"all"}).Do(ctx)
 }
 
 func GetVersionString(ctx context.Context, algoClient *algod.Client) (string, error) {

@@ -26,7 +26,7 @@ jobs:
           goarch: ${{ matrix.goarch }}
           ldflags: "-X main.Version=${{ github.ref_name }}"
           extra_files: LICENSE README.md
-          goversion: '1.23'
+          goversion: '1.25'
           project_path: './nodemgr'
   docker:
     runs-on: ubuntu-latest

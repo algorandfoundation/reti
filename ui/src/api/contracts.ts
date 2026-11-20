@@ -45,6 +45,7 @@ import {
   ValidatorConfigInput,
 } from '@/interfaces/validator'
 import { BalanceChecker } from '@/utils/balanceChecker'
+import { simulatedExtraFee } from '@/utils/fees'
 import {
   VALIDATOR_BOX_PREFIX,
   decodeValidatorBoxName,
@@ -627,12 +628,9 @@ export async function addStake(
 
   stakeTransferPayment.group = undefined
 
+  // Every txn in the group pays its own min fee; this is what the inner txns need on top
   const feeAmount = AlgoAmount.MicroAlgos(
-    1000 *
-      Math.floor(
-        ((simulateResults.simulateResponse.txnGroups[0].appBudgetAdded as number) + 699) / 700,
-      ) -
-      1000, // subtract back out the opcodes added from the gas call(s) which were paid as part of their normal fees,
+    simulatedExtraFee(simulateResults.simulateResponse.txnGroups[0]),
   )
 
   let requiredBalance =
@@ -876,12 +874,9 @@ export async function removeStake(
     allowUnnamedResources: true,
   })
 
+  // Every txn in the group pays its own min fee; this is what the inner txns need on top
   const feeAmount = AlgoAmount.MicroAlgos(
-    1000 *
-      Math.floor(
-        ((simulateResult.simulateResponse.txnGroups[0].appBudgetAdded as number) + 699) / 700,
-      ) -
-      2000, // subtract back out the opcodes added from the two gas calls which were paid as part of their normal fees,
+    simulatedExtraFee(simulateResult.simulateResponse.txnGroups[0]),
   )
 
   let requiredBalance = feeAmount.microAlgos
@@ -943,12 +938,9 @@ export async function epochBalanceUpdate(
       })
       .simulate({ skipSignatures: true, allowUnnamedResources: true })
 
+    // Every txn in the group pays its own min fee; this is what the inner txns need on top
     const feeAmount = AlgoAmount.MicroAlgos(
-      1000 *
-        Math.floor(
-          ((simulateResult.simulateResponse.txnGroups[0].appBudgetAdded as number) + 699) / 700,
-        ) -
-        2000, // subtract back out the opcodes added from the gas call(s) which were paid as part of their normal fees,
+      simulatedExtraFee(simulateResult.simulateResponse.txnGroups[0]),
     )
 
     // Check balance
@@ -1033,17 +1025,14 @@ export async function claimTokens(
     allowUnnamedResources: true,
   })
 
+  // Every txn in the group pays its own min fee; this is what the inner txns need on top
   const feeAmount = AlgoAmount.MicroAlgos(
-    1000 *
-      Math.floor(
-        ((simulateResult.simulateResponse.txnGroups[0].appBudgetAdded as number) + 699) / 700,
-      ) -
-      2000, // subtract back out the opcodes added from the gas call(s) which were paid as part of their normal fees,
+    simulatedExtraFee(simulateResult.simulateResponse.txnGroups[0]),
   )
 
   const composer = algorand.newGroup()
 
-  for (const pool of pools) {
+  for (const [i, pool] of pools.entries()) {
     const client = stakingFactory.getAppClientById({
       appId: pool.poolAppId,
       // Assumes this address was registered already with the AlgorandClient and the use-wallet signer
@@ -1053,7 +1042,13 @@ export async function claimTokens(
     composer
       .addAppCallMethodCall(await client.params.gas({ args: [], note: '1' }))
       .addAppCallMethodCall(await client.params.gas({ args: [], note: '2' }))
-      .addAppCallMethodCall(await client.params.claimTokens({ args: {}, extraFee: feeAmount }))
+      .addAppCallMethodCall(
+        await client.params.claimTokens({
+          args: {},
+          // feeAmount covers the whole group (fees pool), so it goes on the first claim only
+          extraFee: i === 0 ? feeAmount : undefined,
+        }),
+      )
   }
 
   await composer.send({ populateAppCallResources: true })

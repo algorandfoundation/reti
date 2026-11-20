@@ -286,8 +286,12 @@ func (r *Reti) EpochBalanceUpdate(poolID int, poolAppID uint64, caller types.Add
 	if simResult.SimulateResponse.TxnGroups[0].FailureMessage != "" {
 		return errors.New(simResult.SimulateResponse.TxnGroups[0].FailureMessage)
 	}
-	// Figure out how much app budget was added so we can know the real fees to use when we execute
-	atc, err = getAtc(transaction.MinTxnFee * (simResult.SimulateResponse.TxnGroups[0].AppBudgetAdded / 700))
+	// Rebuild with the fee the simulated group actually needs (the gas calls pay nothing, so the epoch call covers it all)
+	fee, err := feeForLastTxn(simResult.SimulateResponse.TxnGroups[0], transaction.MinTxnFee)
+	if err != nil {
+		return err
+	}
+	atc, err = getAtc(fee)
 	if err != nil {
 		return err
 	}
