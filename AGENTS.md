@@ -9,7 +9,7 @@ Réti Open Pooling — a decentralized staking pool protocol on Algorand. Three 
 | Dir | What | Stack |
 | --- | --- | --- |
 | `contracts/` | The protocol itself (`ValidatorRegistry` + `StakingPool`) | TEALScript, vitest |
-| `nodemgr/` | CLI + background daemon node runners install on their Algorand node | Go 1.23, urfave/cli v3 |
+| `nodemgr/` | CLI + background daemon node runners install on their Algorand node | Go 1.25, urfave/cli v3 |
 | `ui/` | Staking / validator-management dashboard | Vite, React 18, TanStack Router+Query |
 
 `contracts`, `contracts/bootstrap`, and `ui` are a pnpm workspace (Node 20, pnpm 9.15.9). `nodemgr` is a separate Go module.
@@ -48,9 +48,9 @@ pnpm run playwright:test  # e2e; needs localnet + bootstrap, boots dev:localnet 
 pnpm run lint | prettier | typecheck | build
 ```
 
-**nodemgr/** (no Go tests exist)
+**nodemgr/** (the only Go tests are the fee helpers in `internal/lib/reti`; CI does not run them)
 ```bash
-go build ./... && go vet ./...
+go build ./... && go vet ./... && go test ./...
 go run . -n sandbox validator info        # top-level cmds: daemon, validator, pool, key
 ```
 
